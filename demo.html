@@ -324,6 +324,19 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
   margin-bottom:8px;
 }
 
+
+/* X chiudi registrazione */
+#reg-close {
+  position:absolute;top:16px;right:16px;
+  background:transparent;border:none;
+  color:rgba(245,234,208,.35);
+  font-size:18px;cursor:pointer;
+  line-height:1;padding:4px 8px;
+  transition:color .3s;
+  border-radius:50%;
+}
+#reg-close:hover { color:rgba(245,234,208,.85); }
+
 /* Scrollbar */
 #reg-box::-webkit-scrollbar{width:4px;}
 #reg-box::-webkit-scrollbar-track{background:transparent;}
@@ -368,6 +381,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
 <div id="reg-screen" style="display:none;">
   <div id="reg-overlay"></div>
   <div id="reg-box">
+
+    <!-- X chiudi -->
+    <button id="reg-close" onclick="closeReg()" title="Chiudi">✕</button>
 
     <!-- Header -->
     <div id="reg-header">
@@ -1013,6 +1029,20 @@ function goArea(id) {
 }
 
 // ══ REGISTRAZIONE ══════════════════════════════
+
+function closeReg() {
+  hideRegScreen();
+  // Torna all'intro-ui
+  const ui = document.getElementById('intro-ui');
+  ui.style.display = 'flex';
+  ui.style.opacity = '0';
+  ui.style.pointerEvents = 'all';
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    ui.style.transition = 'opacity 0.6s ease';
+    ui.style.opacity = '1';
+  }));
+}
+
 function showRegScreen() {
   const s = document.getElementById('reg-screen');
   if (s) s.style.display = 'flex';
