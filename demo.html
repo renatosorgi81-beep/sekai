@@ -536,10 +536,24 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
 'use strict';
 
 // ══ DB & SESSIONE (deve stare in cima) ══════════
+const DEMO_USER = {
+  username: 'renatosorgi81',
+  email: 'renatosorgi81@gmail.com',
+  password: 'tecno5181',
+  birth: '1981-01-01',
+  paid: true,
+  joinDate: '2025-01-01T00:00:00.000Z',
+  demo: true,
+};
+
 const DB = {
   users: JSON.parse(localStorage.getItem('sekai_users') || '[]'),
   save() { localStorage.setItem('sekai_users', JSON.stringify(this.users)); },
-  find(email) { return this.users.find(u => u.email === email); },
+  find(email) {
+    // Controlla prima l'account demo
+    if(email === DEMO_USER.email) return DEMO_USER;
+    return this.users.find(u => u.email === email);
+  },
   add(user) { this.users.push(user); this.save(); },
 };
 let currentUser = JSON.parse(localStorage.getItem('sekai_session') || 'null');
@@ -1045,28 +1059,27 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 function unlockAndStart() {
-  // AudioContext nel click handler — obbligatorio
   if(phraseTimer) { clearInterval(phraseTimer); phraseTimer = null; }
+
+  // Ferma audio precedente
+  if(AC) { try { AC.close(); } catch(e){} AC = null; musicOn = false; }
+
+  // Crea AudioContext nel click — obbligatorio browser
   try { AC = new(window.AudioContext||window.webkitAudioContext)(); } catch(e){}
+
   // Avvia video
   const vid = document.getElementById('bg-video');
   if(vid) vid.play().catch(()=>{});
+
   // Avvia musica
   try { buildMusic(); } catch(e){ console.warn(e); }
 
-  // Nascondi intro-ui
-  const ui = document.getElementById('intro-ui');
-  ui.style.opacity = '0';
-  ui.style.pointerEvents = 'none';
-  setTimeout(() => { ui.style.display = 'none'; }, 600);
+  // Rimane in home — mostra solo il link account
+  document.getElementById('start-btn').style.display = 'none';
+  document.getElementById('already-started').style.display = 'block';
 
-  // Utente già loggato e pagante → mappa
-  if(currentUser && currentUser.paid) {
-    setTimeout(() => showMapUI(), 500);
-    return;
-  }
-  // Nuovo → registrazione
-  setTimeout(() => showRegScreen(), 500);
+  // Riavvia frasi
+  startPhrases();
 }
 
 function showMapUI() {
@@ -1082,6 +1095,7 @@ function showMapUI() {
 
 function enterWorld() {
   hideRegScreen();
+  document.getElementById('intro-ui').style.display = 'none';
   showMapUI();
 }
 
@@ -1198,11 +1212,16 @@ function doLogin() {
   localStorage.setItem('sekai_session', JSON.stringify(user));
 
   if (!user.paid) {
+    // Mostra pagamento
     document.getElementById('form-login').style.display = 'none';
     document.getElementById('form-payment').style.display = 'flex';
     document.getElementById('reg-tabs').style.display = 'none';
   } else {
-    enterWorld();
+    // Pagato — nascondi tutto intro e mostra mappa aree
+    hideRegScreen();
+    const ui = document.getElementById('intro-ui');
+    ui.style.display = 'none';
+    showMapUI();
   }
 }
 
@@ -1218,7 +1237,8 @@ function skipPaymentDev() {
     localStorage.setItem('sekai_session', JSON.stringify(currentUser));
   }
   hideRegScreen();
-  enterWorld();
+  document.getElementById('intro-ui').style.display = 'none';
+  showMapUI();
 }
 
 function enterWorld() {
