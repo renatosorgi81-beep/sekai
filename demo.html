@@ -531,6 +531,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
 <script>
 'use strict';
 
+// ══ DB & SESSIONE (deve stare in cima) ══════════
+const DB = {
+  users: JSON.parse(localStorage.getItem('sekai_users') || '[]'),
+  save() { localStorage.setItem('sekai_users', JSON.stringify(this.users)); },
+  find(email) { return this.users.find(u => u.email === email); },
+  add(user) { this.users.push(user); this.save(); },
+};
+let currentUser = JSON.parse(localStorage.getItem('sekai_session') || 'null');
+
 // ══ STATO ══════════════════════════════════════
 const S = {
   area:'village', areaIdx:0, transitioning:false,
@@ -974,10 +983,10 @@ function showAreaName(name){
 function openMap(){document.getElementById('map').style.display='flex';}
 function closeMap(){document.getElementById('map').style.display='none';}
 
+
 // ══ AVVIO ══════════════════════════════════════
 window.addEventListener('DOMContentLoaded', () => {
   initIntro();
-
   window.addEventListener('resize', () => {
     W = window.innerWidth; H = window.innerHeight;
     if (WC) { WC.width = W; WC.height = H; }
@@ -985,61 +994,53 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 function unlockAndStart() {
-  // Crea AudioContext nel gestore click (obbligatorio browser)
-  AC = new(window.AudioContext || window.webkitAudioContext)();
+  // AudioContext DEVE essere creato dentro un click handler
+  try {
+    AC = new(window.AudioContext || window.webkitAudioContext)();
+  } catch(e) {}
 
   // Avvia video
   const vid = document.getElementById('bg-video');
   if (vid) vid.play().catch(() => {});
 
   // Avvia musica
-  buildMusic();
+  try { buildMusic(); } catch(e) { console.warn('Music error:', e); }
 
-  // Controlla se utente già loggato e pagante
+  // Utente già loggato e pagante → vai alla mappa
   if (currentUser && currentUser.paid) {
-    // Salta registrazione, mostra mappa
     document.getElementById('s1').classList.add('hide');
-    setTimeout(() => { document.getElementById('s2').classList.add('show'); }, 600);
+    setTimeout(() => { document.getElementById('s2').classList.add('show'); }, 500);
     return;
   }
 
-  // Transizione a registrazione
+  // Nuovo utente → registrazione
   document.getElementById('s1').classList.add('hide');
-  setTimeout(() => { showRegScreen(); }, 700);
+  setTimeout(() => { showRegScreen(); }, 600);
 }
 
-
 // ══ REGISTRAZIONE ══════════════════════════════
-
-// Semplice DB locale (in futuro: backend reale)
-const DB = {
-  users: JSON.parse(localStorage.getItem('sekai_users') || '[]'),
-  save() { localStorage.setItem('sekai_users', JSON.stringify(this.users)); },
-  find(email) { return this.users.find(u => u.email === email); },
-  add(user) { this.users.push(user); this.save(); },
-};
-
-let currentUser = JSON.parse(localStorage.getItem('sekai_session') || 'null');
-
 function showRegScreen() {
-  document.getElementById('reg-screen').style.display = 'flex';
-  // Imposta data max (13 anni fa)
-  const maxDate = new Date();
-  maxDate.setFullYear(maxDate.getFullYear() - 13);
+  const s = document.getElementById('reg-screen');
+  if (s) s.style.display = 'flex';
   const el = document.getElementById('r-birth');
-  if (el) el.max = maxDate.toISOString().split('T')[0];
+  if (el) {
+    const d = new Date();
+    d.setFullYear(d.getFullYear() - 13);
+    el.max = d.toISOString().split('T')[0];
+  }
 }
 
 function hideRegScreen() {
-  document.getElementById('reg-screen').style.display = 'none';
+  const s = document.getElementById('reg-screen');
+  if (s) s.style.display = 'none';
 }
 
 function switchTab(tab) {
-  document.getElementById('form-register').style.display = tab === 'register' ? 'flex' : 'none';
-  document.getElementById('form-login').style.display = tab === 'login' ? 'flex' : 'none';
+  document.getElementById('form-register').style.display = tab==='register' ? 'flex' : 'none';
+  document.getElementById('form-login').style.display = tab==='login' ? 'flex' : 'none';
   document.getElementById('form-payment').style.display = 'none';
-  document.getElementById('tab-register').classList.toggle('active', tab === 'register');
-  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('tab-register').classList.toggle('active', tab==='register');
+  document.getElementById('tab-login').classList.toggle('active', tab==='login');
 }
 
 function setError(id, msg) {
@@ -1049,77 +1050,65 @@ function setError(id, msg) {
 
 function doRegister() {
   const username = document.getElementById('r-username').value.trim();
-  const email = document.getElementById('r-email').value.trim();
+  const email    = document.getElementById('r-email').value.trim();
   const password = document.getElementById('r-password').value;
-  const birth = document.getElementById('r-birth').value;
-  const terms = document.getElementById('r-terms').checked;
-  const age = document.getElementById('r-age').checked;
-
+  const birth    = document.getElementById('r-birth').value;
+  const terms    = document.getElementById('r-terms').checked;
+  const age      = document.getElementById('r-age').checked;
   setError('reg-error', '');
 
   if (!username) return setError('reg-error', 'Inserisci un nome utente.');
   if (!email || !email.includes('@')) return setError('reg-error', 'Email non valida.');
-  if (password.length < 8) return setError('reg-error', 'Password troppo corta (min. 8 caratteri).');
+  if (password.length < 8) return setError('reg-error', 'Password minimo 8 caratteri.');
   if (!birth) return setError('reg-error', 'Inserisci la data di nascita.');
-  if (!terms) return setError('reg-error', 'Devi accettare i termini di servizio.');
-  if (!age) return setError('reg-error', 'Devi confermare di avere almeno 13 anni.');
+  if (!terms) return setError('reg-error', 'Accetta i termini di servizio.');
+  if (!age)   return setError('reg-error', 'Devi avere almeno 13 anni.');
 
-  // Verifica età
-  const birthDate = new Date(birth);
-  const today = new Date();
-  const userAge = today.getFullYear() - birthDate.getFullYear();
-  if (userAge < 13) return setError('reg-error', 'Devi avere almeno 13 anni per accedere a Sekai.');
+  const bd = new Date(birth);
+  const ageyrs = new Date().getFullYear() - bd.getFullYear();
+  if (ageyrs < 13) return setError('reg-error', 'Devi avere almeno 13 anni.');
+  if (DB.find(email)) return setError('reg-error', 'Email già registrata. Accedi.');
 
-  // Verifica duplicati
-  if (DB.find(email)) return setError('reg-error', 'Email già registrata. Accedi invece.');
-
-  // Salva utente (non pagante ancora)
   const user = { username, email, password, birth, paid: false, joinDate: new Date().toISOString() };
   DB.add(user);
   currentUser = user;
 
-  // Vai a pagamento
   document.getElementById('form-register').style.display = 'none';
-  document.getElementById('form-login').style.display = 'none';
   document.getElementById('form-payment').style.display = 'flex';
   document.getElementById('reg-tabs').style.display = 'none';
-  document.getElementById('reg-header').querySelector('.reg-tagline').textContent = `Benvenuto, ${username} ✦`;
+  const tag = document.querySelector('.reg-tagline');
+  if (tag) tag.textContent = `Benvenuto, ${username} ✦`;
 }
 
 function doLogin() {
-  const email = document.getElementById('l-email').value.trim();
+  const email    = document.getElementById('l-email').value.trim();
   const password = document.getElementById('l-password').value;
   setError('login-error', '');
 
-  if (!email) return setError('login-error', 'Inserisci la tua email.');
+  if (!email)    return setError('login-error', 'Inserisci la tua email.');
   if (!password) return setError('login-error', 'Inserisci la password.');
 
   const user = DB.find(email);
-  if (!user) return setError('login-error', 'Nessun account trovato con questa email.');
+  if (!user)                   return setError('login-error', 'Nessun account trovato.');
   if (user.password !== password) return setError('login-error', 'Password errata.');
 
   currentUser = user;
   localStorage.setItem('sekai_session', JSON.stringify(user));
 
   if (!user.paid) {
-    // Mostra pagamento
     document.getElementById('form-login').style.display = 'none';
     document.getElementById('form-payment').style.display = 'flex';
     document.getElementById('reg-tabs').style.display = 'none';
   } else {
-    // Già pagato — entra
-    hideRegScreen();
     enterWorld();
   }
 }
 
 function doPaymentPlaceholder() {
-  // Placeholder — in futuro integra Stripe/PayPal
-  alert('Il sistema di pagamento sarà disponibile a breve. Verrai avvisato via email a ' + (currentUser ? currentUser.email : ''));
+  alert('Pagamento disponibile a breve. Ti avviseremo via email: ' + (currentUser?.email || ''));
 }
 
 function skipPaymentDev() {
-  // Solo per test — simula pagamento avvenuto
   if (currentUser) {
     currentUser.paid = true;
     DB.users = DB.users.map(u => u.email === currentUser.email ? currentUser : u);
@@ -1130,6 +1119,12 @@ function skipPaymentDev() {
   enterWorld();
 }
 
+function enterWorld() {
+  // Mostra mappa icone sopra il video
+  document.getElementById('s1').classList.add('hide');
+  hideRegScreen();
+  setTimeout(() => { document.getElementById('s2').classList.add('show'); }, 200);
+}
 </script>
 </body>
 </html>
