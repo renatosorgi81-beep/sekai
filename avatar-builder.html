@@ -922,8 +922,29 @@ function saveAvatar() {
   }
   const saved = { ...AV, code: buildCode(), savedAt: new Date().toISOString() };
   localStorage.setItem('sekai_avatar_preview', JSON.stringify(saved));
-  if(window.onAvatarSaved) window.onAvatarSaved(saved);
-  else alert('Personaggio salvato!\nCodice: '+saved.code);
+
+  // Comunica con demo.html (se in iframe)
+  if(window.parent && window.parent !== window) {
+    window.parent.postMessage({ type: 'AVATAR_SAVED', avatar: saved }, '*');
+  } else if(window.onAvatarSaved) {
+    window.onAvatarSaved(saved);
+  } else {
+    // Standalone — mostra conferma
+    showSaveConfirm(saved);
+  }
+}
+
+function showSaveConfirm(saved) {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(13,10,24,.95);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;';
+  overlay.innerHTML = `
+    <div style="font-family:var(--jp);font-size:36px;color:var(--gold);letter-spacing:.3em;">世界</div>
+    <div style="font-family:var(--serif);font-size:22px;color:var(--cream);letter-spacing:.2em;">Personaggio salvato</div>
+    <div style="font-family:var(--serif);font-style:italic;font-size:15px;color:rgba(245,234,208,.5);">${saved.name} è pronto per Sekai</div>
+    <div style="font-family:monospace;font-size:10px;color:rgba(212,168,83,.4);letter-spacing:.1em;">${saved.code}</div>
+    <button onclick="this.parentElement.remove()" style="margin-top:12px;padding:12px 36px;background:rgba(212,168,83,.15);border:1px solid rgba(212,168,83,.5);border-radius:3px;color:var(--gold);font-family:var(--serif);font-size:14px;letter-spacing:.2em;cursor:pointer;">Continua ✦</button>
+  `;
+  document.body.appendChild(overlay);
 }
 
 // ── CSS EXTRA LEFT PANEL ──
@@ -943,6 +964,28 @@ document.head.appendChild(extraStyle);
 // ── INIT ──
 window.addEventListener('DOMContentLoaded', () => {
   initLeftPanel();
+
+  // Precarica avatar se in modifica
+  const editData = localStorage.getItem('sekai_avatar_edit');
+  if(editData) {
+    try {
+      const parsed = JSON.parse(editData);
+      Object.assign(AV, parsed);
+      localStorage.removeItem('sekai_avatar_edit');
+    } catch(e){}
+  }
+
+  // Aggiungi bottone chiudi se in iframe
+  if(window.parent && window.parent !== window) {
+    const closeBtn = document.createElement('button');
+    closeBtn.innerHTML = '✕';
+    closeBtn.style.cssText = 'position:fixed;top:14px;right:14px;z-index:9999;background:transparent;border:none;color:rgba(245,234,208,.35);font-size:20px;cursor:pointer;padding:6px 10px;border-radius:50%;transition:all .3s;';
+    closeBtn.onmouseover = () => closeBtn.style.color = 'rgba(245,234,208,.85)';
+    closeBtn.onmouseout  = () => closeBtn.style.color = 'rgba(245,234,208,.35)';
+    closeBtn.onclick = () => window.parent.postMessage({ type: 'AVATAR_CLOSE' }, '*');
+    document.body.appendChild(closeBtn);
+  }
+
   selectCat('name');
   updatePreview();
 });
