@@ -16,151 +16,111 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
 #bg-video{position:absolute;top:-4%;left:-4%;width:108%;height:108%;object-fit:cover;z-index:0;filter:blur(1px) saturate(1.4) contrast(1.08) brightness(1.05);transform:scale(1.06);}
 #intro-overlay{position:absolute;inset:0;z-index:1;background:radial-gradient(ellipse 90% 80% at 50% 50%,rgba(0,0,0,.05) 0%,rgba(0,0,0,.12) 55%,rgba(0,0,0,.55) 100%);}
 
-/* ══ STATO 1 — Logo + pulsante musica ══ */
-#s1{
+/* ══ INTRO UI ══ */
+#intro-ui {
   position:absolute;inset:0;z-index:10;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:36px;
+  gap:32px;
   transition:opacity 0.6s ease;
 }
-#s1.hide{opacity:0;pointer-events:none;display:none;}
 
-#logo-block{text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;}
+#intro-logo { text-align:center; display:flex; flex-direction:column; align-items:center; gap:10px; }
 
-.logo-jp{
+.logo-jp {
   font-family:var(--jp);font-weight:300;
   font-size:clamp(64px,12vw,120px);
   color:rgba(255,255,255,.94);
   letter-spacing:.5em;text-indent:.5em;
-  text-shadow:0 2px 20px rgba(0,0,0,.35),0 0 80px rgba(255,245,200,.12);
+  text-shadow:0 2px 20px rgba(0,0,0,.35);
   animation:fadeUp 1.8s ease both;
 }
-.logo-sub{
+.logo-sub {
   font-family:var(--serif);font-weight:300;
   font-size:clamp(10px,1.3vw,15px);
-  color:rgba(255,255,255,.5);
+  color:rgba(255,255,255,.45);
   letter-spacing:.85em;text-indent:.85em;
   animation:fadeUp 1.8s .2s ease both;
 }
-.logo-tag{
+.logo-tag {
   font-family:var(--serif);font-style:italic;
-  font-size:clamp(12px,1.4vw,17px);
-  color:rgba(255,255,255,.55);
-  letter-spacing:.15em;
-  margin-top:4px;
+  font-size:clamp(12px,1.4vw,16px);
+  color:rgba(255,255,255,.45);
+  letter-spacing:.15em;margin-top:4px;
   animation:fadeUp 1.8s .4s ease both;
 }
 
-/* Pulsante — minimalista, solo testo */
-#music-start-btn{
-  background:transparent;
-  border:none;
-  border-bottom:1px solid rgba(255,255,255,.3);
-  padding:6px 0;
-  color:rgba(255,255,255,.55);
-  font-family:var(--serif);
-  font-style:italic;
-  font-size:clamp(12px,1.3vw,15px);
-  letter-spacing:.3em;
-  cursor:pointer;
-  transition:all .5s ease;
-  animation:fadeUp 1.8s .8s ease both;
-}
-#music-start-btn:hover{
-  color:rgba(255,255,255,.9);
-  border-bottom-color:rgba(255,255,255,.7);
-  letter-spacing:.4em;
-}
-
-/* ══ STATO 2 — Icone aree ══ */
-#s2{
-  position:absolute;inset:0;z-index:10;
-  display:none;flex-direction:column;align-items:center;justify-content:center;
-  gap:32px;
-  opacity:0;
-  transition:opacity 0.8s ease;
-}
-#s2.show{
-  display:flex;
-  opacity:1;
-  pointer-events:all;
-}
-
-#s2-title{
+#start-btn {
+  background:transparent;border:none;
+  border-bottom:1px solid rgba(255,255,255,.28);
+  padding:6px 2px;
+  color:rgba(255,255,255,.5);
   font-family:var(--serif);font-style:italic;
-  font-size:clamp(16px,2vw,22px);
-  color:rgba(255,255,255,.75);
+  font-size:clamp(12px,1.3vw,15px);
+  letter-spacing:.35em;
+  cursor:pointer;
+  transition:all .4s ease;
+  animation:fadeUp 1.8s .7s ease both;
+}
+#start-btn:hover {
+  color:rgba(255,255,255,.88);
+  border-bottom-color:rgba(255,255,255,.65);
+  letter-spacing:.45em;
+}
+
+/* ══ MAPPA AREE ══ */
+#map-ui-title {
+  font-family:var(--serif);font-style:italic;
+  font-size:clamp(15px,2vw,21px);
+  color:rgba(255,255,255,.7);
   letter-spacing:.25em;
   text-shadow:0 1px 8px rgba(0,0,0,.5);
 }
-
-/* Griglia icone */
-#hotspots{
+#map-icons {
   display:flex;flex-wrap:wrap;
   justify-content:center;
-  gap:16px;
-  max-width:600px;
-  padding:0 24px;
+  gap:16px;max-width:580px;padding:0 20px;
 }
-
-.hs{
+.hs {
   display:flex;flex-direction:column;align-items:center;gap:8px;
   cursor:pointer;
-  animation:hsIn .5s ease both;
+  transition:transform .25s ease;
 }
-.hs:nth-child(1){animation-delay:.05s}
-.hs:nth-child(2){animation-delay:.12s}
-.hs:nth-child(3){animation-delay:.19s}
-.hs:nth-child(4){animation-delay:.26s}
-.hs:nth-child(5){animation-delay:.33s}
-.hs:nth-child(6){animation-delay:.40s}
-.hs:nth-child(7){animation-delay:.47s}
-@keyframes hsIn{from{opacity:0;transform:translateY(16px) scale(.8);}to{opacity:1;transform:translateY(0) scale(1);}}
-
-.hs-dot{
-  width:64px;height:64px;
-  background:rgba(255,255,255,.14);
-  border:1.5px solid rgba(255,255,255,.45);
+.hs:hover { transform:translateY(-4px); }
+.hs-dot {
+  width:60px;height:60px;
+  background:rgba(255,255,255,.13);
+  border:1.5px solid rgba(255,255,255,.4);
   border-radius:50%;
   display:flex;align-items:center;justify-content:center;
-  font-size:26px;
+  font-size:24px;
   backdrop-filter:blur(8px);
-  transition:all .3s ease;
-  position:relative;
   box-shadow:0 4px 16px rgba(0,0,0,.2);
+  transition:all .3s;
+  animation:ring 3s ease-out infinite;
 }
-/* Anello pulsante */
-.hs-dot::after{
-  content:'';
-  position:absolute;inset:-6px;
-  border:1.5px solid rgba(255,255,255,.3);
-  border-radius:50%;
-  animation:ring 2.5s ease-out infinite;
+.hs:nth-child(2) .hs-dot{animation-delay:.4s}
+.hs:nth-child(3) .hs-dot{animation-delay:.8s}
+.hs:nth-child(4) .hs-dot{animation-delay:1.2s}
+.hs:nth-child(5) .hs-dot{animation-delay:1.6s}
+.hs:nth-child(6) .hs-dot{animation-delay:2.0s}
+.hs:nth-child(7) .hs-dot{animation-delay:2.4s}
+@keyframes ring {
+  0%,70%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.3);}
+  35%{box-shadow:0 0 0 10px rgba(255,255,255,0);}
 }
-.hs:nth-child(2) .hs-dot::after{animation-delay:.35s}
-.hs:nth-child(3) .hs-dot::after{animation-delay:.7s}
-.hs:nth-child(4) .hs-dot::after{animation-delay:1.05s}
-.hs:nth-child(5) .hs-dot::after{animation-delay:1.4s}
-.hs:nth-child(6) .hs-dot::after{animation-delay:1.75s}
-.hs:nth-child(7) .hs-dot::after{animation-delay:2.1s}
-@keyframes ring{0%{transform:scale(1);opacity:.7;}100%{transform:scale(1.7);opacity:0;}}
-
-.hs:hover .hs-dot{
+.hs:hover .hs-dot {
   background:rgba(255,255,255,.28);
-  border-color:rgba(255,255,255,.9);
-  transform:scale(1.12);
-  box-shadow:0 0 24px rgba(255,255,255,.2);
+  border-color:rgba(255,255,255,.85);
 }
-.hs-lbl{
+.hs-lbl {
   font-family:var(--serif);font-style:italic;
-  font-size:11px;
-  color:rgba(255,255,255,.7);
-  letter-spacing:.12em;
-  text-shadow:0 1px 6px rgba(0,0,0,.6);
-  text-align:center;
-  max-width:72px;
-  line-height:1.3;
+  font-size:11px;color:rgba(255,255,255,.65);
+  letter-spacing:.1em;text-align:center;
+  max-width:70px;line-height:1.3;
 }
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+@keyframes hsIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
 
 /* ══ WORLD ══ */
 #world{position:fixed;inset:0;display:none;}
@@ -379,20 +339,20 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
   </video>
   <div id="intro-overlay"></div>
 
-  <!-- STATO 1: pulsante musica + logo (sempre visibile) -->
-  <div id="s1">
-    <div id="logo-block">
+  <!-- SCHERMATA UNICA INTRO -->
+  <div id="intro-ui">
+    <div id="intro-logo">
       <div class="logo-jp">世界</div>
       <p class="logo-sub">S E K A I</p>
       <p class="logo-tag">Un luogo dove il tempo respira piano</p>
     </div>
-    <button id="music-start-btn" onclick="unlockAndStart()">tocca per iniziare</button>
+    <button id="start-btn" onclick="unlockAndStart()">tocca per iniziare</button>
   </div>
 
-  <!-- STATO 2: icone aree (dopo tocco) -->
-  <div id="s2">
-    <p id="s2-title">Dove vuoi andare?</p>
-    <div id="hotspots">
+  <!-- MAPPA AREE (appare dopo login) -->
+  <div id="map-ui" style="display:none; position:absolute; inset:0; z-index:15; flex-direction:column; align-items:center; justify-content:center; gap:28px;">
+    <p id="map-ui-title">Dove vuoi andare?</p>
+    <div id="map-icons">
       <div class="hs" onclick="goArea('village')"><div class="hs-dot">🏘️</div><span class="hs-lbl">Villaggio</span></div>
       <div class="hs" onclick="goArea('forest')"><div class="hs-dot">🌲</div><span class="hs-lbl">Foresta</span></div>
       <div class="hs" onclick="goArea('lake')"><div class="hs-dot">🌙</div><span class="hs-lbl">Lago della Luna</span></div>
@@ -403,7 +363,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
     </div>
   </div>
 
-</div>
 
 <!-- REGISTRAZIONE -->
 <div id="reg-screen" style="display:none;">
@@ -998,29 +957,59 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 function unlockAndStart() {
-  // AudioContext DEVE essere creato dentro un click handler
-  try {
-    AC = new(window.AudioContext || window.webkitAudioContext)();
-  } catch(e) {}
-
+  // AudioContext nel click handler — obbligatorio
+  try { AC = new(window.AudioContext||window.webkitAudioContext)(); } catch(e){}
   // Avvia video
   const vid = document.getElementById('bg-video');
-  if (vid) vid.play().catch(() => {});
-
+  if(vid) vid.play().catch(()=>{});
   // Avvia musica
-  try { buildMusic(); } catch(e) { console.warn('Music error:', e); }
+  try { buildMusic(); } catch(e){ console.warn(e); }
 
-  // Utente già loggato e pagante → vai alla mappa
-  if (currentUser && currentUser.paid) {
-    enterWorld();
+  // Nascondi intro-ui
+  const ui = document.getElementById('intro-ui');
+  ui.style.opacity = '0';
+  ui.style.pointerEvents = 'none';
+  setTimeout(() => { ui.style.display = 'none'; }, 600);
+
+  // Utente già loggato e pagante → mappa
+  if(currentUser && currentUser.paid) {
+    setTimeout(() => showMapUI(), 500);
     return;
   }
+  // Nuovo → registrazione
+  setTimeout(() => showRegScreen(), 500);
+}
 
-  // Nuovo utente → registrazione
-  const s1 = document.getElementById('s1');
-  s1.style.opacity = '0';
-  s1.style.pointerEvents = 'none';
-  setTimeout(() => { s1.style.display = 'none'; showRegScreen(); }, 600);
+function showMapUI() {
+  const m = document.getElementById('map-ui');
+  m.style.display = 'flex';
+  // Fade in
+  m.style.opacity = '0';
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    m.style.transition = 'opacity 0.8s ease';
+    m.style.opacity = '1';
+  }));
+}
+
+function enterWorld() {
+  hideRegScreen();
+  showMapUI();
+}
+
+function goArea(id) {
+  S.area = id;
+  S.areaIdx = S.areas.indexOf(id);
+  // Fade out intro
+  introRunning = false;
+  const intro = document.getElementById('intro');
+  intro.style.transition = 'opacity 1s ease';
+  intro.style.opacity = '0';
+  setTimeout(() => {
+    intro.style.display = 'none';
+    const world = document.getElementById('world');
+    world.style.display = 'block';
+    initWorld();
+  }, 1000);
 }
 
 // ══ REGISTRAZIONE ══════════════════════════════
