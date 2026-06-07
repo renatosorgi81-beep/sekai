@@ -16,6 +16,27 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
 #bg-video{position:absolute;top:-4%;left:-4%;width:108%;height:108%;object-fit:cover;z-index:0;filter:blur(1px) saturate(1.4) contrast(1.08) brightness(1.05);transform:scale(1.06);}
 #intro-overlay{position:absolute;inset:0;z-index:1;background:radial-gradient(ellipse 90% 80% at 50% 50%,rgba(0,0,0,.05) 0%,rgba(0,0,0,.12) 55%,rgba(0,0,0,.55) 100%);}
 
+
+/* ══ FRASI ROTANTI ══ */
+#phrase-box {
+  min-height: 52px;
+  display:flex;align-items:center;justify-content:center;
+  max-width:520px;padding:0 24px;
+}
+#phrase-text {
+  font-family:var(--serif);
+  font-style:italic;
+  font-size:clamp(13px,1.6vw,17px);
+  color:rgba(255,255,255,.62);
+  letter-spacing:.12em;
+  text-align:center;
+  line-height:1.7;
+  text-shadow:0 1px 8px rgba(0,0,0,.5);
+  opacity:0;
+  transition:opacity 1.2s ease;
+}
+#phrase-text.visible { opacity:1; }
+
 /* ══ INTRO UI ══ */
 #intro-ui {
   position:absolute;inset:0;z-index:10;
@@ -359,7 +380,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
       <p class="logo-sub">S E K A I</p>
       <p class="logo-tag">Un luogo dove il tempo respira piano</p>
     </div>
+    <div id="phrase-box">
+      <p id="phrase-text"></p>
+    </div>
     <button id="start-btn" onclick="unlockAndStart()">tocca per iniziare</button>
+    <p id="already-started" style="display:none;font-family:var(--serif);font-style:italic;font-size:13px;color:rgba(255,255,255,.45);letter-spacing:.2em;cursor:pointer;" onclick="showRegScreen()">entra nel tuo account →</p>
   </div>
 
   <!-- MAPPA AREE (appare dopo login) -->
@@ -964,8 +989,55 @@ function closeMap(){document.getElementById('map').style.display='none';}
 
 
 // ══ AVVIO ══════════════════════════════════════
+
+// ══ FRASI ROTANTI ══════════════════════════════
+const PHRASES = [
+  'Un mondo dove ogni alba porta una nuova storia da vivere.',
+  'Qui il tempo non corre — respira, si distende, ti aspetta.',
+  'Incontra anime affini in un luogo che sa di casa.',
+  'Ogni angolo di Sekai nasconde qualcosa di meraviglioso.',
+  'Non è un gioco. È un posto dove essere davvero te stesso.',
+  'La foresta sussurra. Il lago riflette. Le stelle aspettano.',
+  'Per chi ama gli anime, questo è il mondo che hai sempre sognato.',
+  'Porta la tua storia. Trova le storie degli altri.',
+  'Sekai cresce con te — ogni giorno qualcosa di nuovo.',
+  'Un rifugio digitale fatto di luce soffusa e silenzi preziosi.',
+  'Qui la bellezza non ha fretta. Né tu ne avrai bisogno.',
+  'Unisciti a una community che condivide la tua stessa magia.',
+];
+
+let phraseIdx = 0;
+let phraseTimer = null;
+
+function startPhrases() {
+  const el = document.getElementById('phrase-text');
+  if (!el) return;
+
+  function showNext() {
+    // Fade out
+    el.classList.remove('visible');
+    setTimeout(() => {
+      el.textContent = PHRASES[phraseIdx % PHRASES.length];
+      phraseIdx++;
+      // Fade in
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        el.classList.add('visible');
+      }));
+    }, 1200);
+  }
+
+  // Prima frase subito
+  el.textContent = PHRASES[0];
+  phraseIdx = 1;
+  setTimeout(() => el.classList.add('visible'), 100);
+
+  // Poi ogni 4 secondi
+  phraseTimer = setInterval(showNext, 4500);
+}
+
 window.addEventListener('DOMContentLoaded', () => {
   initIntro();
+  startPhrases();
   window.addEventListener('resize', () => {
     W = window.innerWidth; H = window.innerHeight;
     if (WC) { WC.width = W; WC.height = H; }
@@ -974,6 +1046,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 function unlockAndStart() {
   // AudioContext nel click handler — obbligatorio
+  if(phraseTimer) { clearInterval(phraseTimer); phraseTimer = null; }
   try { AC = new(window.AudioContext||window.webkitAudioContext)(); } catch(e){}
   // Avvia video
   const vid = document.getElementById('bg-video');
@@ -1032,7 +1105,7 @@ function goArea(id) {
 
 function closeReg() {
   hideRegScreen();
-  // Torna all'intro-ui
+  // Torna all'intro-ui senza riavviare la musica
   const ui = document.getElementById('intro-ui');
   ui.style.display = 'flex';
   ui.style.opacity = '0';
@@ -1041,6 +1114,11 @@ function closeReg() {
     ui.style.transition = 'opacity 0.6s ease';
     ui.style.opacity = '1';
   }));
+  // Sostituisci bottone con link discreto (musica già in corso)
+  document.getElementById('start-btn').style.display = 'none';
+  document.getElementById('already-started').style.display = 'block';
+  // Riavvia frasi
+  if(!phraseTimer) startPhrases();
 }
 
 function showRegScreen() {
