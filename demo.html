@@ -1015,45 +1015,72 @@ function openMap(){document.getElementById('map').style.display='flex';}
 function closeMap(){document.getElementById('map').style.display='none';}
 
 // ── INIT ───────────────────────────────────────
-window.addEventListener('DOMContentLoaded',()=>{
+window.addEventListener('DOMContentLoaded', () => {
   initIntro();
 
   const intro = document.getElementById('intro');
   let musicReady = false;
+  let tapCount = 0;
 
-  intro.addEventListener('click', () => {
+  function handleFirstInteraction() {
+    // Forza resume AudioContext (obbligatorio su iOS/Android)
+    if(AC && AC.state === 'suspended') {
+      AC.resume();
+    }
+
     if(!musicReady) {
-      // PRIMO TOCCO: avvia musica, mostra hint "tocca ancora per entrare"
-      startAmbientMusic();
+      tapCount++;
+
+      // Crea AudioContext al primo tocco (unico momento consentito dai browser)
+      if(!AC) {
+        AC = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      // Resume se sospeso
+      if(AC.state === 'suspended') AC.resume().then(() => {
+        startGenerativeMusic();
+      });
+      else {
+        startGenerativeMusic();
+      }
+      ambientStarted = true;
       musicReady = true;
 
-      // Aggiorna hint visivamente
+      // Avvia video se bloccato
+      const vid = document.getElementById('bg-video');
+      if(vid) vid.play().catch(() => {});
+
+      // Aggiorna testo
       const hint = document.querySelector('.enter-text');
       if(hint) {
-        hint.style.transition = 'opacity 0.5s';
+        hint.style.transition = 'opacity 0.6s';
         hint.style.opacity = '0';
-        setTimeout(()=>{
+        setTimeout(() => {
           hint.textContent = 'entra nel mondo';
           hint.style.opacity = '1';
-        }, 500);
+        }, 600);
       }
 
-      // Avvia anche il video se non partito
-      const vid = document.getElementById('bg-video');
-      if(vid && vid.paused) vid.play().catch(()=>{});
-
     } else {
-      // SECONDO TOCCO: entra nel mondo
+      // Secondo tocco — entra nel mondo
       enterWorld();
     }
-  });
+  }
 
-  window.addEventListener('resize',()=>{
-    W=window.innerWidth;H=window.innerHeight;
-    if(IC){IC.width=W;IC.height=H;}
-    if(WC){WC.width=W;WC.height=H;}
+  // Cattura QUALSIASI interazione — click, touch, keydown
+  intro.addEventListener('click', handleFirstInteraction);
+  intro.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    handleFirstInteraction();
+  });
+  document.addEventListener('keydown', handleFirstInteraction, { once: true });
+
+  window.addEventListener('resize', () => {
+    W = window.innerWidth; H = window.innerHeight;
+    if(IC){ IC.width = W; IC.height = H; }
+    if(WC){ WC.width = W; WC.height = H; }
   });
 });
+
 </script>
 </body>
 </html>
