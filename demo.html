@@ -159,6 +159,66 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;}
 #tr.f #tt{opacity:1;}
 #tip{position:absolute;bottom:82px;left:50%;transform:translateX(-50%);font-family:'Cormorant Garamond',serif;font-style:italic;font-size:12px;color:rgba(245,234,208,.4);letter-spacing:.2em;z-index:50;pointer-events:none;animation:tipf 3s ease-in-out infinite;transition:opacity 1.5s;}
 @media(max-width:600px){#mg{grid-template-columns:repeat(2,1fr);}.ma:nth-child(5){grid-column:span 1;}}
+
+/* ══ TOUCH GATE ══ */
+#touch-gate {
+  position:absolute;inset:0;z-index:20;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,0.18);
+  transition:opacity 1.2s ease;
+  cursor:pointer;
+}
+#touch-gate.hidden {
+  opacity:0;pointer-events:none;
+}
+#touch-gate-inner {
+  display:flex;flex-direction:column;align-items:center;gap:14px;
+  position:relative;
+}
+.touch-ripple {
+  position:absolute;
+  width:90px;height:90px;
+  border:1.5px solid rgba(255,255,255,0.5);
+  border-radius:50%;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  animation:ripple 2.4s ease-out infinite;
+}
+.touch-ripple-2 {
+  animation-delay:1.2s;
+}
+@keyframes ripple {
+  0%   { width:60px;height:60px;opacity:0.8; }
+  100% { width:160px;height:160px;opacity:0; }
+}
+.touch-icon {
+  font-size:32px;color:rgba(255,255,255,0.85);
+  text-shadow:0 0 20px rgba(255,255,255,0.4);
+  animation:iconPulse 2s ease-in-out infinite;
+  position:relative;z-index:1;
+}
+@keyframes iconPulse {
+  0%,100%{transform:scale(1);opacity:0.8;}
+  50%{transform:scale(1.12);opacity:1;}
+}
+.touch-label {
+  font-family:var(--font-serif);
+  font-style:italic;
+  font-size:clamp(12px,1.4vw,16px);
+  color:rgba(255,255,255,0.65);
+  letter-spacing:.3em;
+  text-shadow:0 1px 8px rgba(0,0,0,0.5);
+  animation:fadeUp 1.5s ease both;
+}
+
+/* Main content fade in after touch */
+#main-ic {
+  transition: opacity 1.5s ease 0.3s;
+}
+#main-ic.visible {
+  opacity:1 !important;
+  pointer-events:all !important;
+}
 </style>
 </head>
 <body>
@@ -169,12 +229,22 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;}
   </video>
   <canvas id="ic"></canvas>
   <div id="intro-overlay"></div>
-  <div class="ic">
+  <!-- Overlay tocco iniziale -->
+  <div id="touch-gate">
+    <div id="touch-gate-inner">
+      <div class="touch-ripple"></div>
+      <div class="touch-ripple touch-ripple-2"></div>
+      <div class="touch-icon">✦</div>
+      <p class="touch-label">tocca per iniziare</p>
+    </div>
+  </div>
+  <!-- Contenuto principale (nascosto finché non si tocca) -->
+  <div class="ic" id="main-ic" style="opacity:0;pointer-events:none;">
     <div class="logo-jp">世界</div>
     <p class="logo-sub">S E K A I</p>
     <div class="enter-hint">
       <span class="enter-line"></span>
-      <span class="enter-text">tocca per entrare</span>
+      <span class="enter-text">entra nel mondo</span>
       <span class="enter-line"></span>
     </div>
   </div>
@@ -389,695 +459,279 @@ function animIntro(){
 }
 
 
-// ── MUSICA AMBIENT STILE ANIME ─────────────────
-// Brani liberi da copyright da archive.org / musopen / freemusicarchive
-const TRACKS = [
-  // Musica ambient/orchestrale libera da copyright
-  "https://ia800905.us.archive.org/19/items/JapaneseTraditionalMusic/koto_01.mp3",
-  "https://freemusicarchive.org/track/Soliloquy/download",
-];
-
-// Fallback: musica generativa Web Audio (sempre disponibile)
+// ── MUSICA ALLEGRA STILE ANIME ─────────────────
 let ambientStarted = false;
-let bgAudio = null;
 
 function startAmbientMusic() {
   if(ambientStarted) return;
   ambientStarted = true;
-
-  // Prova prima con audio generativo Web Audio (funziona sempre)
-  initAC();
-  if(AC) startGenerativeMusic();
+  if(!AC) AC = new(window.AudioContext||window.webkitAudioContext)();
+  if(AC.state==='suspended') { AC.resume().then(()=>buildMusic()); return; }
+  buildMusic();
 }
 
-function startGenerativeMusic() {
+function buildMusic() {
   if(!AC) return;
 
+  // Master gain con fade-in
   const master = AC.createGain();
   master.gain.setValueAtTime(0, AC.currentTime);
-  master.gain.linearRampToValueAtTime(0.75, AC.currentTime + 4);
+  master.gain.linearRampToValueAtTime(0.88, AC.currentTime+3.5);
   master.connect(AC.destination);
 
-  // Riverbero grande (sala da concerto)
+  // Riverbero medio (stanza aperta, non troppo lungo)
   const rev = AC.createConvolver();
-  const rb = AC.createBuffer(2, AC.sampleRate * 6, AC.sampleRate);
-  for(let c=0;c<2;c++){
-    const d = rb.getChannelData(c);
-    for(let i=0;i<d.length;i++) d[i] = (Math.random()*2-1) * Math.pow(1-i/d.length, 1.2);
-  }
-  rev.buffer = rb;
-  const revG = AC.createGain(); revG.gain.value = 0.7;
-  rev.connect(revG); revG.connect(master);
-  const dryG = AC.createGain(); dryG.gain.value = 0.3;
-  dryG.connect(master);
+  const rLen = AC.sampleRate*3;
+  const rBuf = AC.createBuffer(2,rLen,AC.sampleRate);
+  for(let c=0;c<2;c++){const d=rBuf.getChannelData(c);for(let i=0;i<rLen;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/rLen,2);}
+  rev.buffer=rBuf;
+  const revG=AC.createGain(); revG.gain.value=0.38; rev.connect(revG); revG.connect(master);
+  const dry=AC.createGain(); dry.gain.value=0.62; dry.connect(master);
 
-  // Scala pentatonica giapponese In-Sen (molto Ghibli): Do, Reb, Fa, Sol, Sib
-  // Frequenze in Hz (ottava 3 e 4)
-  const scale = [
-    130.81, 138.59, 174.61, 196.00, 233.08, // ottava 3
-    261.63, 277.18, 349.23, 392.00, 466.16, // ottava 4
-    523.25, 554.37, 698.46, 784.00, 932.33, // ottava 5
-  ];
+  // ── SCALA: Do maggiore (allegra, solare) ──
+  // Do Re Mi Fa Sol La Si Do (ottave 4 e 5)
+  const C4=261.63,D4=293.66,E4=329.63,F4=349.23,G4=392,A4=440,B4=493.88;
+  const C5=523.25,D5=587.33,E5=659.25,F5=698.46,G5=784,A5=880,B5=987.77;
+  const C3=130.81,G3=196,E3=164.81;
 
-  // Koto sintetico — suono pizzicato con decay rapido
-  function kotoNote(freq, time, vel) {
-    const o = AC.createOscillator();
-    const o2 = AC.createOscillator();
-    const g = AC.createGain();
-    // Timbro koto: fondamentale + armonica
-    o.type = 'triangle';
-    o.frequency.value = freq;
-    o2.type = 'sine';
-    o2.frequency.value = freq * 2.01; // leggero detune per calore
-    const g2 = AC.createGain(); g2.gain.value = 0.3;
-    o2.connect(g2); g2.connect(g);
-    // Inviluppo koto: attacco rapidissimo, decay lungo
-    g.gain.setValueAtTime(0, time);
-    g.gain.linearRampToValueAtTime(vel * 0.12, time + 0.008);
-    g.gain.exponentialRampToValueAtTime(vel * 0.04, time + 0.3);
-    g.gain.exponentialRampToValueAtTime(0.0001, time + 2.2);
-    o.connect(g); g.connect(rev); g.connect(dryG);
-    o.start(time); o.stop(time + 2.5);
-    o2.start(time); o2.stop(time + 2.5);
+  // ── FUNZIONE: nota con timbro specifico ──
+  function note(freq, time, dur, vol, type='sine', detune=0) {
+    const o=AC.createOscillator(), g=AC.createGain();
+    o.type=type; o.frequency.value=freq;
+    if(detune) o.detune.value=detune;
+    g.gain.setValueAtTime(0,time);
+    g.gain.linearRampToValueAtTime(vol, time+Math.min(0.04,dur*0.1));
+    g.gain.setValueAtTime(vol*0.75, time+dur*0.6);
+    g.gain.linearRampToValueAtTime(0, time+dur);
+    o.connect(g); g.connect(dry); g.connect(rev);
+    o.start(time); o.stop(time+dur+0.05);
   }
 
-  // Pad ambientale (flauto/shakuhachi sintetico)
-  function shakuhachiNote(freq, time, dur, vel) {
-    const o = AC.createOscillator();
-    const g = AC.createGain();
-    const vibrato = AC.createOscillator();
-    const vibratoG = AC.createGain();
-    o.type = 'sine';
-    o.frequency.value = freq;
-    vibrato.type = 'sine';
-    vibrato.frequency.value = 5.5;
-    vibratoG.gain.value = freq * 0.012;
-    vibrato.connect(vibratoG);
-    vibratoG.connect(o.frequency);
-    g.gain.setValueAtTime(0, time);
-    g.gain.linearRampToValueAtTime(vel * 0.06, time + 0.4);
-    g.gain.setValueAtTime(vel * 0.06, time + dur - 0.6);
-    g.gain.linearRampToValueAtTime(0, time + dur);
-    o.connect(g); g.connect(rev);
-    vibrato.connect(vibratoG);
-    o.start(time); o.stop(time + dur + 0.1);
-    vibrato.start(time); vibrato.stop(time + dur + 0.1);
+  // Koto pizzicato (attacco rapido, decay esponenziale)
+  function koto(freq, time, vol=0.1) {
+    const o=AC.createOscillator(), o2=AC.createOscillator(), g=AC.createGain();
+    o.type='triangle'; o.frequency.value=freq;
+    o2.type='sine'; o2.frequency.value=freq*2.003;
+    const g2=AC.createGain(); g2.gain.value=0.28; o2.connect(g2); g2.connect(g);
+    g.gain.setValueAtTime(vol,time);
+    g.gain.exponentialRampToValueAtTime(vol*0.3, time+0.15);
+    g.gain.exponentialRampToValueAtTime(0.0001, time+1.8);
+    o.connect(g); g.connect(dry); g.connect(rev);
+    o.start(time); o.stop(time+2);
+    o2.start(time); o2.stop(time+2);
   }
 
-  // Basso drone (tamburo taiko sintetico — pulse lenta)
-  function drone(freq, time) {
-    const o = AC.createOscillator();
-    const g = AC.createGain();
-    o.type = 'sine';
-    o.frequency.value = freq;
-    g.gain.setValueAtTime(0, time);
-    g.gain.linearRampToValueAtTime(0.04, time + 0.5);
-    g.gain.setValueAtTime(0.04, time + 7);
-    g.gain.linearRampToValueAtTime(0, time + 9);
-    o.connect(g); g.connect(rev);
-    o.start(time); o.stop(time + 9.5);
+  // Flauto anime (shakuhachi veloce, allegro)
+  function flute(freq, time, dur, vol=0.06) {
+    const o=AC.createOscillator(), g=AC.createGain();
+    const vib=AC.createOscillator(), vibG=AC.createGain();
+    o.type='sine'; o.frequency.value=freq;
+    vib.type='sine'; vib.frequency.value=6.5;
+    vibG.gain.value=freq*0.015;
+    vib.connect(vibG); vibG.connect(o.frequency);
+    // Breath noise
+    const noise=AC.createOscillator();
+    noise.type='sawtooth'; noise.frequency.value=freq*0.5;
+    const nG=AC.createGain(); nG.gain.value=vol*0.08;
+    noise.connect(nG); nG.connect(g);
+    g.gain.setValueAtTime(0,time);
+    g.gain.linearRampToValueAtTime(vol,time+0.06);
+    g.gain.setValueAtTime(vol,time+dur-0.12);
+    g.gain.linearRampToValueAtTime(0,time+dur);
+    o.connect(g); g.connect(dry); g.connect(rev);
+    o.start(time); o.stop(time+dur+0.1);
+    vib.start(time); vib.stop(time+dur+0.1);
+    noise.start(time); noise.stop(time+dur+0.1);
   }
 
-  // Composizione procedurale — pattern melodico che evolve
-  let barTime = AC.currentTime + 0.5;
-  const barLen = 8; // secondi per battuta
+  // Percussione (taiko leggero)
+  function taiko(time, vol=0.12) {
+    const o=AC.createOscillator(), g=AC.createGain();
+    o.type='sine'; o.frequency.setValueAtTime(180,time);
+    o.frequency.exponentialRampToValueAtTime(60,time+0.15);
+    g.gain.setValueAtTime(vol,time);
+    g.gain.exponentialRampToValueAtTime(0.0001,time+0.25);
+    o.connect(g); g.connect(dry);
+    o.start(time); o.stop(time+0.3);
+    // Rim
+    const o2=AC.createOscillator(), g2=AC.createGain();
+    o2.type='square'; o2.frequency.value=900;
+    g2.gain.setValueAtTime(vol*0.3,time);
+    g2.gain.exponentialRampToValueAtTime(0.0001,time+0.04);
+    o2.connect(g2); g2.connect(dry);
+    o2.start(time); o2.stop(time+0.05);
+  }
 
-  function playBar() {
-    const now = barTime;
+  // Carillon / glockenspiel (note brillanti)
+  function bell(freq, time, vol=0.07) {
+    [1,2.756,5.404].forEach((harm,i)=>{
+      const o=AC.createOscillator(), g=AC.createGain();
+      o.type='sine'; o.frequency.value=freq*harm;
+      const v=vol*[1,.4,.1][i];
+      g.gain.setValueAtTime(v,time);
+      g.gain.exponentialRampToValueAtTime(0.0001,time+[2.5,1.2,.6][i]);
+      o.connect(g); g.connect(rev); g.connect(dry);
+      o.start(time); o.stop(time+3);
+    });
+  }
 
-    // Drone basso
-    drone(scale[0] * 0.5, now);
+  // ── COMPOSIZIONE: loop da 16 battute (allegro, 120 BPM) ──
+  const BPM=112, beat=60/BPM, bar=beat*4;
 
-    // Pattern koto (melodia principale)
-    const patterns = [
-      [0,2,4,7,9,4,2,0],
-      [2,4,7,9,7,4,2,4],
-      [4,7,9,11,9,7,4,2],
-      [0,4,7,4,2,0,2,4],
-      [7,9,11,9,7,4,2,0],
-      [2,0,2,4,7,9,7,4],
-    ];
-    const pat = patterns[Math.floor(Math.random() * patterns.length)];
-    const rhythm = [0, 0.9, 1.6, 2.4, 3.2, 4.1, 5.0, 5.8];
+  function playLoop() {
+    const t = AC.currentTime + 0.05;
 
-    pat.forEach((ni, i) => {
-      const t = now + rhythm[i] + Math.random() * 0.06;
-      const vel = 0.6 + Math.random() * 0.4;
-      kotoNote(scale[ni % scale.length], t, vel);
-      // Occasionalmente nota bassa in ottava sotto
-      if(Math.random() < 0.25) kotoNote(scale[ni % scale.length] * 0.5, t, vel * 0.4);
+    // ── BASSO (accordi) ──
+    [[C3,0],[G3,2],[C3,4],[E3,6],[G3,8],[C3,10],[G3,12],[E3,14]].forEach(([f,b])=>{
+      note(f, t+b*beat, beat*1.8, 0.06, 'sine');
     });
 
-    // Shakuhachi (melodia lenta sopra)
-    const melNotes = [4,7,9,11,9,7];
-    let mt = now + 1.5;
-    melNotes.forEach((ni,i) => {
-      if(Math.random() < 0.6) {
-        shakuhachiNote(scale[ni % scale.length] * 2, mt, 1.8 + Math.random(), 0.7 + Math.random()*0.3);
+    // ── KOTO (melodia principale — allegra) ──
+    // Frase 1
+    [
+      [E4,0],[G4,.5],[A4,1],[G4,1.5],[E4,2],[D4,2.5],[C4,3],[D4,3.5],
+      [E4,4],[E4,4.5],[E4,5],[D4,5.5],[D4,6],[E4,6.5],[G4,7],[A4,7.5],
+    ].forEach(([f,b])=> koto(f, t+b*beat, 0.11));
+    // Frase 2
+    [
+      [C5,8],[B4,8.5],[A4,9],[G4,9.5],[E4,10],[G4,10.5],[A4,11],[C5,11.5],
+      [D5,12],[C5,12.5],[B4,13],[A4,13.5],[G4,14],[E4,14.5],[D4,15],[C4,15.5],
+    ].forEach(([f,b])=> koto(f, t+b*beat, 0.11));
+
+    // ── FLAUTO (controcanto) ──
+    [
+      [G5,2,beat*1.5],[E5,4,beat],[G5,5,beat*.5],[A5,6,beat*1.8],
+      [G5,9,beat],[E5,10,beat*1.2],[D5,12,beat*.8],[E5,13,beat*.6],[C5,14,beat*2],
+    ].forEach(([f,b,d])=> flute(f, t+b*beat, d, 0.055));
+
+    // ── CARILLON (ornamenti) ──
+    [1,3,5,7,9,11,13,15].forEach(b=>{
+      if(Math.random()<0.5) {
+        const notes2=[C5,D5,E5,G5,A5];
+        bell(notes2[Math.floor(Math.random()*notes2.length)], t+b*beat+Math.random()*beat*.5, 0.05);
       }
-      mt += 1.1 + Math.random() * 0.5;
     });
 
-    barTime += barLen;
-    setTimeout(playBar, (barLen - 0.5) * 1000);
+    // ── TAIKO (ritmo) ──
+    [0,2,4,6,8,10,12,14].forEach(b=> taiko(t+b*beat, 0.1));
+    // Accenti off-beat
+    [1,5,9,13].forEach(b=> taiko(t+b*beat+beat*.5, 0.06));
+
+    // Ripeti
+    setTimeout(playLoop, bar*16*1000 - 100);
   }
+  playLoop();
 
-  playBar();
+  // ── SUONI NATURA ──
 
-  // Suoni natura: vento
-  const wbuf = AC.createBuffer(1, AC.sampleRate*4, AC.sampleRate);
-  const wd = wbuf.getChannelData(0);
-  for(let i=0;i<wd.length;i++) wd[i] = Math.random()*2-1;
-  const ws = AC.createBufferSource(); ws.buffer=wbuf; ws.loop=true;
-  const wf = AC.createBiquadFilter(); wf.type='bandpass'; wf.frequency.value=300; wf.Q.value=0.3;
-  const wg2 = AC.createGain(); wg2.gain.value=0.018;
-  ws.connect(wf); wf.connect(wg2); wg2.connect(master); ws.start();
+  // Vento (rumore bianco filtrato, ondeggiante)
+  const wBuf=AC.createBuffer(1,AC.sampleRate*4,AC.sampleRate);
+  const wd=wBuf.getChannelData(0); for(let i=0;i<wd.length;i++) wd[i]=Math.random()*2-1;
+  const wSrc=AC.createBufferSource(); wSrc.buffer=wBuf; wSrc.loop=true;
+  const wFilt=AC.createBiquadFilter(); wFilt.type='bandpass'; wFilt.frequency.value=400; wFilt.Q.value=0.5;
+  const wGain=AC.createGain(); wGain.gain.value=0;
+  wSrc.connect(wFilt); wFilt.connect(wGain); wGain.connect(master);
+  wSrc.start();
+  // Vento ondeggiante
+  const lfo=AC.createOscillator(); lfo.type='sine'; lfo.frequency.value=0.08;
+  const lfoG=AC.createGain(); lfoG.gain.value=0.015;
+  lfo.connect(lfoG); lfoG.connect(wGain.gain); lfo.start();
+  wGain.gain.setValueAtTime(0,AC.currentTime);
+  wGain.gain.linearRampToValueAtTime(0.02,AC.currentTime+4);
 
-  // Uccelli
-  function chirp() {
+  // Ruscello (rumore basso continuo)
+  const rSrc=AC.createBufferSource(); rSrc.buffer=wBuf; rSrc.loop=true;
+  const rFilt=AC.createBiquadFilter(); rFilt.type='lowpass'; rFilt.frequency.value=800;
+  const rGain=AC.createGain(); rGain.gain.value=0;
+  rSrc.connect(rFilt); rFilt.connect(rGain); rGain.connect(master);
+  rSrc.start();
+  rGain.gain.setValueAtTime(0,AC.currentTime);
+  rGain.gain.linearRampToValueAtTime(0.025,AC.currentTime+5);
+  // Gorgoglio ruscello (LFO veloce)
+  const rLfo=AC.createOscillator(); rLfo.type='sine'; rLfo.frequency.value=7;
+  const rLfoG=AC.createGain(); rLfoG.gain.value=0.01;
+  rLfo.connect(rLfoG); rLfoG.connect(rGain.gain); rLfo.start();
+
+  // Uccelli (allegri, frequenti di giorno)
+  function bird() {
     if(!ambientStarted) return;
-    const o = AC.createOscillator(), g = AC.createGain();
-    const f = 1800+Math.random()*1200;
-    o.frequency.setValueAtTime(f, AC.currentTime);
-    o.frequency.linearRampToValueAtTime(f*1.25, AC.currentTime+0.04);
-    o.frequency.linearRampToValueAtTime(f*0.88, AC.currentTime+0.13);
-    g.gain.setValueAtTime(0,AC.currentTime);
-    g.gain.linearRampToValueAtTime(0.016,AC.currentTime+0.015);
-    g.gain.linearRampToValueAtTime(0,AC.currentTime+0.15);
-    o.type='sine'; o.connect(g); g.connect(rev);
-    o.start(); o.stop(AC.currentTime+0.18);
-    if(Math.random()<0.4) setTimeout(()=>{
-      const o2=AC.createOscillator(),g2=AC.createGain();
-      o2.frequency.value=f*1.12; o2.type='sine';
-      g2.gain.setValueAtTime(0,AC.currentTime);
-      g2.gain.linearRampToValueAtTime(0.012,AC.currentTime+0.015);
-      g2.gain.linearRampToValueAtTime(0,AC.currentTime+0.13);
-      o2.connect(g2); g2.connect(rev);
-      o2.start(); o2.stop(AC.currentTime+0.15);
-    }, 180+Math.random()*120);
-    setTimeout(chirp, 3000+Math.random()*6000);
+    const numChirps = 1 + Math.floor(Math.random()*3);
+    for(let c=0;c<numChirps;c++) {
+      const delay = c*0.18;
+      const f = 2000+Math.random()*1800;
+      const o=AC.createOscillator(), g=AC.createGain();
+      o.type='sine';
+      o.frequency.setValueAtTime(f, AC.currentTime+delay);
+      o.frequency.linearRampToValueAtTime(f*(1.15+Math.random()*.2), AC.currentTime+delay+0.04);
+      o.frequency.linearRampToValueAtTime(f*0.92, AC.currentTime+delay+0.12);
+      g.gain.setValueAtTime(0,AC.currentTime+delay);
+      g.gain.linearRampToValueAtTime(0.022,AC.currentTime+delay+0.01);
+      g.gain.linearRampToValueAtTime(0,AC.currentTime+delay+0.14);
+      o.connect(g); g.connect(rev); g.connect(dry);
+      o.start(AC.currentTime+delay); o.stop(AC.currentTime+delay+0.18);
+    }
+    setTimeout(bird, 1500+Math.random()*4000);
   }
-  setTimeout(chirp, 800);
+  setTimeout(bird, 500);
+
+  // Grilli leggeri (sottofondo sempre)
+  const cricketOsc=AC.createOscillator();
+  cricketOsc.type='square'; cricketOsc.frequency.value=4200;
+  const cricketG=AC.createGain(); cricketG.gain.value=0;
+  const cricketLfo=AC.createOscillator(); cricketLfo.type='sine'; cricketLfo.frequency.value=12;
+  const cricketLfoG=AC.createGain(); cricketLfoG.gain.value=0.004;
+  cricketLfo.connect(cricketLfoG); cricketLfoG.connect(cricketG.gain);
+  cricketOsc.connect(cricketG); cricketG.connect(master);
+  cricketOsc.start(); cricketLfo.start();
+  cricketG.gain.setValueAtTime(0,AC.currentTime);
+  cricketG.gain.linearRampToValueAtTime(0.006,AC.currentTime+6);
 
   document.getElementById('sb').textContent='🔊';
 }
-
-function enterWorld(){
-  startAmbientMusic();
-  const intro=document.getElementById('intro');
-  intro.style.transition='opacity 2s ease';intro.style.opacity='0';
-  setTimeout(()=>{
-    intro.style.display='none';
-    const world=document.getElementById('world');world.style.display='block';
-    initWorld();
-  },2000);
-}
-
-// ── WORLD ──────────────────────────────────────
-function initWorld(){
-  WC=document.getElementById('wc');WX=WC.getContext('2d');
-  W=WC.width=window.innerWidth;H=WC.height=window.innerHeight;
-  window.addEventListener('resize',()=>{W=WC.width=window.innerWidth;H=WC.height=window.innerHeight;});
-  initObjs();showAreaName(AREAS[S.area].name);updateClock();
-  setTimeout(()=>{const t=document.getElementById('tip');if(t){t.style.opacity='0';}},6000);
-  animWorld();
-}
-
-function initObjs(){
-  birds=[];clouds=[];leaves=[];fireflies=[];flowers=[];butterflies=[];meteors=[];particles=[];
-  if(!stars.length)for(let i=0;i<200;i++)stars.push({x:Math.random()*W,y:Math.random()*H*.72,r:Math.random()*1.4+.3,tw:Math.random()*Math.PI*2,sp:.02+Math.random()*.04});
-  for(let i=0;i<6;i++)clouds.push({x:Math.random()*W,y:H*.05+Math.random()*H*.3,w:120+Math.random()*200,h:40+Math.random()*60,sp:.08+Math.random()*.15,a:.5+Math.random()*.4});
-  for(let i=0;i<5;i++)spawnBird();
-  for(let i=0;i<18;i++)spawnLeaf(Math.random()*W,Math.random()*H);
-  for(let i=0;i<22;i++)fireflies.push({x:Math.random()*W,y:H*.35+Math.random()*H*.55,vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.3,ph:Math.random()*Math.PI*2,r:Math.random()*2+1});
-  for(let i=0;i<35;i++)flowers.push({x:Math.random()*W,y:H*.67+Math.random()*H*.28,sz:3+Math.random()*8,col:['#ffb7c5','#ff9a9e','#fecfef','#f8c8d4','#ffccaa','#ffe0aa'][Math.floor(Math.random()*6)],ph:Math.random()*Math.PI*2,sp:.004+Math.random()*.009});
-  for(let i=0;i<5;i++)butterflies.push({x:Math.random()*W,y:H*.3+Math.random()*H*.38,ph:Math.random()*Math.PI*2,sp:.3+Math.random()*.5,col:['#ffb7c5','#c8e8ff','#d8c8ff','#ffffa0'][i%4],tx:Math.random()*W,ty:H*.3+Math.random()*H*.38});
-}
-
-function spawnBird(){birds.push({x:-30,y:H*.1+Math.random()*H*.32,sp:.5+Math.random()*1.2,fp:Math.random()*Math.PI*2,fs:.08+Math.random()*.06,sz:6+Math.random()*8,a:.6+Math.random()*.4});}
-function spawnLeaf(x,y){leaves.push({x,y,vx:(Math.random()-.5)*1.4,vy:.3+Math.random()*.7,rot:Math.random()*Math.PI*2,rsp:(Math.random()-.5)*.05,sz:4+Math.random()*8,col:['#d4a853','#c8a040','#e8b860','#c09030'][Math.floor(Math.random()*4)],a:.7+Math.random()*.3,sw:Math.random()*Math.PI*2,sws:.01+Math.random()*.02});}
-
-// ── COLORI ────────────────────────────────────
-function lerp(a,b,t){
-  const p=s=>parseInt(s,16);
-  const r1=p(a.slice(1,3)),g1=p(a.slice(3,5)),b1=p(a.slice(5,7));
-  const r2=p(b.slice(1,3)),g2=p(b.slice(3,5)),b2=p(b.slice(5,7));
-  return`rgb(${Math.round(r1+(r2-r1)*t)},${Math.round(g1+(g2-g1)*t)},${Math.round(b1+(b2-b1)*t)})`;
-}
-function getSky(){
-  const t=S.wt,sk=AREAS[S.area].sky;
-  const ph=t<.25?0:t<.5?1:t<.75?2:3;
-  const pt=t<.25?t/.25:t<.5?(t-.25)/.25:t<.75?(t-.5)/.25:(t-.75)/.25;
-  const nx=(ph+1)%4;
-  return{top:lerp(sk[ph],sk[nx],pt),bot:lerp(sk[(ph+1)%4]||sk[3],sk[(nx+1)%4]||sk[3],pt)};
-}
-function getLM(){
-  const t=S.wt;
-  if(t<.25)return.45+t*2.2;if(t<.5)return.95;if(t<.75)return.95-(t-.5)*2.6;return.3+(t-.75)*.7;
-}
-
-// ── DRAW ───────────────────────────────────────
-function drawWorld(){
-  const ctx=WX,w=W,h=H,f=S.frame;
-  const sk=getSky(),lm=getLM(),t=S.wt;
-  const isNight=t>.7||t<.12,isDawn=t<.22,isDusk=t>.45&&t<.65;
-
-  // SKY
-  const sg=ctx.createLinearGradient(0,0,0,h*.65);
-  sg.addColorStop(0,sk.top);sg.addColorStop(1,sk.bot);
-  ctx.fillStyle=sg;ctx.fillRect(0,0,w,h);
-
-  // STARS
-  if(isNight||isDawn){
-    const sa=isNight?1:Math.max(0,(0.18-t)/0.18);
-    stars.forEach(s=>{
-      s.tw+=s.sp;const a=(.5+.5*Math.sin(s.tw))*Math.min(1,sa);
-      if(a<.01)return;
-      ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
-      ctx.fillStyle=`rgba(255,255,220,${a})`;ctx.fill();
-    });
-  }
-
-  // LUNA
-  if(isNight){
-    const mx=w*.76+Math.sin(f*.0003)*18,my=h*.15;
-    const mg=ctx.createRadialGradient(mx,my,0,mx,my,55);
-    mg.addColorStop(0,'rgba(255,245,200,.22)');mg.addColorStop(1,'transparent');
-    ctx.fillStyle=mg;ctx.fillRect(mx-55,my-55,110,110);
-    ctx.beginPath();ctx.arc(mx,my,21,0,Math.PI*2);
-    ctx.fillStyle='rgba(255,248,210,.95)';ctx.fill();
-  }
-
-  // SOLE
-  if(!isNight){
-    const sp=isDusk?(t-.45)/.3:t/.45;
-    const sx=w*.18+sp*w*.64,sy=h*.1+Math.pow(sp-.5,2)*h*.5;
-    const sc=isDusk?'rgba(255,130,50,':'rgba(255,225,90,';
-    const sg2=ctx.createRadialGradient(sx,sy,0,sx,sy,70);
-    sg2.addColorStop(0,sc+'.28)');sg2.addColorStop(1,'transparent');
-    ctx.fillStyle=sg2;ctx.fillRect(sx-70,sy-70,140,140);
-    ctx.beginPath();ctx.arc(sx,sy,isDusk?26:18,0,Math.PI*2);
-    ctx.fillStyle=isDusk?'rgba(255,130,50,.9)':'rgba(255,235,110,.95)';ctx.fill();
-  }
-
-  // CLOUDS
-  clouds.forEach(c=>{
-    c.x+=c.sp;if(c.x>w+c.w)c.x=-c.w;
-    ctx.save();ctx.globalAlpha=c.a*(isNight?.28:.82);
-    drawCloud(ctx,c.x,c.y,c.w,c.h,isNight);ctx.restore();
-  });
-
-  // METEORS
-  if(isNight&&Math.random()<.002)meteors.push({x:Math.random()*w,y:0,vx:4+Math.random()*5,vy:3+Math.random()*4,a:1});
-  meteors.forEach((m,i)=>{
-    m.x+=m.vx;m.y+=m.vy;m.a-=.022;
-    if(m.a<=0){meteors.splice(i,1);return;}
-    ctx.save();ctx.globalAlpha=m.a;ctx.strokeStyle='rgba(255,255,200,.9)';ctx.lineWidth=1.5;
-    ctx.beginPath();ctx.moveTo(m.x,m.y);ctx.lineTo(m.x-m.vx*8,m.y-m.vy*8);ctx.stroke();ctx.restore();
-  });
-
-  // AURORA (hill notte)
-  if(S.area==='hill'&&isNight){
-    ctx.save();ctx.globalAlpha=.1;
-    ['#00ff88','#0088ff','#aa00ff'].forEach((col,band)=>{
-      const ag=ctx.createLinearGradient(0,0,w,0);
-      ag.addColorStop(0,'transparent');ag.addColorStop(.35,col);ag.addColorStop(.65,col);ag.addColorStop(1,'transparent');
-      ctx.fillStyle=ag;ctx.beginPath();
-      for(let x=0;x<=w;x+=10){
-        const y=h*.08+band*28+Math.sin(x*.005+f*.005+band)*38;
-        x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
-      }
-      ctx.lineTo(w,h*.18+band*28);ctx.lineTo(0,h*.18+band*28);ctx.closePath();ctx.fill();
-    });
-    ctx.restore();
-  }
-
-  // DAWN/DUSK HAZE
-  if(isDawn||isDusk){
-    const hz=ctx.createLinearGradient(0,h*.3,0,h*.65);
-    hz.addColorStop(0,'transparent');hz.addColorStop(1,isDawn?'rgba(240,149,110,.1)':'rgba(255,100,40,.12)');
-    ctx.fillStyle=hz;ctx.fillRect(0,h*.3,w,h*.4);
-  }
-
-  // AREA ELEMENTS
-  const baseY=h*.62;
-  drawAreaEl(ctx,w,h,baseY,isNight,isDawn,isDusk,lm,f);
-
-  // GROUND
-  const gr=AREAS[S.area].ground;
-  const gg=ctx.createLinearGradient(0,baseY-50,0,h);
-  gg.addColorStop(0,gr);gg.addColorStop(1,'rgba(0,0,0,.6)');
-  ctx.fillStyle=gg;ctx.beginPath();ctx.moveTo(0,h);
-  for(let x=0;x<=w;x+=6){
-    const y=baseY+Math.sin(x*.005+f*.0001)*34+Math.sin(x*.012+f*.00015)*18+Math.cos(x*.003)*13;
-    ctx.lineTo(x,y);
-  }
-  ctx.lineTo(w,h);ctx.closePath();ctx.fill();
-
-  // GROUND FG
-  const gg2=ctx.createLinearGradient(0,baseY+30,0,h);
-  gg2.addColorStop(0,'rgba(0,0,0,.25)');gg2.addColorStop(1,'rgba(0,0,0,.7)');
-  ctx.fillStyle=gg2;ctx.beginPath();ctx.moveTo(0,h);
-  for(let x=0;x<=w;x+=6){
-    const y=baseY+52+Math.sin(x*.006+1.5)*28+Math.sin(x*.015+.8)*14;
-    ctx.lineTo(x,y);
-  }
-  ctx.lineTo(w,h);ctx.closePath();ctx.fill();
-
-  // GRASS WIND
-  ctx.strokeStyle='rgba(100,150,80,.35)';ctx.lineWidth=1;
-  for(let x=0;x<w;x+=14){
-    const gy=baseY+52+Math.sin(x*.006+1.5)*28;
-    const sw=Math.sin(f*.003+x*.02)*8;
-    ctx.beginPath();ctx.moveTo(x,gy+4);ctx.quadraticCurveTo(x+sw,gy-10,x+sw*1.5,gy-20);ctx.stroke();
-  }
-
-  // LEAVES
-  leaves.forEach((l,i)=>{
-    l.sw+=l.sws;l.vx=Math.sin(l.sw)*1.2;l.x+=l.vx;l.y+=l.vy;l.rot+=l.rsp;
-    if(l.y>h+20){leaves.splice(i,1);spawnLeaf(Math.random()*w,-20);return;}
-    ctx.save();ctx.globalAlpha=l.a;ctx.translate(l.x,l.y);ctx.rotate(l.rot);
-    ctx.beginPath();ctx.ellipse(0,0,l.sz,l.sz*.5,0,0,Math.PI*2);ctx.fillStyle=l.col;ctx.fill();ctx.restore();
-  });
-
-  // BIRDS
-  if(!isNight){
-    birds.forEach((b,i)=>{
-      b.x+=b.sp;b.fp+=b.fs;if(b.x>w+50){birds.splice(i,1);spawnBird();return;}
-      const wy=Math.sin(b.fp*.5)*3,wg=Math.sin(b.fp)*b.sz*.8;
-      ctx.save();ctx.globalAlpha=b.a;ctx.strokeStyle='rgba(40,25,15,.65)';ctx.lineWidth=1.5;
-      ctx.beginPath();ctx.moveTo(b.x-b.sz,b.y+wy+wg);ctx.quadraticCurveTo(b.x,b.y+wy-4,b.x+b.sz,b.y+wy+wg);ctx.stroke();ctx.restore();
-    });
-  }
-
-  // FLOWERS
-  flowers.forEach(fl=>{
-    fl.ph+=fl.sp;const sw=Math.sin(fl.ph)*3;
-    if(fl.y<h*.6)return;
-    ctx.save();ctx.globalAlpha=.82*lm;ctx.translate(fl.x+sw,fl.y);
-    ctx.strokeStyle='rgba(70,110,50,.55)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(0,fl.sz*2);ctx.stroke();
-    for(let p=0;p<5;p++){const a=(p/5)*Math.PI*2+fl.ph*.2;ctx.beginPath();ctx.ellipse(Math.cos(a)*fl.sz*.7,Math.sin(a)*fl.sz*.7,fl.sz*.5,fl.sz*.3,a,0,Math.PI*2);ctx.fillStyle=fl.col;ctx.fill();}
-    ctx.beginPath();ctx.arc(0,0,fl.sz*.33,0,Math.PI*2);ctx.fillStyle='#fff8d0';ctx.fill();ctx.restore();
-  });
-
-  // FIREFLIES
-  const ffa=t>.6||t<.14?Math.min(1,t>.6?(t-.6)/.1:(0.14-t)/0.14):0;
-  if(ffa>0){
-    fireflies.forEach(ff=>{
-      ff.ph+=.04;ff.x+=ff.vx+Math.sin(ff.ph)*.5;ff.y+=ff.vy+Math.cos(ff.ph*.7)*.3;
-      if(ff.x<0)ff.x=w;if(ff.x>w)ff.x=0;if(ff.y<h*.3)ff.vy+=.05;if(ff.y>h*.94)ff.vy-=.05;
-      const gl2=.5+.5*Math.sin(ff.ph*2);
-      ctx.save();ctx.globalAlpha=gl2*ffa*.88;
-      const fg=ctx.createRadialGradient(ff.x,ff.y,0,ff.x,ff.y,ff.r*6);
-      fg.addColorStop(0,'rgba(200,255,150,.9)');fg.addColorStop(1,'transparent');
-      ctx.fillStyle=fg;ctx.fillRect(ff.x-ff.r*6,ff.y-ff.r*6,ff.r*12,ff.r*12);
-      ctx.beginPath();ctx.arc(ff.x,ff.y,ff.r,0,Math.PI*2);
-      ctx.fillStyle=`rgba(220,255,180,${gl2})`;ctx.fill();ctx.restore();
-    });
-  }
-
-  // BUTTERFLIES
-  if(!isNight){
-    butterflies.forEach(b=>{
-      b.ph+=.04;const dx=b.tx-b.x,dy=b.ty-b.y,dist=Math.sqrt(dx*dx+dy*dy);
-      if(dist<20){b.tx=Math.random()*w;b.ty=H*.3+Math.random()*H*.38;}
-      b.x+=(dx/dist)*b.sp;b.y+=(dy/dist)*b.sp*.7+Math.sin(b.ph*3)*1.5;
-      ctx.save();ctx.globalAlpha=.65*lm;ctx.translate(b.x,b.y);
-      const wg=Math.abs(Math.sin(b.ph*4))*.8+.2;
-      [-1,1].forEach(side=>{ctx.beginPath();ctx.ellipse(side*7*wg,0,8*wg,5,side*.3,0,Math.PI*2);ctx.fillStyle=b.col;ctx.globalAlpha=.55*lm;ctx.fill();});
-      ctx.restore();
-    });
-  }
-
-  // PARTICLES
-  if(Math.random()<.25)particles.push({x:Math.random()*w,y:H*.45+Math.random()*H*.38,vy:-.3-Math.random()*.5,a:.5+Math.random()*.4,r:1+Math.random()*1.5,life:1});
-  particles.forEach((p,i)=>{p.y+=p.vy;p.life-=.008;p.a=p.life*.4;if(p.life<=0){particles.splice(i,1);return;}ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(255,240,200,${p.a*lm})`;ctx.fill();});
-
-  // VIGNETTE
-  const vg=ctx.createRadialGradient(w/2,h/2,h*.28,w/2,h/2,h*.88);
-  vg.addColorStop(0,'transparent');vg.addColorStop(1,'rgba(0,0,0,.38)');
-  ctx.fillStyle=vg;ctx.fillRect(0,0,w,h);
-
-  // NIGHT FOG
-  if(isNight){
-    const nf=ctx.createLinearGradient(0,h*.55,0,h*.78);
-    nf.addColorStop(0,'transparent');nf.addColorStop(1,'rgba(20,15,40,.28)');
-    ctx.fillStyle=nf;ctx.fillRect(0,h*.55,w,h*.45);
-  }
-}
-
-function drawCloud(ctx,x,y,w,h,isNight){
-  ctx.fillStyle=isNight?'#9090a0':'#ffffff';
-  const r=h/2;
-  ctx.beginPath();ctx.arc(x+w*.3,y,r*.7,0,Math.PI*2);ctx.arc(x+w*.5,y-r*.3,r,0,Math.PI*2);ctx.arc(x+w*.7,y,r*.8,0,Math.PI*2);ctx.fill();
-  ctx.beginPath();ctx.roundRect(x+w*.1,y,w*.8,r,r*.5);ctx.fill();
-}
-
-// ── AREA ELEMENTS ──────────────────────────────
-function drawAreaEl(ctx,w,h,baseY,isNight,isDawn,isDusk,lm,f){
-  switch(S.area){
-    case'village':drawVillage(ctx,w,h,baseY,isNight,lm,f);break;
-    case'forest': drawForest(ctx,w,h,baseY,isNight,lm,f);break;
-    case'lake':   drawLake(ctx,w,h,baseY,isNight,lm,f);break;
-    case'library':drawLibrary(ctx,w,h,baseY,isNight,lm,f);break;
-    case'hill':   drawHill(ctx,w,h,baseY,isNight,lm,f);break;
-    case'port':   drawPort(ctx,w,h,baseY,isNight,lm,f);break;
-    case'garden': drawGarden(ctx,w,h,baseY,isNight,lm,f);break;
-  }
-}
-
-function drawVillage(ctx,w,h,by,ni,lm,f){
-  [{x:.15,w:90,hh:70,c:'#c4a06a'},{x:.38,w:110,hh:85,c:'#b8906a'},{x:.60,w:95,hh:75,c:'#c8a870'},{x:.80,w:80,hh:60,c:'#b89060'}].forEach(house=>{
-    const hx=w*house.x,hy=by+48;
-    ctx.fillStyle=house.c;ctx.fillRect(hx-house.w/2,hy-house.hh,house.w,house.hh+10);
-    ctx.fillStyle='#6a4020';ctx.beginPath();ctx.moveTo(hx-house.w*.62,hy-house.hh);ctx.lineTo(hx,hy-house.hh-42);ctx.lineTo(hx+house.w*.62,hy-house.hh);ctx.closePath();ctx.fill();
-    const wa=ni?.9:.3;
-    ctx.fillStyle=`rgba(255,215,90,${wa})`;ctx.fillRect(hx-13,hy-house.hh+14,13,11);ctx.fillRect(hx+5,hy-house.hh+14,13,11);
-    if(ni){
-      const ly=hy-house.hh-52+Math.sin(f*.02)*4;
-      const lg=ctx.createRadialGradient(hx,ly,0,hx,ly,28);lg.addColorStop(0,'rgba(255,170,50,.45)');lg.addColorStop(1,'transparent');
-      ctx.fillStyle=lg;ctx.fillRect(hx-28,ly-28,56,56);
-      ctx.fillStyle='rgba(255,130,35,.88)';ctx.fillRect(hx-4,ly-5,8,9);
-    }
-  });
-}
-
-function drawForest(ctx,w,h,by,ni,lm,f){
-  [.08,.2,.34,.5,.64,.76,.9].forEach((xp,i)=>{
-    const tx=w*xp,th=130+i*22,tw=45+i*8,ty=by+32;
-    ctx.fillStyle='#4a2a10';ctx.fillRect(tx-7,ty-th,14,th+15);
-    [0,.3,.6].forEach((off,li)=>{
-      const sc=1-off*.28;
-      const tg=ctx.createRadialGradient(tx,ty-th*(.52+off*.28),0,tx,ty-th*(.52+off*.28),tw*sc);
-      tg.addColorStop(0,ni?'#1a3020':'#4a8a48');tg.addColorStop(1,ni?'#0a1810':'#2a6030');
-      ctx.fillStyle=tg;ctx.beginPath();ctx.ellipse(tx+Math.sin(f*.002+li)*2,ty-th*(.52+off*.28),tw*sc,th*.28*sc,0,0,Math.PI*2);ctx.fill();
-    });
-  });
-  const fg=ctx.createLinearGradient(0,by,0,by+90);
-  fg.addColorStop(0,'transparent');fg.addColorStop(1,ni?'rgba(8,12,20,.45)':'rgba(180,210,180,.18)');
-  ctx.fillStyle=fg;ctx.fillRect(0,by,w,90);
-}
-
-function drawLake(ctx,w,h,by,ni,lm,f){
-  const ly=by+22;
-  const lg=ctx.createLinearGradient(0,ly,0,h);
-  lg.addColorStop(0,ni?'#1a2a4a':'#4a90a4');lg.addColorStop(1,ni?'#0a1020':'#2a6080');
-  ctx.fillStyle=lg;ctx.beginPath();ctx.ellipse(w/2,ly+65,w*.48,72,0,0,Math.PI*2);ctx.fill();
-  // Reflection
-  const rg=ctx.createLinearGradient(w/2-25,ly+20,w/2+25,ly+85);
-  rg.addColorStop(0,ni?'rgba(200,200,140,.42)':'rgba(255,225,90,.35)');rg.addColorStop(1,'transparent');
-  ctx.fillStyle=rg;ctx.fillRect(w/2-14,ly+20,28,68);
-  // Ripples
-  for(let i=0;i<4;i++){
-    const ry=ly+42+i*18+Math.sin(f*.02+i)*3;
-    ctx.strokeStyle=`rgba(255,255,255,${.14-i*.03})`;ctx.lineWidth=1;
-    ctx.beginPath();ctx.ellipse(w/2,ry,78+i*38,8,0,0,Math.PI*2);ctx.stroke();
-  }
-  // Lotus
-  [.34,.5,.65,.56,.44].forEach((xp,i)=>{
-    const nx=w*xp,ny=ly+58+i*7;
-    ctx.fillStyle='#5a9040';ctx.beginPath();ctx.ellipse(nx,ny,11,5.5,0,0,Math.PI*2);ctx.fill();
-    ctx.fillStyle='#ffb7c5';ctx.beginPath();ctx.arc(nx,ny-3,3.5,0,Math.PI*2);ctx.fill();
-  });
-}
-
-function drawLibrary(ctx,w,h,by,ni,lm,f){
-  const bx=w*.5,by2=by-25;
-  ctx.fillStyle='#8a7060';ctx.fillRect(bx-w*.2,by2-145,w*.4,145+28);
-  ctx.fillStyle='#5a3820';ctx.beginPath();ctx.moveTo(bx-w*.24,by2-145);ctx.lineTo(bx,by2-205);ctx.lineTo(bx+w*.24,by2-145);ctx.closePath();ctx.fill();
-  const wa2=ni?.88:.45;
-  [[-.12,.55],[0,.55],[.12,.55],[-.06,.65],[.06,.65]].forEach(([xo,yp])=>{
-    ctx.fillStyle=`rgba(255,195,70,${wa2})`;ctx.fillRect(bx+xo*w-9,by2-145+(yp-.55)*300,17,23);
-  });
-  ctx.fillStyle='#2a1808';ctx.beginPath();ctx.arc(bx,by2-25,19,Math.PI,0);ctx.rect(bx-19,by2-25,38,28);ctx.fill();
-  ctx.strokeStyle='rgba(60,120,40,.45)';ctx.lineWidth=2;
-  for(let i=0;i<8;i++){ctx.beginPath();ctx.moveTo(bx-w*.2+i*20,by2+3);ctx.quadraticCurveTo(bx-w*.2+i*20+Math.sin(f*.01+i)*9,by2-48,bx-w*.2+i*20+5,by2-98);ctx.stroke();}
-}
-
-function drawHill(ctx,w,h,by,ni,lm,f){
-  const pk=by-65;
-  ctx.fillStyle='#1a2a14';ctx.beginPath();ctx.moveTo(0,h);ctx.quadraticCurveTo(w*.5,pk-85,w,h);ctx.closePath();ctx.fill();
-  ctx.strokeStyle='rgba(170,150,90,.28)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(w*.5,h);ctx.quadraticCurveTo(w*.5+28,pk+38,w*.5,pk);ctx.stroke();
-  const px=w*.5,py=pk-4;
-  ctx.fillStyle='#1e1008';ctx.fillRect(px-18,py-52,36,52);
-  [[28,0],[36,22]].forEach(([tw,ty])=>{
-    ctx.fillStyle='#30180c';ctx.beginPath();ctx.moveTo(px-tw*.6,py-52-ty);ctx.lineTo(px,py-82-ty);ctx.lineTo(px+tw*.6,py-52-ty);ctx.lineTo(px+tw*.72,py-48-ty);ctx.lineTo(px-tw*.72,py-48-ty);ctx.closePath();ctx.fill();
-  });
-  if(ni){const pg=ctx.createRadialGradient(px,py-62,0,px,py-62,55);pg.addColorStop(0,'rgba(255,175,50,.28)');pg.addColorStop(1,'transparent');ctx.fillStyle=pg;ctx.fillRect(px-55,py-117,110,110);}
-}
-
-function drawPort(ctx,w,h,by,ni,lm,f){
-  const sy=by+12;
-  const sg=ctx.createLinearGradient(0,sy,0,h);
-  sg.addColorStop(0,ni?'#0a1830':'#4a80a0');sg.addColorStop(1,ni?'#050e18':'#2a5070');
-  ctx.fillStyle=sg;ctx.fillRect(0,sy,w,h-sy);
-  for(let wv=0;wv<5;wv++){
-    ctx.strokeStyle=`rgba(255,255,255,${.14-wv*.02})`;ctx.lineWidth=1.5;
-    ctx.beginPath();for(let x=0;x<=w;x+=5){const y=sy+wv*24+Math.sin(x*.02+f*.03+wv)*6;x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}ctx.stroke();
-  }
-  [[.24,0],[.58,.5],[.8,.25]].forEach(([xp,ph])=>{
-    const bx=w*xp,byo=sy+16+Math.sin(f*.02+ph*Math.PI)*5;
-    ctx.save();ctx.translate(bx,byo);ctx.rotate(Math.sin(f*.01+ph)*.08);
-    ctx.fillStyle='#5a2e0e';ctx.beginPath();ctx.moveTo(-28,0);ctx.quadraticCurveTo(0,18,28,0);ctx.closePath();ctx.fill();
-    ctx.strokeStyle='#3a2006';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(0,-58);ctx.stroke();
-    ctx.fillStyle='rgba(245,234,208,.82)';ctx.beginPath();ctx.moveTo(0,-53);ctx.lineTo(28+Math.sin(f*.02)*5,-24);ctx.lineTo(0,-4);ctx.closePath();ctx.fill();
-    ctx.restore();
-  });
-  ctx.fillStyle='#4a2e12';ctx.fillRect(w*.45,sy-4,14,78);ctx.fillRect(w*.35,sy+10,115,11);
-}
-
-function drawGarden(ctx,w,h,by,ni,lm,f){
-  const px=w*.76,py=by-22;
-  ctx.fillStyle='#5a2030';ctx.fillRect(px-23,py-82,46,82);
-  [[38,0],[48,24]].forEach(([tw,ty])=>{
-    ctx.fillStyle='#7a3040';ctx.beginPath();ctx.moveTo(px-tw*.68,py-82-ty);ctx.lineTo(px,py-112-ty);ctx.lineTo(px+tw*.68,py-82-ty);ctx.lineTo(px+tw*.78,py-78-ty);ctx.lineTo(px-tw*.78,py-78-ty);ctx.closePath();ctx.fill();
-  });
-  const pndX=w*.25,pndY=by+42;
-  const pg=ctx.createRadialGradient(pndX,pndY,0,pndX,pndY,78);
-  pg.addColorStop(0,ni?'#1a3050':'#5090b0');pg.addColorStop(1,ni?'#0a1828':'#3a7090');
-  ctx.fillStyle=pg;ctx.beginPath();ctx.ellipse(pndX,pndY,88,38,0,0,Math.PI*2);ctx.fill();
-  [{x:.14,h:118},{x:.43,h:138},{x:.58,h:108},{x:.87,h:128}].forEach(t=>{
-    const tx=w*t.x,ty=by+32;
-    ctx.fillStyle='#4a2818';ctx.fillRect(tx-5,ty-t.h,10,t.h+8);
-    [0,.3,.6].forEach((off,li)=>{
-      const sc=1-off*.2;
-      ctx.fillStyle='rgba(255,183,197,.65)';ctx.beginPath();
-      ctx.ellipse(tx+Math.sin(f*.001+li)*3,ty-t.h*(.52+off*.2),38*sc,28*sc,0,0,Math.PI*2);ctx.fill();
-    });
-  });
-}
-
-// ── LOOP ───────────────────────────────────────
-function animWorld(){
-  S.frame++;S.wt+=S.speed;if(S.wt>1)S.wt=0;
-  drawWorld();updateClock();
-  // Sound: crickets
-  if(S.soundOn&&snd.crickets&&S.frame%300===0){
-    const ni=S.wt>.7||S.wt<.12;
-    snd.crickets.gain.gain.setTargetAtTime(ni?.014:0,AC.currentTime,5);
-  }
-  requestAnimationFrame(animWorld);
-}
-
-function updateClock(){
-  const t=S.wt,h2=Math.floor(t*24),m=Math.floor((t*24-h2)*60);
-  document.getElementById('ct').textContent=`${String(h2).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
-  document.getElementById('ci').textContent=t<.12?'🌅':t<.5?'☀️':t<.62?'🌇':'🌙';
-}
-
-// ── NAV ────────────────────────────────────────
-function navArea(dir){if(S.transitioning)return;S.areaIdx=(S.areaIdx+dir+S.areas.length)%S.areas.length;travelTo(S.areas[S.areaIdx]);}
-function travelTo(id){
-  if(S.transitioning||(id===S.area&&document.getElementById('map').style.display==='none'))return;
-  closeMap();
-  if(id===S.area)return;
-  S.transitioning=true;
-  const tr=document.getElementById('tr'),tt=document.getElementById('tt');
-  tt.textContent=AREAS[id].tagline;
-  requestAnimationFrame(()=>{
-    tr.classList.add('f');
-    setTimeout(()=>{
-      S.area=id;S.areaIdx=S.areas.indexOf(id);
-      initObjs();showAreaName(AREAS[id].name);
-      setTimeout(()=>{
-        tr.classList.remove('f');
-        setTimeout(()=>{S.transitioning=false;},1000);
-      },1200);
-    },1000);
-  });
-}
-function showAreaName(name){
-  const el=document.getElementById('an');
-  el.style.opacity='0';el.textContent=name;
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{el.style.transition='opacity 1s';el.style.opacity='1';}));
-}
-function openMap(){document.getElementById('map').style.display='flex';}
-function closeMap(){document.getElementById('map').style.display='none';}
 
 // ── INIT ───────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
   initIntro();
 
-  const intro = document.getElementById('intro');
-  let musicReady = false;
-  let tapCount = 0;
+  const gate = document.getElementById('touch-gate');
+  const mainIc = document.getElementById('main-ic');
+  let touched = false;
 
-  function handleFirstInteraction() {
-    // Forza resume AudioContext (obbligatorio su iOS/Android)
-    if(AC && AC.state === 'suspended') {
-      AC.resume();
-    }
+  function onFirstTouch(e) {
+    if(touched) return;
+    touched = true;
+    if(e) e.preventDefault();
 
-    if(!musicReady) {
-      tapCount++;
+    // Crea AudioContext nel gestore del tocco (obbligatorio browser)
+    if(!AC) AC = new(window.AudioContext||window.webkitAudioContext)();
 
-      // Crea AudioContext al primo tocco (unico momento consentito dai browser)
-      if(!AC) {
-        AC = new (window.AudioContext || window.webkitAudioContext)();
-      }
-      // Resume se sospeso
-      if(AC.state === 'suspended') AC.resume().then(() => {
-        startGenerativeMusic();
-      });
-      else {
-        startGenerativeMusic();
-      }
-      ambientStarted = true;
-      musicReady = true;
-
-      // Avvia video se bloccato
+    const go = () => {
+      buildMusic();
+      // Avvia video
       const vid = document.getElementById('bg-video');
-      if(vid) vid.play().catch(() => {});
+      if(vid) vid.play().catch(()=>{});
+      // Nascondi gate, mostra contenuto
+      gate.classList.add('hidden');
+      setTimeout(()=>{
+        gate.style.display='none';
+        mainIc.classList.add('visible');
+      }, 1200);
+    };
 
-      // Aggiorna testo
-      const hint = document.querySelector('.enter-text');
-      if(hint) {
-        hint.style.transition = 'opacity 0.6s';
-        hint.style.opacity = '0';
-        setTimeout(() => {
-          hint.textContent = 'entra nel mondo';
-          hint.style.opacity = '1';
-        }, 600);
-      }
-
-    } else {
-      // Secondo tocco — entra nel mondo
-      enterWorld();
-    }
+    if(AC.state==='suspended') AC.resume().then(go); else go();
   }
 
-  // Cattura QUALSIASI interazione — click, touch, keydown
-  intro.addEventListener('click', handleFirstInteraction);
-  intro.addEventListener('touchend', (e) => {
-    e.preventDefault();
-    handleFirstInteraction();
-  });
-  document.addEventListener('keydown', handleFirstInteraction, { once: true });
+  gate.addEventListener('click', onFirstTouch);
+  gate.addEventListener('touchend', onFirstTouch, {passive:false});
 
-  window.addEventListener('resize', () => {
-    W = window.innerWidth; H = window.innerHeight;
-    if(IC){ IC.width = W; IC.height = H; }
-    if(WC){ WC.width = W; WC.height = H; }
+  // Click sul contenuto principale — entra nel mondo
+  mainIc.addEventListener('click', enterWorld);
+  mainIc.addEventListener('touchend', (e)=>{ e.preventDefault(); enterWorld(); }, {passive:false});
+
+  window.addEventListener('resize', ()=>{
+    W=window.innerWidth; H=window.innerHeight;
+    if(IC){IC.width=W;IC.height=H;}
+    if(WC){WC.width=W;WC.height=H;}
   });
 });
 
