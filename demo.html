@@ -134,6 +134,88 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
 @keyframes atip{0%,100%{transform:translateX(-50%) translateY(0);}50%{transform:translateX(-50%) translateY(-4px);}}
 
 @media(max-width:600px){#mg{grid-template-columns:repeat(2,1fr);}}
+
+/* ══ ICONE MAPPA INTERATTIVA ══ */
+#hotspots {
+  position:absolute;inset:0;z-index:15;pointer-events:none;
+  opacity:0;transition:opacity 1.5s ease 0.8s;
+}
+#hotspots.show { opacity:1; }
+
+.hotspot {
+  position:absolute;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  cursor:pointer;pointer-events:all;
+  transform:translate(-50%,-50%);
+  transition:transform 0.3s ease;
+}
+.hotspot:hover { transform:translate(-50%,-50%) scale(1.15); }
+
+/* Cerchio pulsante */
+.hs-ring {
+  position:relative;
+  width:48px;height:48px;
+  display:flex;align-items:center;justify-content:center;
+}
+.hs-pulse {
+  position:absolute;inset:0;
+  border:1.5px solid rgba(255,255,255,0.6);
+  border-radius:50%;
+  animation:hsPulse 2.5s ease-out infinite;
+}
+.hs-pulse2 { animation-delay:1.25s; }
+@keyframes hsPulse {
+  0%   { transform:scale(.6); opacity:.9; }
+  100% { transform:scale(1.6); opacity:0; }
+}
+.hs-dot {
+  width:32px;height:32px;
+  background:rgba(255,255,255,0.18);
+  backdrop-filter:blur(6px);
+  border:1.5px solid rgba(255,255,255,0.55);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;
+  position:relative;z-index:1;
+  box-shadow:0 2px 12px rgba(0,0,0,0.2);
+  transition:background 0.3s;
+}
+.hotspot:hover .hs-dot {
+  background:rgba(255,255,255,0.35);
+  border-color:rgba(255,255,255,0.9);
+}
+
+/* Label */
+.hs-label {
+  font-family:var(--serif);
+  font-style:italic;
+  font-size:11px;
+  color:rgba(255,255,255,0.8);
+  letter-spacing:.15em;
+  text-shadow:0 1px 6px rgba(0,0,0,0.6);
+  white-space:nowrap;
+  background:rgba(0,0,0,0.22);
+  backdrop-filter:blur(4px);
+  padding:3px 8px;
+  border-radius:2px;
+  opacity:0;
+  transition:opacity 0.3s;
+}
+.hotspot:hover .hs-label { opacity:1; }
+
+/* Animazione entrata sfalsata */
+.hotspot { animation:hsIn 0.8s ease both; }
+.hotspot:nth-child(1){animation-delay:.1s}
+.hotspot:nth-child(2){animation-delay:.25s}
+.hotspot:nth-child(3){animation-delay:.4s}
+.hotspot:nth-child(4){animation-delay:.55s}
+.hotspot:nth-child(5){animation-delay:.7s}
+.hotspot:nth-child(6){animation-delay:.85s}
+.hotspot:nth-child(7){animation-delay:1s}
+@keyframes hsIn {
+  from{opacity:0;transform:translate(-50%,-50%) scale(0.5);}
+  to{opacity:1;transform:translate(-50%,-50%) scale(1);}
+}
 </style>
 </head>
 <body>
@@ -163,6 +245,61 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
       <span class="eline"></span>
     </div>
   </div>
+
+  <!-- ICONE MAPPA INTERATTIVA -->
+  <div id="hotspots">
+    <!-- Posizioni % sul video: left%, top% -->
+    <div class="hotspot" style="left:50%;top:52%" onclick="goArea('village')">
+      <div class="hs-ring">
+        <div class="hs-pulse"></div><div class="hs-pulse hs-pulse2"></div>
+        <div class="hs-dot">🏘️</div>
+      </div>
+      <span class="hs-label">Villaggio</span>
+    </div>
+    <div class="hotspot" style="left:22%;top:45%" onclick="goArea('forest')">
+      <div class="hs-ring">
+        <div class="hs-pulse"></div><div class="hs-pulse hs-pulse2"></div>
+        <div class="hs-dot">🌲</div>
+      </div>
+      <span class="hs-label">Foresta dei Sogni</span>
+    </div>
+    <div class="hotspot" style="left:38%;top:62%" onclick="goArea('lake')">
+      <div class="hs-ring">
+        <div class="hs-pulse"></div><div class="hs-pulse hs-pulse2"></div>
+        <div class="hs-dot">🌙</div>
+      </div>
+      <span class="hs-label">Lago della Luna</span>
+    </div>
+    <div class="hotspot" style="left:75%;top:40%" onclick="goArea('library')">
+      <div class="hs-ring">
+        <div class="hs-pulse"></div><div class="hs-pulse hs-pulse2"></div>
+        <div class="hs-dot">📚</div>
+      </div>
+      <span class="hs-label">Biblioteca</span>
+    </div>
+    <div class="hotspot" style="left:62%;top:28%" onclick="goArea('hill')">
+      <div class="hs-ring">
+        <div class="hs-pulse"></div><div class="hs-pulse hs-pulse2"></div>
+        <div class="hs-dot">⭐</div>
+      </div>
+      <span class="hs-label">Collina delle Stelle</span>
+    </div>
+    <div class="hotspot" style="left:85%;top:58%" onclick="goArea('port')">
+      <div class="hs-ring">
+        <div class="hs-pulse"></div><div class="hs-pulse hs-pulse2"></div>
+        <div class="hs-dot">⛵</div>
+      </div>
+      <span class="hs-label">Porto delle Avventure</span>
+    </div>
+    <div class="hotspot" style="left:30%;top:72%" onclick="goArea('garden')">
+      <div class="hs-ring">
+        <div class="hs-pulse"></div><div class="hs-pulse hs-pulse2"></div>
+        <div class="hs-dot">🌸</div>
+      </div>
+      <span class="hs-label">Giardino</span>
+    </div>
+  </div>
+
 </div>
 
 <!-- MONDO -->
@@ -250,191 +387,68 @@ function startMusic() {
 }
 
 function buildMusic() {
-  // Master
-  const master = AC.createGain();
-  master.gain.setValueAtTime(0, AC.currentTime);
-  master.gain.linearRampToValueAtTime(0.82, AC.currentTime + 3);
-  master.connect(AC.destination);
+  // Musica reale da file MP3
+  const audio = new Audio('music.mp3');
+  audio.loop = true;
+  audio.volume = 0;
+  audio.play().catch(() => {});
 
-  // Riverbero
-  const rev = AC.createConvolver();
-  const rLen = AC.sampleRate * 3.5;
-  const rBuf = AC.createBuffer(2, rLen, AC.sampleRate);
-  for (let c = 0; c < 2; c++) {
-    const d = rBuf.getChannelData(c);
-    for (let i = 0; i < rLen; i++) d[i] = (Math.random()*2-1) * Math.pow(1-i/rLen, 1.8);
-  }
-  rev.buffer = rBuf;
-  const revG = AC.createGain(); revG.gain.value = 0.45; rev.connect(revG); revG.connect(master);
-  const dry = AC.createGain(); dry.gain.value = 0.55; dry.connect(master);
+  // Fade in graduale
+  let vol = 0;
+  const fadeIn = setInterval(() => {
+    vol = Math.min(1, vol + 0.01);
+    audio.volume = vol;
+    if (vol >= 1) clearInterval(fadeIn);
+  }, 80);
 
-  // Scala Do maggiore (allegra, solare) — note in Hz
-  const sc = {
-    C3:130.81, G3:196.00,
-    C4:261.63, D4:293.66, E4:329.63, F4:349.23, G4:392.00, A4:440.00, B4:493.88,
-    C5:523.25, D5:587.33, E5:659.25, F5:698.46, G5:784.00, A5:880.00, B5:987.77,
-    C6:1046.50,
-  };
+  // Suoni natura sovrapposti (vento + uccelli via Web Audio)
+  try {
+    if (!AC) AC = new(window.AudioContext || window.webkitAudioContext)();
+    if (AC.state === 'suspended') AC.resume();
 
-  // Koto sintetico (pizzicato)
-  function koto(freq, t, vol=0.10) {
-    const o=AC.createOscillator(), o2=AC.createOscillator(), g=AC.createGain();
-    o.type='triangle'; o.frequency.value=freq;
-    o2.type='sine'; o2.frequency.value=freq*2.004;
-    const g2=AC.createGain(); g2.gain.value=0.25; o2.connect(g2); g2.connect(g);
-    g.gain.setValueAtTime(vol, t);
-    g.gain.exponentialRampToValueAtTime(vol*0.25, t+0.18);
-    g.gain.exponentialRampToValueAtTime(0.0001, t+2.0);
-    o.connect(g); g.connect(dry); g.connect(rev);
-    o.start(t); o.stop(t+2.2);
-    o2.start(t); o2.stop(t+2.2);
-  }
+    const nBuf = AC.createBuffer(1, AC.sampleRate*4, AC.sampleRate);
+    const nd = nBuf.getChannelData(0);
+    for (let i=0; i<nd.length; i++) nd[i] = Math.random()*2-1;
 
-  // Flauto allegro (shakuhachi)
-  function flute(freq, t, dur, vol=0.055) {
-    const o=AC.createOscillator(), g=AC.createGain();
-    const vib=AC.createOscillator(), vG=AC.createGain();
-    o.type='sine'; o.frequency.value=freq;
-    vib.type='sine'; vib.frequency.value=5.8; vG.gain.value=freq*0.014;
-    vib.connect(vG); vG.connect(o.frequency);
-    g.gain.setValueAtTime(0,t);
-    g.gain.linearRampToValueAtTime(vol, t+0.07);
-    g.gain.setValueAtTime(vol, t+dur-0.1);
-    g.gain.linearRampToValueAtTime(0, t+dur);
-    o.connect(g); g.connect(dry); g.connect(rev);
-    o.start(t); o.stop(t+dur+0.1);
-    vib.start(t); vib.stop(t+dur+0.1);
-  }
+    // Vento
+    const wSrc = AC.createBufferSource(); wSrc.buffer=nBuf; wSrc.loop=true;
+    const wFilt = AC.createBiquadFilter(); wFilt.type='bandpass'; wFilt.frequency.value=380; wFilt.Q.value=0.4;
+    const wGain = AC.createGain(); wGain.gain.value=0;
+    wSrc.connect(wFilt); wFilt.connect(wGain); wGain.connect(AC.destination); wSrc.start();
+    wGain.gain.linearRampToValueAtTime(0.018, AC.currentTime+4);
 
-  // Carillon (glockenspiel, brillante)
-  function bell(freq, t, vol=0.055) {
-    [1, 2.756, 5.404].forEach((h, i) => {
-      const o=AC.createOscillator(), g=AC.createGain();
-      o.type='sine'; o.frequency.value=freq*h;
-      const v=vol*[1,.35,.1][i], dur=[2.8,1.1,.5][i];
-      g.gain.setValueAtTime(v,t);
-      g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
-      o.connect(g); g.connect(rev); g.connect(dry);
-      o.start(t); o.stop(t+dur+0.1);
-    });
-  }
+    // Ruscello
+    const rSrc = AC.createBufferSource(); rSrc.buffer=nBuf; rSrc.loop=true;
+    const rFilt = AC.createBiquadFilter(); rFilt.type='lowpass'; rFilt.frequency.value=700;
+    const rGain = AC.createGain(); rGain.gain.value=0;
+    rSrc.connect(rFilt); rFilt.connect(rGain); rGain.connect(AC.destination); rSrc.start();
+    rGain.gain.linearRampToValueAtTime(0.022, AC.currentTime+5);
 
-  // Percussione leggera (taiko)
-  function perc(t, vol=0.09) {
-    const o=AC.createOscillator(), g=AC.createGain();
-    o.type='sine';
-    o.frequency.setValueAtTime(160, t);
-    o.frequency.exponentialRampToValueAtTime(55, t+0.12);
-    g.gain.setValueAtTime(vol, t);
-    g.gain.exponentialRampToValueAtTime(0.0001, t+0.22);
-    o.connect(g); g.connect(dry);
-    o.start(t); o.stop(t+0.25);
-  }
-
-  // Basso drone (profondo, caldo)
-  function bass(freq, t, dur) {
-    const o=AC.createOscillator(), g=AC.createGain();
-    o.type='sine'; o.frequency.value=freq;
-    g.gain.setValueAtTime(0,t);
-    g.gain.linearRampToValueAtTime(0.055, t+0.5);
-    g.gain.setValueAtTime(0.055, t+dur-0.5);
-    g.gain.linearRampToValueAtTime(0, t+dur);
-    o.connect(g); g.connect(rev); g.connect(dry);
-    o.start(t); o.stop(t+dur+0.1);
-  }
-
-  // ── LOOP MUSICALE (112 BPM) ──
-  const BPM=112, bt=60/BPM, bar=bt*4;
-
-  function playLoop() {
-    const t = AC.currentTime + 0.05;
-
-    // Basso (8 battute)
-    [[sc.C3,0],[sc.G3,2*bar],[sc.C3,4*bar],[sc.G3,6*bar]].forEach(([f,off])=> bass(f,t+off,bar*2));
-
-    // Percussioni
-    for (let b=0; b<32; b++) {
-      perc(t + b*bt, b%4===0 ? 0.10 : 0.055);
-    }
-
-    // Melodia koto — allegra, Do maggiore
-    const mel = [
-      [sc.E4,0],[sc.G4,.5],[sc.A4,1],[sc.G4,1.5],[sc.E4,2],[sc.D4,2.5],[sc.C4,3],[sc.E4,3.5],
-      [sc.G4,4],[sc.A4,4.5],[sc.C5,5],[sc.A4,5.5],[sc.G4,6],[sc.E4,6.5],[sc.D4,7],[sc.C4,7.5],
-      [sc.E5,8],[sc.D5,8.5],[sc.C5,9],[sc.B4,9.5],[sc.A4,10],[sc.G4,10.5],[sc.A4,11],[sc.B4,11.5],
-      [sc.C5,12],[sc.E5,12.5],[sc.G5,13],[sc.E5,13.5],[sc.D5,14],[sc.C5,14.5],[sc.B4,15],[sc.G4,15.5],
-    ];
-    mel.forEach(([f,b]) => koto(f, t+b*bt, 0.10 + Math.random()*0.03));
-
-    // Controcanto flauto
-    [
-      [sc.C5,1,bt*1.8],[sc.E5,3,bt*1.2],[sc.G5,5,bt*2],[sc.F5,7.5,bt*1.5],
-      [sc.A5,9,bt*1.8],[sc.G5,11,bt*1.2],[sc.E5,13,bt*2],[sc.C5,15,bt*2],
-    ].forEach(([f,b,d]) => flute(f, t+b*bt, d, 0.05));
-
-    // Carillon ornamenti
-    for (let b=0; b<16; b++) {
-      if (Math.random() < 0.35) {
-        const bells = [sc.C5,sc.E5,sc.G5,sc.A5,sc.C6];
-        bell(bells[Math.floor(Math.random()*bells.length)], t + b*bt*2 + Math.random()*bt, 0.048);
+    // Uccelli
+    function bird() {
+      if (!musicOn) return;
+      const chirps = 1 + Math.floor(Math.random()*3);
+      for (let c=0; c<chirps; c++) {
+        setTimeout(() => {
+          const f = 1800+Math.random()*2000;
+          const o=AC.createOscillator(), g=AC.createGain();
+          o.type='sine';
+          o.frequency.setValueAtTime(f, AC.currentTime);
+          o.frequency.linearRampToValueAtTime(f*1.2, AC.currentTime+0.04);
+          o.frequency.linearRampToValueAtTime(f*0.9, AC.currentTime+0.13);
+          g.gain.setValueAtTime(0, AC.currentTime);
+          g.gain.linearRampToValueAtTime(0.02, AC.currentTime+0.01);
+          g.gain.linearRampToValueAtTime(0, AC.currentTime+0.15);
+          o.connect(g); g.connect(AC.destination);
+          o.start(); o.stop(AC.currentTime+0.18);
+        }, c*(150+Math.random()*100));
       }
+      setTimeout(bird, 1500+Math.random()*5000);
     }
+    setTimeout(bird, 800);
+  } catch(e) {}
 
-    setTimeout(playLoop, (bar*8 - 0.2) * 1000);
-  }
-
-  setTimeout(playLoop, 500);
-
-  // ── SUONI NATURA ──
-  const nBuf = AC.createBuffer(1, AC.sampleRate*4, AC.sampleRate);
-  const nd = nBuf.getChannelData(0);
-  for (let i=0; i<nd.length; i++) nd[i] = Math.random()*2-1;
-
-  // Vento
-  const wSrc = AC.createBufferSource(); wSrc.buffer=nBuf; wSrc.loop=true;
-  const wFilt = AC.createBiquadFilter(); wFilt.type='bandpass'; wFilt.frequency.value=380; wFilt.Q.value=0.4;
-  const wGain = AC.createGain(); wGain.gain.value=0.022;
-  wSrc.connect(wFilt); wFilt.connect(wGain); wGain.connect(master); wSrc.start();
-  // LFO vento ondeggiante
-  const wLfo=AC.createOscillator(); wLfo.type='sine'; wLfo.frequency.value=0.1;
-  const wLfoG=AC.createGain(); wLfoG.gain.value=0.012;
-  wLfo.connect(wLfoG); wLfoG.connect(wGain.gain); wLfo.start();
-
-  // Ruscello
-  const rSrc = AC.createBufferSource(); rSrc.buffer=nBuf; rSrc.loop=true;
-  const rFilt = AC.createBiquadFilter(); rFilt.type='lowpass'; rFilt.frequency.value=750;
-  const rGain = AC.createGain(); rGain.gain.value=0.028;
-  rSrc.connect(rFilt); rFilt.connect(rGain); rGain.connect(master); rSrc.start();
-  // Gorgoglio
-  const rLfo=AC.createOscillator(); rLfo.type='sine'; rLfo.frequency.value=8.5;
-  const rLfoG=AC.createGain(); rLfoG.gain.value=0.012;
-  rLfo.connect(rLfoG); rLfoG.connect(rGain.gain); rLfo.start();
-
-  // Salva riferimenti per toggle
-  musicNodes = { windGain: wGain, windGain2: rGain };
-
-  // Uccelli (allegri, variati)
-  function bird() {
-    if (!musicOn) return;
-    const chirps = 1 + Math.floor(Math.random()*3);
-    for (let c=0; c<chirps; c++) {
-      setTimeout(() => {
-        const f = 1800 + Math.random()*2000;
-        const o=AC.createOscillator(), g=AC.createGain();
-        o.type='sine';
-        o.frequency.setValueAtTime(f, AC.currentTime);
-        o.frequency.linearRampToValueAtTime(f*(1.1+Math.random()*.25), AC.currentTime+0.04);
-        o.frequency.linearRampToValueAtTime(f*0.88, AC.currentTime+0.13);
-        g.gain.setValueAtTime(0,AC.currentTime);
-        g.gain.linearRampToValueAtTime(0.022,AC.currentTime+0.012);
-        g.gain.linearRampToValueAtTime(0,AC.currentTime+0.15);
-        o.connect(g); g.connect(rev); g.connect(dry);
-        o.start(); o.stop(AC.currentTime+0.2);
-      }, c * (150+Math.random()*100));
-    }
-    setTimeout(bird, 1200 + Math.random()*4500);
-  }
-  setTimeout(bird, 600);
+  document.getElementById('sb').textContent = '🔊';
 }
 
 // ══ INTRO ══════════════════════════════════════
@@ -504,6 +518,13 @@ function animIntro(canvas) {
 }
 
 // ══ ENTER WORLD ════════════════════════════════
+function goArea(id) {
+  // Salva area selezionata e vai nel mondo
+  S.area = id;
+  S.areaIdx = S.areas.indexOf(id);
+  enterWorld();
+}
+
 function enterWorld() {
   if (document.getElementById('world').style.display === 'block') return;
   introRunning = false;
