@@ -24,9 +24,23 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;}
 }
 
 #bg-video{
-  position:absolute;inset:0;
-  width:100%;height:100%;
+  position:absolute;
+  top:-4%;left:-4%;
+  width:108%;height:108%;
   object-fit:cover;z-index:0;
+  /* Blur leggero che ammorbidisce la sgranatura
+     e dà effetto pittorico/acquerello */
+  filter:
+    blur(1.2px)
+    saturate(1.35)
+    contrast(1.08)
+    brightness(1.05);
+  /* Scale per coprire i bordi del blur */
+  transform:scale(1.06);
+  transform-origin:center;
+  /* Rendering pittorico su mobile */
+  image-rendering:auto;
+  will-change:transform;
 }
 
 #intro canvas{
@@ -149,7 +163,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;}
 </head>
 <body>
 
-<div id="intro" onclick="enterWorld()">
+<div id="intro">
   <video id="bg-video" autoplay muted loop playsinline>
     <source src="bg.mp4" type="video/mp4">
   </video>
@@ -1002,11 +1016,38 @@ function closeMap(){document.getElementById('map').style.display='none';}
 
 // ── INIT ───────────────────────────────────────
 window.addEventListener('DOMContentLoaded',()=>{
-  // Avvia musica al primo click ovunque sulla schermata intro
-  document.getElementById('intro').addEventListener('click', () => {
-    startAmbientMusic();
-  }, {once: true});
   initIntro();
+
+  const intro = document.getElementById('intro');
+  let musicReady = false;
+
+  intro.addEventListener('click', () => {
+    if(!musicReady) {
+      // PRIMO TOCCO: avvia musica, mostra hint "tocca ancora per entrare"
+      startAmbientMusic();
+      musicReady = true;
+
+      // Aggiorna hint visivamente
+      const hint = document.querySelector('.enter-text');
+      if(hint) {
+        hint.style.transition = 'opacity 0.5s';
+        hint.style.opacity = '0';
+        setTimeout(()=>{
+          hint.textContent = 'entra nel mondo';
+          hint.style.opacity = '1';
+        }, 500);
+      }
+
+      // Avvia anche il video se non partito
+      const vid = document.getElementById('bg-video');
+      if(vid && vid.paused) vid.play().catch(()=>{});
+
+    } else {
+      // SECONDO TOCCO: entra nel mondo
+      enterWorld();
+    }
+  });
+
   window.addEventListener('resize',()=>{
     W=window.innerWidth;H=window.innerHeight;
     if(IC){IC.width=W;IC.height=H;}
