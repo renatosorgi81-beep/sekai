@@ -194,6 +194,182 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
 
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
 @media(max-width:600px){#mg{grid-template-columns:repeat(2,1fr);} #hotspots{gap:12px;} .hs-dot{width:54px;height:54px;font-size:22px;}}
+
+/* ══ REGISTRAZIONE ══ */
+#reg-screen {
+  position:fixed;inset:0;z-index:900;
+  display:flex;align-items:center;justify-content:center;
+  padding:20px;
+}
+#reg-overlay {
+  position:absolute;inset:0;
+  background:rgba(8,6,18,0.92);
+  backdrop-filter:blur(16px);
+}
+#reg-box {
+  position:relative;z-index:1;
+  width:100%;max-width:420px;
+  background:rgba(20,16,35,0.98);
+  border:1px solid rgba(212,168,83,0.25);
+  border-radius:6px;
+  padding:36px 32px;
+  max-height:90vh;overflow-y:auto;
+  box-shadow:0 20px 60px rgba(0,0,0,0.5);
+}
+
+/* Header */
+#reg-header {
+  text-align:center;margin-bottom:28px;
+}
+.reg-logo-jp {
+  font-family:var(--jp);font-weight:300;
+  font-size:42px;color:var(--gold);
+  letter-spacing:.4em;text-indent:.4em;
+  text-shadow:0 0 30px rgba(212,168,83,0.3);
+}
+.reg-logo-sub {
+  font-family:var(--serif);font-size:11px;
+  color:rgba(212,168,83,0.6);letter-spacing:.7em;
+  margin-top:4px;
+}
+.reg-tagline {
+  font-family:var(--serif);font-style:italic;
+  font-size:15px;color:rgba(245,234,208,0.55);
+  letter-spacing:.15em;margin-top:10px;
+}
+
+/* Tabs */
+#reg-tabs {
+  display:flex;border-bottom:1px solid rgba(212,168,83,0.2);
+  margin-bottom:24px;
+}
+.rtab {
+  flex:1;padding:10px;
+  background:transparent;border:none;
+  font-family:var(--serif);font-size:14px;
+  letter-spacing:.15em;
+  color:rgba(245,234,208,0.4);
+  cursor:pointer;transition:all .3s;
+  border-bottom:2px solid transparent;
+  margin-bottom:-1px;
+}
+.rtab.active {
+  color:var(--gold);
+  border-bottom-color:var(--gold);
+}
+
+/* Campi form */
+.reg-form { display:flex;flex-direction:column;gap:16px; }
+.field-group { display:flex;flex-direction:column;gap:6px; }
+.field-group label {
+  font-family:var(--serif);font-size:12px;
+  color:rgba(245,234,208,0.55);letter-spacing:.15em;
+}
+.field-group input {
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:3px;
+  padding:11px 14px;
+  color:rgba(245,234,208,0.9);
+  font-family:var(--serif);font-size:14px;
+  outline:none;transition:border .3s;
+}
+.field-group input:focus {
+  border-color:rgba(212,168,83,0.5);
+  background:rgba(255,255,255,0.08);
+}
+.field-group input::placeholder { color:rgba(245,234,208,0.25); }
+
+/* Checkbox */
+.field-check {
+  display:flex;align-items:flex-start;gap:10px;
+}
+.field-check input[type="checkbox"] {
+  width:16px;height:16px;margin-top:2px;
+  accent-color:var(--gold);cursor:pointer;flex-shrink:0;
+}
+.field-check label {
+  font-family:var(--serif);font-size:12px;
+  color:rgba(245,234,208,0.5);line-height:1.5;cursor:pointer;
+}
+.reg-link { color:var(--gold);text-decoration:none; }
+.reg-link:hover { text-decoration:underline; }
+
+/* Pulsante principale */
+.reg-btn {
+  display:flex;align-items:center;justify-content:center;gap:12px;
+  padding:14px 24px;
+  background:linear-gradient(135deg, rgba(212,168,83,0.15), rgba(212,168,83,0.08));
+  border:1px solid rgba(212,168,83,0.5);
+  border-radius:3px;
+  color:var(--gold);
+  font-family:var(--serif);font-size:15px;letter-spacing:.2em;
+  cursor:pointer;transition:all .3s;
+  margin-top:4px;width:100%;
+}
+.reg-btn:hover {
+  background:rgba(212,168,83,0.22);
+  border-color:rgba(212,168,83,0.85);
+  box-shadow:0 4px 20px rgba(212,168,83,0.15);
+}
+.reg-btn-price {
+  font-size:13px;opacity:.7;
+  border-left:1px solid rgba(212,168,83,0.3);
+  padding-left:12px;margin-left:4px;
+}
+.reg-btn-secondary {
+  background:transparent;border:none;
+  color:rgba(245,234,208,0.3);
+  font-family:var(--serif);font-style:italic;
+  font-size:12px;letter-spacing:.1em;
+  cursor:pointer;transition:color .3s;
+  text-align:center;padding:8px;
+}
+.reg-btn-secondary:hover { color:rgba(245,234,208,0.6); }
+
+/* Errori */
+.reg-error {
+  font-family:var(--serif);font-size:12px;
+  color:#e07070;letter-spacing:.1em;text-align:center;
+  min-height:18px;
+}
+
+/* Pagamento */
+#payment-info {
+  text-align:center;padding:20px;
+  background:rgba(212,168,83,0.06);
+  border:1px solid rgba(212,168,83,0.2);
+  border-radius:4px;margin-bottom:8px;
+}
+.payment-amount {
+  font-family:var(--jp);font-size:44px;
+  color:var(--gold);letter-spacing:.05em;
+  text-shadow:0 0 20px rgba(212,168,83,0.3);
+}
+.payment-desc {
+  font-family:var(--serif);font-style:italic;
+  font-size:13px;color:rgba(245,234,208,0.5);
+  margin-top:6px;letter-spacing:.1em;
+}
+.payment-features {
+  list-style:none;margin-top:16px;
+  display:flex;flex-direction:column;gap:7px;text-align:left;
+}
+.payment-features li {
+  font-family:var(--serif);font-size:13px;
+  color:rgba(245,234,208,0.65);letter-spacing:.08em;
+}
+.payment-note {
+  font-family:var(--serif);font-style:italic;
+  font-size:12px;color:rgba(245,234,208,0.35);
+  text-align:center;letter-spacing:.08em;line-height:1.6;
+  margin-bottom:8px;
+}
+
+/* Scrollbar */
+#reg-box::-webkit-scrollbar{width:4px;}
+#reg-box::-webkit-scrollbar-track{background:transparent;}
+#reg-box::-webkit-scrollbar-thumb{background:rgba(212,168,83,0.3);border-radius:2px;}
 </style>
 </head>
 <body>
@@ -232,6 +408,98 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
     </div>
   </div>
 
+</div>
+
+<!-- REGISTRAZIONE -->
+<div id="reg-screen" style="display:none;">
+  <div id="reg-overlay"></div>
+  <div id="reg-box">
+
+    <!-- Header -->
+    <div id="reg-header">
+      <div class="reg-logo-jp">世界</div>
+      <p class="reg-logo-sub">S E K A I</p>
+      <p class="reg-tagline">Unisciti al mondo</p>
+    </div>
+
+    <!-- Tab switcher -->
+    <div id="reg-tabs">
+      <button class="rtab active" id="tab-register" onclick="switchTab('register')">Registrati</button>
+      <button class="rtab" id="tab-login" onclick="switchTab('login')">Accedi</button>
+    </div>
+
+    <!-- FORM REGISTRAZIONE -->
+    <div id="form-register" class="reg-form">
+      <div class="field-group">
+        <label>Nome utente</label>
+        <input type="text" id="r-username" placeholder="Come vuoi essere chiamato?" maxlength="20">
+      </div>
+      <div class="field-group">
+        <label>Email</label>
+        <input type="email" id="r-email" placeholder="La tua email">
+      </div>
+      <div class="field-group">
+        <label>Password</label>
+        <input type="password" id="r-password" placeholder="Minimo 8 caratteri">
+      </div>
+      <div class="field-group">
+        <label>Data di nascita</label>
+        <input type="date" id="r-birth" max="">
+      </div>
+      <div class="field-check">
+        <input type="checkbox" id="r-terms">
+        <label for="r-terms">Ho letto e accetto i <a href="#" class="reg-link">Termini di servizio</a></label>
+      </div>
+      <div class="field-check">
+        <input type="checkbox" id="r-age">
+        <label for="r-age">Confermo di avere almeno 13 anni</label>
+      </div>
+      <button class="reg-btn" onclick="doRegister()">
+        <span>Continua al pagamento</span>
+        <span class="reg-btn-price">€ 9,90</span>
+      </button>
+      <p id="reg-error" class="reg-error"></p>
+    </div>
+
+    <!-- FORM LOGIN -->
+    <div id="form-login" class="reg-form" style="display:none;">
+      <div class="field-group">
+        <label>Email</label>
+        <input type="email" id="l-email" placeholder="La tua email">
+      </div>
+      <div class="field-group">
+        <label>Password</label>
+        <input type="password" id="l-password" placeholder="La tua password">
+      </div>
+      <button class="reg-btn" onclick="doLogin()">
+        <span>Entra in Sekai</span>
+      </button>
+      <p id="login-error" class="reg-error"></p>
+    </div>
+
+    <!-- PAGAMENTO (appare dopo registrazione) -->
+    <div id="form-payment" class="reg-form" style="display:none;">
+      <div id="payment-info">
+        <div class="payment-amount">€ 9,90</div>
+        <p class="payment-desc">Accesso completo a Sekai — una tantum</p>
+        <ul class="payment-features">
+          <li>✦ Accesso a tutte le 7 aree del mondo</li>
+          <li>✦ Avatar personalizzabile</li>
+          <li>✦ Casa nel villaggio</li>
+          <li>✦ Community e amicizie</li>
+          <li>✦ Aggiornamenti futuri inclusi</li>
+        </ul>
+      </div>
+      <p class="payment-note">Il sistema di pagamento sarà disponibile a breve.<br>Registrati ora e ti avviseremo non appena sarà attivo.</p>
+      <button class="reg-btn" onclick="doPaymentPlaceholder()">
+        <span>Procedi al pagamento</span>
+      </button>
+      <button class="reg-btn-secondary" onclick="skipPaymentDev()">
+        Accedi in anteprima (test)
+      </button>
+    </div>
+
+  </div>
 </div>
 
 <!-- MONDO -->
@@ -451,23 +719,22 @@ function animIntro(canvas) {
 
 // ══ ENTER WORLD ════════════════════════════════
 function goArea(id) {
-  // Salva area selezionata e vai nel mondo
   S.area = id;
   S.areaIdx = S.areas.indexOf(id);
-  enterWorld();
+  // Nascondi intro e vai nel mondo
+  document.getElementById('intro').style.opacity = '0';
+  setTimeout(() => {
+    document.getElementById('intro').style.display = 'none';
+    document.getElementById('world').style.display = 'block';
+    initWorld();
+  }, 800);
 }
 
 function enterWorld() {
   if (document.getElementById('world').style.display === 'block') return;
-  introRunning = false;
-  const intro = document.getElementById('intro');
-  intro.style.opacity = '0';
-  setTimeout(() => {
-    intro.style.display = 'none';
-    const world = document.getElementById('world');
-    world.style.display = 'block';
-    initWorld();
-  }, 2500);
+  // Dopo login/pagamento mostra la mappa delle aree
+  document.getElementById('s1').classList.add('hide');
+  document.getElementById('s2').classList.add('show');
 }
 
 // ══ WORLD ENGINE ═══════════════════════════════
@@ -729,11 +996,139 @@ function unlockAndStart() {
   // Avvia musica
   buildMusic();
 
-  // Transizione stato 1 → stato 2
+  // Controlla se utente già loggato e pagante
+  if (currentUser && currentUser.paid) {
+    // Salta registrazione, mostra mappa
+    document.getElementById('s1').classList.add('hide');
+    setTimeout(() => { document.getElementById('s2').classList.add('show'); }, 600);
+    return;
+  }
+
+  // Transizione a registrazione
   document.getElementById('s1').classList.add('hide');
-  setTimeout(() => {
-    document.getElementById('s2').classList.add('show');
-  }, 600);
+  setTimeout(() => { showRegScreen(); }, 700);
+}
+
+
+// ══ REGISTRAZIONE ══════════════════════════════
+
+// Semplice DB locale (in futuro: backend reale)
+const DB = {
+  users: JSON.parse(localStorage.getItem('sekai_users') || '[]'),
+  save() { localStorage.setItem('sekai_users', JSON.stringify(this.users)); },
+  find(email) { return this.users.find(u => u.email === email); },
+  add(user) { this.users.push(user); this.save(); },
+};
+
+let currentUser = JSON.parse(localStorage.getItem('sekai_session') || 'null');
+
+function showRegScreen() {
+  document.getElementById('reg-screen').style.display = 'flex';
+  // Imposta data max (13 anni fa)
+  const maxDate = new Date();
+  maxDate.setFullYear(maxDate.getFullYear() - 13);
+  const el = document.getElementById('r-birth');
+  if (el) el.max = maxDate.toISOString().split('T')[0];
+}
+
+function hideRegScreen() {
+  document.getElementById('reg-screen').style.display = 'none';
+}
+
+function switchTab(tab) {
+  document.getElementById('form-register').style.display = tab === 'register' ? 'flex' : 'none';
+  document.getElementById('form-login').style.display = tab === 'login' ? 'flex' : 'none';
+  document.getElementById('form-payment').style.display = 'none';
+  document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+}
+
+function setError(id, msg) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = msg;
+}
+
+function doRegister() {
+  const username = document.getElementById('r-username').value.trim();
+  const email = document.getElementById('r-email').value.trim();
+  const password = document.getElementById('r-password').value;
+  const birth = document.getElementById('r-birth').value;
+  const terms = document.getElementById('r-terms').checked;
+  const age = document.getElementById('r-age').checked;
+
+  setError('reg-error', '');
+
+  if (!username) return setError('reg-error', 'Inserisci un nome utente.');
+  if (!email || !email.includes('@')) return setError('reg-error', 'Email non valida.');
+  if (password.length < 8) return setError('reg-error', 'Password troppo corta (min. 8 caratteri).');
+  if (!birth) return setError('reg-error', 'Inserisci la data di nascita.');
+  if (!terms) return setError('reg-error', 'Devi accettare i termini di servizio.');
+  if (!age) return setError('reg-error', 'Devi confermare di avere almeno 13 anni.');
+
+  // Verifica età
+  const birthDate = new Date(birth);
+  const today = new Date();
+  const userAge = today.getFullYear() - birthDate.getFullYear();
+  if (userAge < 13) return setError('reg-error', 'Devi avere almeno 13 anni per accedere a Sekai.');
+
+  // Verifica duplicati
+  if (DB.find(email)) return setError('reg-error', 'Email già registrata. Accedi invece.');
+
+  // Salva utente (non pagante ancora)
+  const user = { username, email, password, birth, paid: false, joinDate: new Date().toISOString() };
+  DB.add(user);
+  currentUser = user;
+
+  // Vai a pagamento
+  document.getElementById('form-register').style.display = 'none';
+  document.getElementById('form-login').style.display = 'none';
+  document.getElementById('form-payment').style.display = 'flex';
+  document.getElementById('reg-tabs').style.display = 'none';
+  document.getElementById('reg-header').querySelector('.reg-tagline').textContent = `Benvenuto, ${username} ✦`;
+}
+
+function doLogin() {
+  const email = document.getElementById('l-email').value.trim();
+  const password = document.getElementById('l-password').value;
+  setError('login-error', '');
+
+  if (!email) return setError('login-error', 'Inserisci la tua email.');
+  if (!password) return setError('login-error', 'Inserisci la password.');
+
+  const user = DB.find(email);
+  if (!user) return setError('login-error', 'Nessun account trovato con questa email.');
+  if (user.password !== password) return setError('login-error', 'Password errata.');
+
+  currentUser = user;
+  localStorage.setItem('sekai_session', JSON.stringify(user));
+
+  if (!user.paid) {
+    // Mostra pagamento
+    document.getElementById('form-login').style.display = 'none';
+    document.getElementById('form-payment').style.display = 'flex';
+    document.getElementById('reg-tabs').style.display = 'none';
+  } else {
+    // Già pagato — entra
+    hideRegScreen();
+    enterWorld();
+  }
+}
+
+function doPaymentPlaceholder() {
+  // Placeholder — in futuro integra Stripe/PayPal
+  alert('Il sistema di pagamento sarà disponibile a breve. Verrai avvisato via email a ' + (currentUser ? currentUser.email : ''));
+}
+
+function skipPaymentDev() {
+  // Solo per test — simula pagamento avvenuto
+  if (currentUser) {
+    currentUser.paid = true;
+    DB.users = DB.users.map(u => u.email === currentUser.email ? currentUser : u);
+    DB.save();
+    localStorage.setItem('sekai_session', JSON.stringify(currentUser));
+  }
+  hideRegScreen();
+  enterWorld();
 }
 
 </script>
