@@ -21,9 +21,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
   position:absolute;inset:0;z-index:10;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:36px;
-  transition:opacity 0.8s ease;
+  transition:opacity 0.6s ease;
 }
-#s1.hide{opacity:0;pointer-events:none;}
+#s1.hide{opacity:0;pointer-events:none;display:none;}
 
 #logo-block{text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;}
 
@@ -75,12 +75,16 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
 /* ══ STATO 2 — Icone aree ══ */
 #s2{
   position:absolute;inset:0;z-index:10;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  display:none;flex-direction:column;align-items:center;justify-content:center;
   gap:32px;
-  opacity:0;pointer-events:none;
-  transition:opacity 1s ease;
+  opacity:0;
+  transition:opacity 0.8s ease;
 }
-#s2.show{opacity:1;pointer-events:all;}
+#s2.show{
+  display:flex;
+  opacity:1;
+  pointer-events:all;
+}
 
 #s2-title{
   font-family:var(--serif);font-style:italic;
@@ -1008,14 +1012,15 @@ function unlockAndStart() {
 
   // Utente già loggato e pagante → vai alla mappa
   if (currentUser && currentUser.paid) {
-    document.getElementById('s1').classList.add('hide');
-    setTimeout(() => { document.getElementById('s2').classList.add('show'); }, 500);
+    enterWorld();
     return;
   }
 
   // Nuovo utente → registrazione
-  document.getElementById('s1').classList.add('hide');
-  setTimeout(() => { showRegScreen(); }, 600);
+  const s1 = document.getElementById('s1');
+  s1.style.opacity = '0';
+  s1.style.pointerEvents = 'none';
+  setTimeout(() => { s1.style.display = 'none'; showRegScreen(); }, 600);
 }
 
 // ══ REGISTRAZIONE ══════════════════════════════
@@ -1120,10 +1125,21 @@ function skipPaymentDev() {
 }
 
 function enterWorld() {
-  // Mostra mappa icone sopra il video
-  document.getElementById('s1').classList.add('hide');
+  const s1 = document.getElementById('s1');
+  const s2 = document.getElementById('s2');
+  // Nascondi s1
+  s1.style.opacity = '0';
+  s1.style.pointerEvents = 'none';
+  setTimeout(() => { s1.style.display = 'none'; }, 600);
+  // Nascondi reg screen
   hideRegScreen();
-  setTimeout(() => { document.getElementById('s2').classList.add('show'); }, 200);
+  // Mostra s2 con icone
+  setTimeout(() => {
+    s2.style.display = 'flex';
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => { s2.style.opacity = '1'; });
+    });
+  }, 400);
 }
 </script>
 </body>
