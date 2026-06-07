@@ -901,6 +901,8 @@ const DEMO_USER = {
   password: 'tecno5181',
   birth: '1981-01-01',
   paid: true,
+  hasAvatar: true,
+  avatar: { name:'Renato', gender:'m', hair:'short', haircolor:'#2a1a0a', eyes:'almond', eyecolor:'#3a2010', skin:'#f0c898', style:'casual', clothcolor:'#4a6a8a', personality:'curious', accessory:'none' },
   joinDate: '2025-01-01T00:00:00.000Z',
   demo: true,
 };
@@ -1575,16 +1577,21 @@ function doLogin() {
   currentUser = user;
   localStorage.setItem('sekai_session', JSON.stringify(user));
 
+  hideRegScreen();
+  document.getElementById('intro-ui').style.display = 'none';
+
   if (!user.paid) {
-    // Mostra pagamento
+    // Non ha pagato — mostra pagamento
+    showRegScreen();
     document.getElementById('form-login').style.display = 'none';
+    document.getElementById('form-register').style.display = 'none';
     document.getElementById('form-payment').style.display = 'flex';
     document.getElementById('reg-tabs').style.display = 'none';
+  } else if (!user.hasAvatar) {
+    // Pagato ma senza avatar — crea avatar
+    showAvatarScreen();
   } else {
-    // Pagato — nascondi tutto intro e mostra mappa aree
-    hideRegScreen();
-    const ui = document.getElementById('intro-ui');
-    ui.style.display = 'none';
+    // Tutto ok — entra direttamente
     showMapUI();
   }
 }
