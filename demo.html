@@ -841,7 +841,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
       <p id="wc-personality"></p>
     </div>
     <div id="wc-avatar-wrap">
-      <canvas id="wc-canvas" width="200" height="280"></canvas>
+      <svg id="wc-svg" viewBox="0 0 200 270"
+        style="width:200px;height:270px;filter:drop-shadow(0 8px 32px rgba(0,0,0,.6));">
+      </svg>
       <div id="wc-glow"></div>
     </div>
     <div id="wc-bottom">
@@ -2503,32 +2505,61 @@ const PERSONALITY_TAGLINES = {
 
 function showWelcomeScreen() {
   const sc = document.getElementById('welcome-screen');
+  if(!sc) return;
   sc.style.display = 'flex';
-  const av = currentUser.avatar;
-  if(!av) return;
+  const av = currentUser?.avatar;
+  if(!av) { showMapUI(); return; }
 
-  // Testi
-  document.getElementById('wc-charname').textContent = av.name || currentUser.username;
-  document.getElementById('wc-personality').textContent =
-    {curious:'Animo curioso',sunny:'Spirito solare',calm:'Cuore calmo',
-     wise:'Mente saggia',dreamy:'Anima sognatrice',wild:'Spirito libero'}[av.personality] || '';
-  document.getElementById('wc-tagline').textContent =
-    PERSONALITY_TAGLINES[av.personality] || 'Il mondo ti aspetta.';
+  // Nome personaggio
+  const nameEl = document.getElementById('wc-charname');
+  if(nameEl) nameEl.textContent = av.name || currentUser.username;
 
-  // Disegna avatar sul canvas welcome
-  const wCanvas = document.getElementById('wc-canvas');
-  if(wCanvas && typeof avDraw === 'function') {
-    // Salva stato AV, carica dati avatar, disegna, ripristina
-    const savedData = {...AV.data};
-    const savedCanvas = document.getElementById('av-canvas');
-    // Temporaneamente usa wc-canvas
-    Object.assign(AV.data, av);
-    const ctx = wCanvas.getContext('2d');
-    const w = wCanvas.width, h = wCanvas.height;
-    // Mini-draw semplificato
-    drawAvatarOnCanvas(ctx, w, h, av);
-    // Ripristina
-    Object.assign(AV.data, savedData);
+  // Personalità — usa il nuovo sistema array
+  const persEl = document.getElementById('wc-personality');
+  if(persEl) {
+    const tags = Array.isArray(av.personality)
+      ? av.personality.slice(0,3).join(' · ')
+      : (av.personality || '');
+    persEl.textContent = tags;
+  }
+
+  // Tagline basata su lifePhase o personality
+  const tagEl = document.getElementById('wc-tagline');
+  if(tagEl) {
+    const lifeLines = {
+      searching:  'Ogni passo in Sekai è un passo verso te stesso.',
+      selflov:    'Qui trovi uno spazio per voler bene a chi sei.',
+      healing:    'Questo mondo ti aspettava. Prenditi il tempo che ti serve.',
+      building:   'Sekai cresce con te. Costruiamo insieme.',
+      sharing:    'La tua esperienza è un dono per chi è appena arrivato.',
+      living:     'Vivi. Esplora. Respira. Il mondo è tuo.',
+      unknown:    'Non sapere è il punto di partenza migliore.',
+    };
+    tagEl.textContent = lifeLines[av.lifePhase] || 'Il mondo ti aspetta. Entra quando sei pronto.';
+  }
+
+  // Disegna avatar SVG nella schermata welcome
+  const wcSvg = document.getElementById('wc-svg');
+  if(wcSvg) {
+    if(currentUser.avatarSVG) {
+      // Usa SVG pre-renderizzato passato dall'iframe
+      wcSvg.innerHTML = currentUser.avatarSVG;
+    } else {
+      // Fallback: mostra iniziale del nome
+      wcSvg.innerHTML = `
+        <circle cx="100" cy="100" r="80" fill="rgba(212,168,83,0.1)" stroke="rgba(212,168,83,0.3)" stroke-width="1"/>
+        <text x="100" y="115" text-anchor="middle" font-family="serif" font-size="60"
+          fill="rgba(212,168,83,0.7)">${(av.name||'?')[0].toUpperCase()}</text>
+      `;
+    }
+  }
+
+  // Aggiorna greeting
+  const greetEl = document.getElementById('wc-greeting');
+  if(greetEl) {
+    const hour = new Date().getHours();
+    const greeting = hour < 12 ? 'Buongiorno in Sekai' : hour < 18 ? 'Bentornato in Sekai' : 'Buonasera in Sekai';
+    greetEl.textContent = greeting;
   }
 }
 
@@ -2627,12 +2658,14 @@ function showAvatarScreen() {
       if (currentUser) {
         currentUser.avatar = saved;
         currentUser.hasAvatar = true;
+        // Salva anche SVG string se disponibile
+        if(e.data.svgString) currentUser.avatarSVG = e.data.svgString;
         DB.users = DB.users.map(u => u.email === currentUser.email ? currentUser : u);
         DB.save();
         localStorage.setItem('sekai_session', JSON.stringify(currentUser));
       }
       hideAvatarScreen();
-      showMapUI();
+      showWelcomeScreen();
       window.removeEventListener('message', window._avatarSavedHandler);
     }
     if (e.data && e.data.type === 'AVATAR_CLOSE') {
