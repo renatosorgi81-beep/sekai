@@ -916,7 +916,10 @@ function saveAvatar() {
 
   // Comunica con demo.html (se in iframe)
   if(window.parent && window.parent !== window) {
-    window.parent.postMessage({ type: 'AVATAR_SAVED', avatar: saved }, '*');
+    // Includi anche il SVG renderizzato
+    const svgEl = document.getElementById('avatar-svg');
+    const svgString = svgEl ? svgEl.innerHTML : '';
+    window.parent.postMessage({ type: 'AVATAR_SAVED', avatar: saved, svgString }, '*');
   } else if(window.onAvatarSaved) {
     window.onAvatarSaved(saved);
   } else {
