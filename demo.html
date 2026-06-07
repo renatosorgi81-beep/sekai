@@ -144,6 +144,95 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
 @keyframes hsIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
 
 
+
+/* ══ WELCOME SCREEN ══ */
+#welcome-screen {
+  position:fixed;inset:0;z-index:850;
+  display:flex;align-items:center;justify-content:center;
+  padding:20px;
+}
+#wc-bg {
+  position:absolute;inset:0;
+  background:rgba(8,6,18,.94);
+  backdrop-filter:blur(20px);
+}
+#wc-box {
+  position:relative;z-index:1;
+  display:flex;flex-direction:column;align-items:center;
+  gap:20px;text-align:center;
+  max-width:340px;width:100%;
+  animation:fadeUp .8s ease both;
+}
+#wc-top { display:flex;flex-direction:column;gap:6px; }
+#wc-greeting {
+  font-family:var(--serif);font-style:italic;
+  font-size:14px;color:rgba(245,234,208,.45);
+  letter-spacing:.25em;
+}
+#wc-charname {
+  font-family:var(--jp);font-size:32px;font-weight:300;
+  color:var(--gold);letter-spacing:.3em;
+  text-shadow:0 0 30px rgba(212,168,83,.4);
+}
+#wc-personality {
+  font-family:var(--serif);font-style:italic;
+  font-size:13px;color:rgba(245,234,208,.4);
+  letter-spacing:.15em;
+}
+
+/* Avatar preview */
+#wc-avatar-wrap {
+  position:relative;
+  display:flex;align-items:center;justify-content:center;
+}
+#wc-canvas {
+  border-radius:8px;
+  filter:drop-shadow(0 8px 32px rgba(0,0,0,.6));
+  position:relative;z-index:1;
+}
+#wc-glow {
+  position:absolute;
+  width:180px;height:180px;
+  background:radial-gradient(circle,rgba(212,168,83,.15) 0%,transparent 70%);
+  animation:wcGlow 3s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes wcGlow {
+  0%,100%{transform:scale(1);opacity:.6;}
+  50%{transform:scale(1.2);opacity:1;}
+}
+
+#wc-bottom { display:flex;flex-direction:column;gap:10px;align-items:center; }
+#wc-tagline {
+  font-family:var(--serif);font-style:italic;
+  font-size:13px;color:rgba(245,234,208,.35);
+  letter-spacing:.1em;line-height:1.6;
+  max-width:260px;
+}
+#wc-enter-btn {
+  padding:14px 48px;
+  background:rgba(212,168,83,.15);
+  border:1.5px solid rgba(212,168,83,.55);
+  border-radius:3px;
+  color:var(--gold);
+  font-family:var(--serif);font-size:15px;letter-spacing:.25em;
+  cursor:pointer;transition:all .35s;
+  animation:pulse-gold 2.5s ease-in-out infinite;
+}
+#wc-enter-btn:hover {
+  background:rgba(212,168,83,.28);
+  border-color:rgba(212,168,83,.9);
+  box-shadow:0 0 24px rgba(212,168,83,.2);
+}
+#wc-edit-btn {
+  background:transparent;border:none;
+  font-family:var(--serif);font-style:italic;
+  font-size:12px;color:rgba(245,234,208,.3);
+  letter-spacing:.15em;cursor:pointer;
+  transition:color .3s;padding:4px;
+}
+#wc-edit-btn:hover { color:rgba(245,234,208,.65); }
+
 /* ══ AVATAR SCREEN ══ */
 #avatar-screen {
   position:fixed;inset:0;z-index:800;
@@ -856,6 +945,28 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
   </div><!-- /av-container -->
 </div>
 
+
+<!-- SCHERMATA BENVENUTO (dopo login con avatar già creato) -->
+<div id="welcome-screen" style="display:none;">
+  <div id="wc-bg"></div>
+  <div id="wc-box">
+    <div id="wc-top">
+      <p id="wc-greeting">Bentornato in Sekai</p>
+      <h2 id="wc-charname"></h2>
+      <p id="wc-personality"></p>
+    </div>
+    <div id="wc-avatar-wrap">
+      <canvas id="wc-canvas" width="200" height="280"></canvas>
+      <div id="wc-glow"></div>
+    </div>
+    <div id="wc-bottom">
+      <p id="wc-tagline"></p>
+      <button id="wc-enter-btn" onclick="enterFromWelcome()">✦ Entra nel mondo</button>
+      <button id="wc-edit-btn" onclick="editAvatar()">Modifica personaggio</button>
+    </div>
+  </div>
+</div>
+
 <!-- MONDO -->
 <div id="world">
   <canvas id="wc"></canvas>
@@ -901,8 +1012,8 @@ const DEMO_USER = {
   password: 'tecno5181',
   birth: '1981-01-01',
   paid: true,
-  hasAvatar: true,
-  avatar: { name:'Renato', gender:'m', hair:'short', haircolor:'#2a1a0a', eyes:'almond', eyecolor:'#3a2010', skin:'#f0c898', style:'casual', clothcolor:'#4a6a8a', personality:'curious', accessory:'none' },
+  hasAvatar: false,
+  avatar: null,
   joinDate: '2025-01-01T00:00:00.000Z',
   demo: true,
 };
@@ -1591,8 +1702,8 @@ function doLogin() {
     // Pagato ma senza avatar — crea avatar
     showAvatarScreen();
   } else {
-    // Tutto ok — entra direttamente
-    showMapUI();
+    // Ha tutto — mostra schermata benvenuto con avatar
+    showWelcomeScreen();
   }
 }
 
@@ -2040,7 +2151,125 @@ function saveAvatarAndEnter() {
     localStorage.setItem('sekai_session', JSON.stringify(currentUser));
   }
   hideAvatarScreen();
+  // Prima volta — vai diretto alla mappa (nessun welcome ancora)
   showMapUI();
+}
+
+
+// ══ WELCOME SCREEN ══════════════════════════════
+
+const PERSONALITY_TAGLINES = {
+  curious:  'Ogni angolo di Sekai nasconde una scoperta per te.',
+  sunny:    'La tua luce illumina ogni luogo in cui arrivi.',
+  calm:     'Porti quiete e armonia ovunque tu vada.',
+  wise:     'Le tue parole hanno il peso delle stagioni.',
+  dreamy:   'Cammini tra i mondi con gli occhi aperti sul sogno.',
+  wild:     'Il vento ti conosce. La foresta ti aspetta.',
+};
+
+function showWelcomeScreen() {
+  const sc = document.getElementById('welcome-screen');
+  sc.style.display = 'flex';
+  const av = currentUser.avatar;
+  if(!av) return;
+
+  // Testi
+  document.getElementById('wc-charname').textContent = av.name || currentUser.username;
+  document.getElementById('wc-personality').textContent =
+    {curious:'Animo curioso',sunny:'Spirito solare',calm:'Cuore calmo',
+     wise:'Mente saggia',dreamy:'Anima sognatrice',wild:'Spirito libero'}[av.personality] || '';
+  document.getElementById('wc-tagline').textContent =
+    PERSONALITY_TAGLINES[av.personality] || 'Il mondo ti aspetta.';
+
+  // Disegna avatar sul canvas welcome
+  const wCanvas = document.getElementById('wc-canvas');
+  if(wCanvas && typeof avDraw === 'function') {
+    // Salva stato AV, carica dati avatar, disegna, ripristina
+    const savedData = {...AV.data};
+    const savedCanvas = document.getElementById('av-canvas');
+    // Temporaneamente usa wc-canvas
+    Object.assign(AV.data, av);
+    const ctx = wCanvas.getContext('2d');
+    const w = wCanvas.width, h = wCanvas.height;
+    // Mini-draw semplificato
+    drawAvatarOnCanvas(ctx, w, h, av);
+    // Ripristina
+    Object.assign(AV.data, savedData);
+  }
+}
+
+function drawAvatarOnCanvas(ctx, w, h, av) {
+  // Stesso disegno di avDraw ma su canvas arbitrario
+  const savedCanvas = document.getElementById('av-canvas');
+  // Sostituisci temporaneamente e chiama avDraw
+  const realCanvas = document.getElementById('av-canvas');
+  // Hack: ridisegna direttamente
+  const d = av;
+  const cx = w/2, cy = h*0.42;
+  ctx.clearRect(0,0,w,h);
+  const bg=ctx.createLinearGradient(0,0,0,h);
+  bg.addColorStop(0,'#1a1030');bg.addColorStop(1,'#0d0a18');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
+  // Ombra
+  ctx.save();ctx.globalAlpha=.2;ctx.fillStyle='#000';
+  ctx.beginPath();ctx.ellipse(cx,cy+95,30,8,0,0,Math.PI*2);ctx.fill();ctx.restore();
+  // Corpo semplificato
+  const bodyH=100,bodyW=44;
+  const cg=ctx.createLinearGradient(cx-bodyW/2,cy+10,cx+bodyW/2,cy+bodyH);
+  cg.addColorStop(0,lighten(d.clothcolor,30));cg.addColorStop(1,d.clothcolor);
+  ctx.fillStyle=cg;
+  ctx.beginPath();ctx.moveTo(cx-bodyW*.5,cy+bodyH);ctx.lineTo(cx-bodyW*.38,cy+10);ctx.lineTo(cx+bodyW*.38,cy+10);ctx.lineTo(cx+bodyW*.5,cy+bodyH);ctx.closePath();ctx.fill();
+  // Collo
+  ctx.fillStyle=d.skin;ctx.fillRect(cx-7,cy-5,14,15);
+  // Testa
+  const headR=32;
+  const hg=ctx.createRadialGradient(cx-6,cy-headR*.3,3,cx,cy-headR*.1,headR*1.2);
+  hg.addColorStop(0,lighten(d.skin,20));hg.addColorStop(1,d.skin);
+  ctx.fillStyle=hg;ctx.beginPath();ctx.ellipse(cx,cy-headR*.1,headR,headR*1.05,0,0,Math.PI*2);ctx.fill();
+  // Occhi
+  const eyeW=d.eyes==='big'?9:7,eyeH=d.eyes==='big'?10:d.eyes==='narrow'?4:8;
+  [-15,15].forEach((ox,i)=>{
+    ctx.fillStyle='rgba(255,255,255,.9)';ctx.beginPath();ctx.ellipse(cx+ox,cy,eyeW+2,eyeH+2,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle=d.eyecolor;ctx.beginPath();ctx.ellipse(cx+ox,cy,eyeW*.7,eyeH*.85,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#0a0a0a';ctx.beginPath();ctx.ellipse(cx+ox,cy,eyeW*.3,eyeH*.45,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,.85)';ctx.beginPath();ctx.arc(cx+ox+eyeW*.2,cy-eyeH*.25,eyeW*.18,0,Math.PI*2);ctx.fill();
+  });
+  // Bocca
+  ctx.strokeStyle=darken(d.skin,35);ctx.lineWidth=1.8;
+  ctx.beginPath();ctx.moveTo(cx-7,cy+18);ctx.quadraticCurveTo(cx,cy+23,cx+7,cy+18);ctx.stroke();
+  // Capelli
+  ctx.fillStyle=d.haircolor;
+  ctx.beginPath();ctx.ellipse(cx,cy-headR*.6,headR*1.05,headR*.55,0,Math.PI,0);ctx.fill();
+  if(d.hair==='long'||d.hair==='wavy') {
+    [-1,1].forEach(s=>{
+      ctx.beginPath();ctx.moveTo(cx+s*headR*.8,cy-8);
+      ctx.quadraticCurveTo(cx+s*headR*1.1,cy+50,cx+s*headR*.8,cy+bodyH*.55);
+      ctx.lineWidth=12;ctx.strokeStyle=d.haircolor;ctx.stroke();
+    });
+  }
+  // Guance
+  ctx.save();ctx.globalAlpha=.15;ctx.fillStyle='#e05878';
+  ctx.beginPath();ctx.ellipse(cx-18,cy+7,8,5,0,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.ellipse(cx+18,cy+7,8,5,0,0,Math.PI*2);ctx.fill();
+  ctx.restore();
+}
+
+function hideWelcomeScreen() {
+  document.getElementById('welcome-screen').style.display = 'none';
+}
+
+function enterFromWelcome() {
+  hideWelcomeScreen();
+  showMapUI();
+}
+
+function editAvatar() {
+  hideWelcomeScreen();
+  // Precarica dati avatar esistente
+  if(currentUser.avatar) {
+    Object.assign(AV.data, currentUser.avatar);
+  }
+  showAvatarScreen();
 }
 
 </script>
