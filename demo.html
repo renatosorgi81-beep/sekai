@@ -2603,6 +2603,55 @@ function editAvatar() {
 }
 
 
+function showAvatarScreen() {
+  const sc = document.getElementById('avatar-screen');
+  if (!sc) return;
+  sc.style.display = 'block';
+
+  const app = document.getElementById('av-app');
+  if (!app) return;
+
+  const cats = ['name','gender','face','hair','eyes','brows','nose','mouth','skin','cloth','accessory','personality'];
+  const icons = {name:'✦',gender:'◈',face:'◯',hair:'〜',eyes:'◉',brows:'⌒',nose:'▾',mouth:'◡',skin:'◐',cloth:'◧',accessory:'✧',personality:'♡'};
+  const labels = {name:'Nome',gender:'Genere',face:'Viso',hair:'Capelli',eyes:'Occhi',brows:'Sopracciglia',nose:'Naso',mouth:'Bocca',skin:'Carnagione',cloth:'Vestiti',accessory:'Accessori',personality:'Personalità'};
+
+  app.innerHTML = `
+    <button id="av-close-btn" onclick="closeAvatarScreen()">✕</button>
+    <div id="header" style="grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:rgba(13,10,24,.95);border-bottom:1px solid rgba(212,168,83,.2);">
+      <div class="h-logo" style="font-family:var(--jp);font-size:20px;color:var(--gold);letter-spacing:.3em;">世界 <span style="font-family:var(--serif);font-size:13px;color:rgba(212,168,83,.5);letter-spacing:.3em;">Sekai</span></div>
+      <div class="h-title" style="font-family:var(--serif);font-style:italic;font-size:15px;color:rgba(245,234,208,.5);letter-spacing:.15em;">Crea il tuo personaggio</div>
+      <div class="h-step" id="completion-pct" style="font-family:var(--serif);font-size:12px;color:rgba(245,234,208,.3);letter-spacing:.2em;">0% completato</div>
+    </div>
+    <div id="left-panel">
+      ${cats.map((cat,i) => `<div class="category${i===0?' active':''}" onclick="selectCat('${cat}')" id="cat-${cat}"><span class="cat-icon">${icons[cat]}</span><span class="cat-label">${labels[cat]}</span><span class="cat-check">✓</span></div>`).join('')}
+    </div>
+    <div id="preview-panel">
+      <div id="preview-bg-glow"></div>
+      <div id="avatar-svg-wrap">
+        <svg id="avatar-svg" viewBox="0 0 260 340" xmlns="http://www.w3.org/2000/svg" style="width:260px;height:340px;filter:drop-shadow(0 12px 40px rgba(0,0,0,.7))"></svg>
+      </div>
+      <div id="preview-name" style="font-family:var(--jp);font-size:18px;color:var(--gold);letter-spacing:.3em;margin-top:8px;">—</div>
+      <div id="preview-code" style="font-family:monospace;font-size:9px;color:rgba(212,168,83,.25);letter-spacing:.1em;margin-top:4px;"></div>
+    </div>
+    <div id="right-panel"></div>
+    <div id="footer" style="grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:rgba(13,10,24,.95);border-top:1px solid rgba(212,168,83,.2);gap:16px;">
+      <div id="unique-badge" style="font-family:var(--serif);font-size:11px;color:rgba(212,168,83,.5);letter-spacing:.1em;">🔒 Avatar unico garantito</div>
+      <div style="display:flex;gap:10px;">
+        <button id="random-btn" onclick="randomize()" style="padding:12px 20px;background:transparent;border:1px solid rgba(255,255,255,.1);border-radius:3px;color:rgba(245,234,208,.4);font-family:var(--serif);font-size:12px;letter-spacing:.15em;cursor:pointer;">⚄ Casuale</button>
+        <button id="save-btn" onclick="saveAvatar()" style="padding:12px 40px;background:rgba(212,168,83,.15);border:1.5px solid rgba(212,168,83,.6);border-radius:3px;color:var(--gold);font-family:var(--serif);font-size:14px;letter-spacing:.25em;cursor:pointer;">✦ Salva personaggio</button>
+      </div>
+    </div>
+  `;
+
+  // Se ha già un avatar, precarica i dati
+  if (currentUser && currentUser.avatar) {
+    Object.assign(AV, currentUser.avatar);
+  }
+
+  selectCat('name');
+  updatePreview();
+}
+
 function hideAvatarScreen() {
   const sc = document.getElementById('avatar-screen');
   if(sc) sc.style.display = 'none';
