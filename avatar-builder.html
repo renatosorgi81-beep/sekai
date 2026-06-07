@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sekai — Crea il tuo Avatar</title>
+<title>Sekai — Crea il tuo Personaggio</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Zen+Kaku+Gothic+New:wght@300;400&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -201,349 +201,631 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--cream);font-fa
   #preview-panel{min-height:280px;border:none;border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
   #avatar-svg{width:180px;height:240px;}
 }
+
+/* ── SEZIONI IDENTITÀ ── */
+.identity-section { display:flex;flex-direction:column;gap:14px; }
+.free-text-area {
+  width:100%;min-height:80px;padding:12px 14px;resize:vertical;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(212,168,83,.2);
+  border-radius:3px;color:var(--cream);
+  font-family:var(--serif);font-size:14px;
+  letter-spacing:.05em;line-height:1.6;outline:none;
+  transition:border .3s;
+}
+.free-text-area:focus{border-color:rgba(212,168,83,.5);}
+.free-text-area::placeholder{color:rgba(245,234,208,.2);font-style:italic;}
+.tag-cloud { display:flex;flex-wrap:wrap;gap:6px; }
+.tag {
+  padding:5px 11px;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:20px;
+  font-family:var(--serif);font-size:11px;
+  color:rgba(245,234,208,.55);letter-spacing:.06em;
+  cursor:pointer;transition:all .2s;
+}
+.tag:hover{border-color:rgba(212,168,83,.35);color:var(--cream);}
+.tag.sel{background:rgba(212,168,83,.14);border-color:rgba(212,168,83,.65);color:var(--gold);}
+.counter-badge {
+  font-family:var(--serif);font-size:10px;
+  color:rgba(212,168,83,.5);letter-spacing:.1em;
+  text-align:right;margin-top:-8px;
+}
+.private-badge {
+  display:inline-flex;align-items:center;gap:5px;
+  font-family:var(--serif);font-size:10px;
+  color:rgba(212,168,83,.4);letter-spacing:.1em;
+  padding:3px 8px;border:1px solid rgba(212,168,83,.15);
+  border-radius:20px;margin-bottom:4px;
+}
+.mood-grid {
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;
+}
+.mood-card {
+  padding:10px 12px;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:4px;
+  font-family:var(--serif);font-size:12px;
+  color:rgba(245,234,208,.55);
+  cursor:pointer;transition:all .2s;
+  line-height:1.4;
+}
+.mood-card:hover{border-color:rgba(212,168,83,.35);color:var(--cream);}
+.mood-card.sel{background:rgba(212,168,83,.12);border-color:rgba(212,168,83,.6);color:var(--gold);}
+.mood-card .mood-icon{font-size:18px;display:block;margin-bottom:4px;}
+.section-note {
+  font-family:var(--serif);font-style:italic;font-size:11px;
+  color:rgba(245,234,208,.3);letter-spacing:.08em;
+  line-height:1.5;padding:8px 0;
+}
 </style>
 </head>
 <body>
 <div id="app">
 
-  <!-- HEADER -->
   <div id="header">
     <div class="h-logo">世界 <span style="font-family:var(--serif);font-size:13px;color:rgba(212,168,83,.5);letter-spacing:.3em;">Sekai</span></div>
-    <div class="h-title">Crea il tuo personaggio</div>
-    <div class="h-step" id="completion-pct">0% completato</div>
+    <div class="h-title">Il tuo personaggio</div>
+    <div class="h-step" id="completion-pct">Inizia da qui</div>
   </div>
 
-  <!-- PANNELLO SINISTRO -->
-  <div id="left-panel">
-    <div class="category active" onclick="selectCat('name')" id="cat-name">
-      <span class="cat-icon">✦</span>
-      <span class="cat-label">Nome</span>
-      <span class="cat-check">✓</span>
-    </div>
-    <div class="category" onclick="selectCat('gender')" id="cat-gender">
-      <span class="cat-icon">◈</span>
-      <span class="cat-label">Genere</span>
-      <span class="cat-check">✓</span>
-    </div>
-    <div class="category" onclick="selectCat('face')" id="cat-face">
-      <span class="cat-icon">◯</span>
-      <span class="cat-label">Viso</span>
-      <span class="cat-check">✓</span>
-    </div>
-    <div class="category" onclick="selectCat('hair')" id="cat-hair">
-      <span class="cat-icon">〜</span>
-      <span class="cat-label">Capelli</span>
-      <span class="cat-check">✓</span>
-    </div>
-    <div class="category" onclick="selectCat('eyes')" id="cat-eyes">
-      <span class="cat-icon">◉</span>
-      <span class="cat-label">Occhi</span>
-      <span class="cat-check">✓</span>
-    </div>
-    <div class="category" onclick="selectCat('brows')" id="cat-brows">
-      <span class="cat-icon">⌒</span>
-      <span class="cat-label">Sopracciglia</span>
-      <span class="cat-check">✓</span>
-    </div>
-    <div class="category" onclick="selectCat('nose')" id="cat-nose">
-      <span class="cat-icon">▾</span>
-      <span class="cat-label">Naso</span>
-      <span class="cat-check">✓</span>
-    </div>
-    <div class="category" onclick="selectCat('mouth')" id="cat-mouth">
-      <span class="cat-icon">◡</span>
-      <span class="cat-label">Bocca</span>
-      <span class="cat-check">✓</span>
-    </div>
-    <div class="category" onclick="selectCat('skin')" id="cat-skin">
-      <span class="cat-icon">◐</span>
-      <span class="cat-label">Carnagione</span>
-      <span class="cat-check">✓</span>
-    </div>
-    <div class="category" onclick="selectCat('cloth')" id="cat-cloth">
-      <span class="cat-icon">◧</span>
-      <span class="cat-label">Vestiti</span>
-      <span class="cat-check">✓</span>
-    </div>
-    <div class="category" onclick="selectCat('accessory')" id="cat-accessory">
-      <span class="cat-icon">✧</span>
-      <span class="cat-label">Accessori</span>
-      <span class="cat-check">✓</span>
-    </div>
-    <div class="category" onclick="selectCat('personality')" id="cat-personality">
-      <span class="cat-icon">♡</span>
-      <span class="cat-label">Personalità</span>
-      <span class="cat-check">✓</span>
-    </div>
-  </div>
+  <div id="left-panel" id="left-panel"></div>
 
-  <!-- PREVIEW -->
   <div id="preview-panel">
     <div id="preview-bg-glow"></div>
     <div id="avatar-svg-wrap">
-      <svg id="avatar-svg" viewBox="0 0 260 340" xmlns="http://www.w3.org/2000/svg">
-        <!-- Generato dinamicamente da JS -->
-      </svg>
+      <svg id="avatar-svg" viewBox="0 0 260 340" xmlns="http://www.w3.org/2000/svg"></svg>
     </div>
     <div id="preview-name">—</div>
+    <div id="preview-sub"></div>
     <div id="preview-code"></div>
   </div>
 
-  <!-- PANNELLO DESTRO -->
-  <div id="right-panel">
-    <!-- Contenuto dinamico -->
-  </div>
+  <div id="right-panel"></div>
 
-  <!-- FOOTER -->
   <div id="footer">
-    <div id="unique-badge">🔒 Avatar unico garantito</div>
+    <div id="unique-badge">🔒 Il tuo avatar è unico</div>
     <div style="display:flex;gap:10px;">
       <button id="random-btn" onclick="randomize()">⚄ Casuale</button>
-      <button id="save-btn" onclick="saveAvatar()">✦ Salva personaggio</button>
+      <button id="save-btn" onclick="saveAvatar()">✦ Salva il tuo personaggio</button>
     </div>
   </div>
 
 </div>
-
 <script>
 'use strict';
 
 // ══ DATI AVATAR ════════════════════════════════
 const AV = {
-  name: '',
-  gender: 'm',
-  face: 'oval',
-  hair: 'wild',
-  hairColor: '#c8a020',
-  eyes: 'round',
-  eyeColor: '#206040',
-  brows: 'natural',
-  nose: 'soft',
-  mouth: 'smile',
-  skin: '#f0c898',
-  cloth: 'hoodie',
-  clothColor: '#1a3a6a',
-  accessory: 'none',
-  personality: 'curious',
+  // ASPETTO
+  name:'', gender:'m', face:'oval', hair:'wild', hairColor:'#c8a020',
+  eyes:'round', eyeColor:'#206040', brows:'natural', nose:'soft',
+  mouth:'smile', skin:'#f0c898', cloth:'hoodie', clothColor:'#1a3a6a',
+  accessory:'none',
+  // IDENTITÀ INTERIORE
+  personality: [],       // max 5 tag
+  passions: [],          // max 5 tag
+  values: [],            // max 3 tag
+  lifePhase: '',         // 1 scelta
+  socialStyle: '',       // 1 scelta
+  gift: '',              // 1 scelta
+  silenceMode: '',       // 1 scelta
+  favoriteArea: '',      // 1 scelta
+  // CAMPI LIBERI
+  loveText: '',          // cosa ami
+  learningText: '',      // cosa stai imparando
+  understandText: '',    // cosa vorresti che capissero di te
+  dreamText: '',         // il tuo sogno (privato)
+  strengthText: '',      // la tua forza (privato)
 };
 
-// ══ OPZIONI ════════════════════════════════════
+// ══ CATEGORIE ══════════════════════════════════
+const CATS = [
+  {id:'name',       icon:'✦', label:'Nome'},
+  {id:'gender',     icon:'◈', label:'Genere'},
+  {id:'face',       icon:'◯', label:'Viso'},
+  {id:'hair',       icon:'〜', label:'Capelli'},
+  {id:'eyes',       icon:'◉', label:'Occhi'},
+  {id:'brows',      icon:'⌒', label:'Sopracciglia'},
+  {id:'nose',       icon:'▾', label:'Naso'},
+  {id:'mouth',      icon:'◡', label:'Bocca'},
+  {id:'skin',       icon:'◐', label:'Carnagione'},
+  {id:'cloth',      icon:'◧', label:'Vestiti'},
+  {id:'accessory',  icon:'✧', label:'Accessori'},
+  {id:'sep1',       icon:'',  label:'── IDENTITÀ ──', separator:true},
+  {id:'personality',icon:'🌿', label:'Personalità'},
+  {id:'passions',   icon:'🔥', label:'Passioni'},
+  {id:'values',     icon:'⭐', label:'Valori'},
+  {id:'lifephase',  icon:'🌱', label:'Dove sei adesso'},
+  {id:'social',     icon:'🤝', label:'Con gli altri'},
+  {id:'gift',       icon:'🎁', label:'Il tuo dono'},
+  {id:'silence',    icon:'🌙', label:'Nel silenzio'},
+  {id:'area',       icon:'🗺️', label:'Il tuo posto'},
+  {id:'sep2',       icon:'',  label:'── IN PAROLE TUE ──', separator:true},
+  {id:'freetext',   icon:'✍️', label:'Parole libere'},
+  {id:'private',    icon:'🔒', label:'Solo per te'},
+];
+
 const OPTS = {
   gender: [
-    {val:'m', label:'♂ Maschile'},
-    {val:'f', label:'♀ Femminile'},
-    {val:'n', label:'✦ Neutro'},
+    {val:'m',label:'♂ Maschile'},{val:'f',label:'♀ Femminile'},{val:'n',label:'✦ Neutro'},
   ],
   face: [
-    {val:'oval',    label:'Ovale'},
-    {val:'round',   label:'Rotondo'},
-    {val:'sharp',   label:'Affilato'},
-    {val:'soft',    label:'Morbido'},
-    {val:'wide',    label:'Largo'},
+    {val:'oval',label:'Ovale'},{val:'round',label:'Rotondo'},{val:'sharp',label:'Affilato'},
+    {val:'soft',label:'Morbido'},{val:'wide',label:'Largo'},
   ],
   hair: [
-    {val:'wild',    label:'Selvaggi'},
-    {val:'short',   label:'Corti'},
-    {val:'long',    label:'Lunghi'},
-    {val:'wavy',    label:'Mossi'},
-    {val:'bun',     label:'Raccolti'},
-    {val:'side',    label:'Di lato'},
-    {val:'spiky',   label:'A punte'},
-    {val:'bangs',   label:'Con frangia'},
+    {val:'wild',label:'Selvaggi'},{val:'short',label:'Corti'},{val:'long',label:'Lunghi'},
+    {val:'wavy',label:'Mossi'},{val:'bun',label:'Raccolti'},{val:'side',label:'Di lato'},
+    {val:'spiky',label:'A punte'},{val:'bangs',label:'Con frangia'},
   ],
   hairColors: [
-    {val:'#c8a020',label:'Biondo'},
-    {val:'#2a1a0a',label:'Nero'},
-    {val:'#6a3a10',label:'Castano'},
-    {val:'#c03020',label:'Rosso'},
-    {val:'#e87090',label:'Rosa'},
-    {val:'#5040a0',label:'Viola'},
-    {val:'#2060c0',label:'Blu'},
-    {val:'#40a060',label:'Verde'},
-    {val:'#e8e0d8',label:'Bianco'},
-    {val:'#d06010',label:'Arancio'},
-    {val:'#806040',label:'Rame'},
-    {val:'#808090',label:'Grigio'},
+    {val:'#c8a020',label:'Biondo'},{val:'#2a1a0a',label:'Nero'},{val:'#6a3a10',label:'Castano'},
+    {val:'#c03020',label:'Rosso'},{val:'#e87090',label:'Rosa'},{val:'#5040a0',label:'Viola'},
+    {val:'#2060c0',label:'Blu'},{val:'#40a060',label:'Verde'},{val:'#e8e0d8',label:'Bianco'},
+    {val:'#d06010',label:'Arancio'},{val:'#806040',label:'Rame'},{val:'#808090',label:'Grigio'},
   ],
   eyes: [
-    {val:'round',   label:'Rotondi'},
-    {val:'big',     label:'Grandi'},
-    {val:'almond',  label:'Mandorla'},
-    {val:'narrow',  label:'Sottili'},
-    {val:'droopy',  label:'Abbassati'},
-    {val:'sharp',   label:'Affilati'},
-    {val:'sleepy',  label:'Assonnati'},
-    {val:'starry',  label:'Stellati'},
+    {val:'round',label:'Rotondi'},{val:'big',label:'Grandi'},{val:'almond',label:'Mandorla'},
+    {val:'narrow',label:'Sottili'},{val:'droopy',label:'Abbassati'},{val:'sharp',label:'Affilati'},
+    {val:'sleepy',label:'Assonnati'},{val:'starry',label:'Stellati'},
   ],
   eyeColors: [
-    {val:'#206040',label:'Verde'},
-    {val:'#3a2010',label:'Marrone'},
-    {val:'#1a4080',label:'Blu'},
-    {val:'#806020',label:'Ambra'},
-    {val:'#602080',label:'Viola'},
-    {val:'#808090',label:'Grigio'},
-    {val:'#205050',label:'Verde scuro'},
-    {val:'#c03040',label:'Rosso'},
-    {val:'#40a0a0',label:'Acqua'},
-    {val:'#101010',label:'Nero'},
+    {val:'#206040',label:'Verde'},{val:'#3a2010',label:'Marrone'},{val:'#1a4080',label:'Blu'},
+    {val:'#806020',label:'Ambra'},{val:'#602080',label:'Viola'},{val:'#808090',label:'Grigio'},
+    {val:'#205050',label:'Verde scuro'},{val:'#c03040',label:'Rosso'},
+    {val:'#40a0a0',label:'Acqua'},{val:'#101010',label:'Nero'},
   ],
   brows: [
-    {val:'natural', label:'Naturali'},
-    {val:'thick',   label:'Spesse'},
-    {val:'thin',    label:'Sottili'},
-    {val:'arched',  label:'Arcuate'},
-    {val:'flat',    label:'Piatte'},
+    {val:'natural',label:'Naturali'},{val:'thick',label:'Spesse'},
+    {val:'thin',label:'Sottili'},{val:'arched',label:'Arcuate'},{val:'flat',label:'Piatte'},
   ],
   nose: [
-    {val:'soft',    label:'Morbido'},
-    {val:'button',  label:'A bottone'},
-    {val:'sharp',   label:'Affilato'},
-    {val:'wide',    label:'Largo'},
+    {val:'soft',label:'Morbido'},{val:'button',label:'A bottone'},
+    {val:'sharp',label:'Affilato'},{val:'wide',label:'Largo'},
   ],
   mouth: [
-    {val:'smile',   label:'Sorriso'},
-    {val:'neutral', label:'Neutro'},
-    {val:'smirk',   label:'Mezzo sorriso'},
-    {val:'open',    label:'Aperta'},
-    {val:'serious', label:'Serio'},
-    {val:'cute',    label:'Carino'},
+    {val:'smile',label:'Sorriso'},{val:'neutral',label:'Neutro'},
+    {val:'smirk',label:'Mezzo sorriso'},{val:'open',label:'Aperta'},
+    {val:'serious',label:'Serio'},{val:'cute',label:'Carino'},
   ],
   skin: [
-    {val:'#fde8c8',label:'Chiarissima'},
-    {val:'#f5d4a0',label:'Chiara'},
-    {val:'#f0c898',label:'Media chiara'},
-    {val:'#d4a060',label:'Media'},
-    {val:'#b07840',label:'Media scura'},
-    {val:'#8a5828',label:'Scura'},
-    {val:'#6a3818',label:'Molto scura'},
-    {val:'#4a2010',label:'Profonda'},
+    {val:'#fde8c8',label:'Chiarissima'},{val:'#f5d4a0',label:'Chiara'},
+    {val:'#f0c898',label:'Media chiara'},{val:'#d4a060',label:'Media'},
+    {val:'#b07840',label:'Media scura'},{val:'#8a5828',label:'Scura'},
+    {val:'#6a3818',label:'Molto scura'},{val:'#4a2010',label:'Profonda'},
   ],
   cloth: [
-    {val:'hoodie',    label:'Felpa'},
-    {val:'kimono',    label:'Kimono'},
-    {val:'jacket',    label:'Giacca'},
-    {val:'uniform',   label:'Uniforme'},
-    {val:'cloak',     label:'Mantello'},
-    {val:'casual',    label:'Casual'},
+    {val:'hoodie',label:'Felpa'},{val:'kimono',label:'Kimono'},
+    {val:'jacket',label:'Giacca'},{val:'uniform',label:'Uniforme'},
+    {val:'cloak',label:'Mantello'},{val:'casual',label:'Casual'},
   ],
   clothColors: [
-    {val:'#1a3a6a',label:'Blu notte'},
-    {val:'#2a4a2a',label:'Verde bosco'},
-    {val:'#5a2a3a',label:'Bordeaux'},
-    {val:'#3a2a5a',label:'Viola'},
-    {val:'#5a3a1a',label:'Marrone'},
-    {val:'#1a1a2a',label:'Nero'},
-    {val:'#6a2a1a',label:'Ruggine'},
-    {val:'#2a4a5a',label:'Petrolio'},
-    {val:'#5a4a2a',label:'Ocra'},
-    {val:'#4a1a4a',label:'Prugna'},
+    {val:'#1a3a6a',label:'Blu notte'},{val:'#2a4a2a',label:'Verde bosco'},
+    {val:'#5a2a3a',label:'Bordeaux'},{val:'#3a2a5a',label:'Viola'},
+    {val:'#5a3a1a',label:'Marrone'},{val:'#1a1a2a',label:'Nero'},
+    {val:'#6a2a1a',label:'Ruggine'},{val:'#2a4a5a',label:'Petrolio'},
+    {val:'#5a4a2a',label:'Ocra'},{val:'#4a1a4a',label:'Prugna'},
   ],
   accessory: [
-    {val:'none',     label:'Nessuno'},
-    {val:'hat',      label:'🎩 Cappello'},
-    {val:'flower',   label:'🌸 Fiore'},
-    {val:'scarf',    label:'🧣 Sciarpa'},
-    {val:'glasses',  label:'👓 Occhiali'},
-    {val:'earring',  label:'💎 Orecchino'},
-    {val:'headband', label:'🎀 Cerchietto'},
+    {val:'none',label:'Nessuno'},{val:'hat',label:'🎩 Cappello'},
+    {val:'flower',label:'🌸 Fiore'},{val:'scarf',label:'🧣 Sciarpa'},
+    {val:'glasses',label:'👓 Occhiali'},{val:'earring',label:'💎 Orecchino'},
+    {val:'headband',label:'🎀 Cerchietto'},
   ],
+
+  // ── IDENTITÀ ──
   personality: [
-    {val:'curious',  label:'🔍 Curioso'},
-    {val:'sunny',    label:'☀️ Solare'},
-    {val:'calm',     label:'🌙 Calmo'},
-    {val:'wise',     label:'📚 Saggio'},
-    {val:'dreamy',   label:'✨ Sognatore'},
-    {val:'wild',     label:'🌿 Libero'},
-    {val:'fierce',   label:'⚡ Determinato'},
-    {val:'gentle',   label:'🌸 Gentile'},
+    // Luce
+    'Solare','Ottimista','Entusiasta','Gioioso','Vivace','Spontaneo','Giocoso','Ironico',
+    // Profondità
+    'Riflessivo','Malinconico','Introspettivo','Sensibile','Intenso','Nostalgico',
+    'Poetico','Misterioso','Silenzioso','Contemplativo','Filosofico','Visionario','Spirituale',
+    // Forza
+    'Determinato','Coraggioso','Resiliente','Tenace','Ambizioso','Indipendente',
+    'Protettivo','Leale','Giusto','Onesto','Diretto','Affidabile',
+    // Relazione
+    'Socievole','Aperto','Accogliente','Timido ma presente','Riservato','Fedele',
+    'Diplomatico','Mediatore','Ascoltatore','Divertente',
+    // Mondo
+    'Curioso','Esploratore','Avventuroso','Osservatore','Analitico','Artistico',
+    'Creativo','Innovatore','Amante della natura','Amante del silenzio',
+    // Cuore
+    'Romantico','Tenero','Affettuoso','Premuroso','Generoso','Altruista','Empatico','Sognatore',
+  ],
+  passions: [
+    // Arte
+    'Disegno','Pittura','Scrittura','Poesia','Musica','Canto','Danza',
+    'Fotografia','Cinema','Animazione','Fumetti','Manga','Illustrazione',
+    'Scultura','Artigianato','Moda','Design',
+    // Storie
+    'Anime','Fantasy','Fantascienza','Horror','Mistero','Mitologia',
+    'Storia','Filosofia','Letteratura','Videogiochi','Giochi di ruolo',
+    // Corpo
+    'Sport','Arti marziali','Yoga','Meditazione','Escursionismo',
+    'Nuoto','Arrampicata','Skateboard','Ciclismo','Parkour',
+    // Mente
+    'Matematica','Scienze','Astronomia','Psicologia','Linguistica',
+    'Lingue straniere','Programmazione','Economia','Sociologia',
+    // Natura
+    'Animali','Piante','Oceano','Montagna','Cucina','Giardinaggio','Ecologia',
+    // Connessione
+    'Viaggi','Culture del mondo','Volontariato','Insegnare','Ascoltare gli altri',
+  ],
+  values: [
+    'Rispetto','Libertà','Famiglia','Amicizia','Giustizia','Creatività',
+    'Coraggio','Onestà','Empatia','Crescita','Spiritualità','Natura',
+    'Comunità','Indipendenza','Amore','Pace','Conoscenza','Autenticità',
+    'Semplicità','Bellezza','Altruismo','Gratitudine',
+  ],
+  lifePhase: [
+    {val:'searching',   icon:'🔍', label:'Sto cercando me stesso'},
+    {val:'selflov',     icon:'💛', label:'Sto imparando a volermi bene'},
+    {val:'healing',     icon:'🌿', label:'Sto superando qualcosa di difficile'},
+    {val:'building',    icon:'🏗️', label:'Sto costruendo qualcosa di nuovo'},
+    {val:'sharing',     icon:'🌸', label:'Sto condividendo ciò che ho imparato'},
+    {val:'living',      icon:'☀️', label:'Sto semplicemente vivendo'},
+    {val:'unknown',     icon:'🌙', label:"Non lo so ancora — e va bene così"},
+  ],
+  socialStyle: [
+    {val:'listen',   icon:'👂', label:'Preferisco ascoltare'},
+    {val:'tell',     icon:'💬', label:'Preferisco raccontare'},
+    {val:'both',     icon:'🔄', label:'Faccio entrambe le cose'},
+    {val:'observe',  icon:'👁️', label:'Osservo prima di avvicinarmi'},
+    {val:'open',     icon:'🤗', label:'Mi avvicino subito'},
+    {val:'slow',     icon:'🐢', label:'Ho bisogno di tempo per fidarmi'},
+  ],
+  gift: [
+    {val:'listen',   icon:'👂', label:'Ascoltare davvero'},
+    {val:'advice',   icon:'💡', label:'Dare consigli'},
+    {val:'create',   icon:'🎨', label:'Creare cose belle'},
+    {val:'teach',    icon:'📚', label:'Spiegare e insegnare'},
+    {val:'laugh',    icon:'😄', label:'Far ridere e sorridere'},
+    {val:'silence',  icon:'🤫', label:'Stare in silenzio accanto'},
+    {val:'stories',  icon:'📖', label:'Raccontare storie'},
+    {val:'motivate', icon:'⚡', label:'Motivare gli altri'},
+    {val:'protect',  icon:'🛡️', label:'Proteggere chi è fragile'},
+    {val:'inspire',  icon:'✨', label:'Ispirare con il proprio esempio'},
+  ],
+  silenceMode: [
+    {val:'walk',     icon:'🚶', label:'Cammino'},
+    {val:'music',    icon:'🎵', label:'Ascolto musica'},
+    {val:'write',    icon:'✍️', label:'Scrivo'},
+    {val:'draw',     icon:'🎨', label:'Disegno'},
+    {val:'sleep',    icon:'😴', label:'Dormo'},
+    {val:'cook',     icon:'🍳', label:'Cucino'},
+    {val:'someone',  icon:'🤝', label:'Sto con qualcuno'},
+    {val:'alone',    icon:'🌿', label:'Sto solo'},
+    {val:'anime',    icon:'🎌', label:'Guardo anime'},
+    {val:'unknown',  icon:'❓', label:"Non lo so ancora"},
+  ],
+  favoriteArea: [
+    {val:'village',  icon:'🏘️', label:'Villaggio — incontri e calore'},
+    {val:'forest',   icon:'🌲', label:'Foresta — solitudine e magia'},
+    {val:'lake',     icon:'🌙', label:'Lago — riflessione e silenzio'},
+    {val:'library',  icon:'📚', label:'Biblioteca — storie e conoscenza'},
+    {val:'hill',     icon:'⭐', label:'Collina — sogni e stelle'},
+    {val:'port',     icon:'⛵', label:'Porto — avventura e scoperta'},
+    {val:'garden',   icon:'🌸', label:'Giardino — pace e bellezza'},
+    {val:'unknown',  icon:'🗺️', label:'Devo ancora scoprirlo'},
   ],
 };
 
 let currentCat = 'name';
 
-// ══ CATEGORIE ══════════════════════════════════
+// ── INIT LEFT PANEL ──
+function initLeftPanel() {
+  const panel = document.getElementById('left-panel');
+  panel.innerHTML = CATS.map(c => {
+    if(c.separator) return `<div class="cat-separator">${c.label}</div>`;
+    return `<div class="category" onclick="selectCat('${c.id}')" id="cat-${c.id}">
+      <span class="cat-icon">${c.icon}</span>
+      <span class="cat-label">${c.label}</span>
+      <span class="cat-check">✓</span>
+    </div>`;
+  }).join('');
+  document.querySelector('#cat-name')?.classList.add('active');
+}
+
 function selectCat(cat) {
+  if(!document.getElementById('cat-'+cat)) return;
   currentCat = cat;
   document.querySelectorAll('.category').forEach(c => c.classList.remove('active'));
   document.getElementById('cat-'+cat)?.classList.add('active');
   renderRightPanel();
+  // Scroll left panel to show active
+  document.getElementById('cat-'+cat)?.scrollIntoView({block:'nearest'});
 }
 
+// ── RENDER RIGHT PANEL ──
 function renderRightPanel() {
   const panel = document.getElementById('right-panel');
   panel.innerHTML = '';
 
-  if(currentCat === 'name') {
-    panel.innerHTML = `
-      <div class="opt-section-title">NOME DEL PERSONAGGIO</div>
-      <input class="name-input" id="name-inp" type="text" maxlength="16"
-        placeholder="Come ti chiamerai?" value="${AV.name}"
-        oninput="AV.name=this.value;updatePreview()">
-      <div style="font-family:var(--serif);font-size:11px;color:rgba(245,234,208,.3);letter-spacing:.1em;line-height:1.6;">
-        Scegli un nome unico per il tuo personaggio.<br>Sarà visibile agli altri abitanti di Sekai.
-      </div>`;
-    return;
-  }
+  switch(currentCat) {
 
-  if(currentCat === 'hair') {
-    addSection(panel, 'FORMA', OPTS.hair, 'hair');
-    addSection(panel, 'COLORE', null, 'hairColor', OPTS.hairColors);
-    return;
-  }
-  if(currentCat === 'eyes') {
-    addSection(panel, 'FORMA', OPTS.eyes, 'eyes');
-    addSection(panel, 'COLORE', null, 'eyeColor', OPTS.eyeColors);
-    return;
-  }
-  if(currentCat === 'skin') {
-    addSection(panel, 'CARNAGIONE', null, 'skin', OPTS.skin);
-    return;
-  }
-  if(currentCat === 'cloth') {
-    addSection(panel, 'STILE', OPTS.cloth, 'cloth');
-    addSection(panel, 'COLORE', null, 'clothColor', OPTS.clothColors);
-    return;
-  }
+    case 'name':
+      panel.innerHTML = `
+        <div class="opt-section-title">✦ NOME DEL PERSONAGGIO</div>
+        <p class="section-note">Non è il tuo nome reale — è chi sei in Sekai.</p>
+        <input class="name-input" id="name-inp" type="text" maxlength="20"
+          placeholder="Come ti chiamerai?" value="${AV.name}"
+          oninput="AV.name=this.value;updatePreview();markDone('name')">
+      `;
+      break;
 
-  const map = {
-    gender:'gender', face:'face', brows:'brows',
-    nose:'nose', mouth:'mouth', accessory:'accessory', personality:'personality',
-  };
-  const key = map[currentCat];
-  if(key) addSection(panel, currentCat.toUpperCase(), OPTS[key], key);
+    case 'gender':
+      addOptButtons(panel, 'GENERE', OPTS.gender, 'gender');
+      break;
+
+    case 'face':
+      addOptButtons(panel, 'FORMA DEL VISO', OPTS.face, 'face');
+      break;
+
+    case 'hair':
+      addOptButtons(panel, 'FORMA CAPELLI', OPTS.hair, 'hair');
+      addColors(panel, 'COLORE', OPTS.hairColors, 'hairColor');
+      break;
+
+    case 'eyes':
+      addOptButtons(panel, 'FORMA OCCHI', OPTS.eyes, 'eyes');
+      addColors(panel, 'COLORE', OPTS.eyeColors, 'eyeColor');
+      break;
+
+    case 'brows':
+      addOptButtons(panel, 'SOPRACCIGLIA', OPTS.brows, 'brows');
+      break;
+
+    case 'nose':
+      addOptButtons(panel, 'NASO', OPTS.nose, 'nose');
+      break;
+
+    case 'mouth':
+      addOptButtons(panel, 'BOCCA', OPTS.mouth, 'mouth');
+      break;
+
+    case 'skin':
+      addColors(panel, 'CARNAGIONE', OPTS.skin, 'skin');
+      break;
+
+    case 'cloth':
+      addOptButtons(panel, 'STILE', OPTS.cloth, 'cloth');
+      addColors(panel, 'COLORE', OPTS.clothColors, 'clothColor');
+      break;
+
+    case 'accessory':
+      addOptButtons(panel, 'ACCESSORIO', OPTS.accessory, 'accessory');
+      break;
+
+    // ── IDENTITÀ ──
+
+    case 'personality':
+      addTagCloud(panel,
+        '🌿 PERSONALITÀ',
+        'Scegli fino a 5 parole che ti descrivono. Puoi anche scriverne di tue.',
+        OPTS.personality, 'personality', 5, true
+      );
+      break;
+
+    case 'passions':
+      addTagCloud(panel,
+        '🔥 PASSIONI',
+        'Cosa ti accende davvero? Scegli fino a 5 o scrivi le tue.',
+        OPTS.passions, 'passions', 5, true
+      );
+      break;
+
+    case 'values':
+      addTagCloud(panel,
+        '⭐ VALORI',
+        'Massimo 3. Sono le tue radici — non cambiano spesso.',
+        OPTS.values, 'values', 3, false
+      );
+      break;
+
+    case 'lifephase':
+      addMoodCards(panel,
+        '🌱 DOVE SEI ADESSO',
+        'Un solo momento. Cambia nel tempo — puoi aggiornarlo quando vuoi.',
+        OPTS.lifePhase, 'lifePhase'
+      );
+      break;
+
+    case 'social':
+      addMoodCards(panel,
+        '🤝 CON GLI ALTRI',
+        'Come ti relazioni naturalmente con le persone?',
+        OPTS.socialStyle, 'socialStyle'
+      );
+      break;
+
+    case 'gift':
+      addMoodCards(panel,
+        '🎁 IL TUO DONO',
+        'Cosa sai offrire agli altri? Non un talento da esibire — un dono da condividere.',
+        OPTS.gift, 'gift'
+      );
+      break;
+
+    case 'silence':
+      addMoodCards(panel,
+        '🌙 NEL SILENZIO',
+        'Quando hai bisogno di stare bene, cosa fai?',
+        OPTS.silenceMode, 'silenceMode'
+      );
+      break;
+
+    case 'area':
+      addMoodCards(panel,
+        '🗺️ IL TUO POSTO IN SEKAI',
+        'Quale area senti più tua in questo momento?',
+        OPTS.favoriteArea, 'favoriteArea'
+      );
+      break;
+
+    case 'freetext':
+      panel.innerHTML = `
+        <div class="opt-section-title">✍️ IN PAROLE TUE</div>
+        <p class="section-note">Tutto facoltativo. Le tue parole, non le nostre etichette.</p>
+
+        <div class="opt-section-title" style="font-size:10px;margin-top:8px;">UNA COSA CHE AMI PROFONDAMENTE</div>
+        <textarea class="free-text-area" placeholder="Può essere una persona, un posto, una canzone, un momento..." maxlength="300"
+          oninput="AV.loveText=this.value;markDone('freetext')">${AV.loveText}</textarea>
+
+        <div class="opt-section-title" style="font-size:10px;margin-top:4px;">UNA COSA CHE STAI IMPARANDO SU TE STESSO</div>
+        <textarea class="free-text-area" placeholder="Anche solo un pensiero, anche incompleto..." maxlength="300"
+          oninput="AV.learningText=this.value">${AV.learningText}</textarea>
+
+        <div class="opt-section-title" style="font-size:10px;margin-top:4px;">UNA COSA CHE VORRESTI CHE GLI ALTRI CAPISSERO DI TE</div>
+        <textarea class="free-text-area" placeholder="Quello che di solito non riesci a dire..." maxlength="300"
+          oninput="AV.understandText=this.value">${AV.understandText}</textarea>
+      `;
+      break;
+
+    case 'private':
+      panel.innerHTML = `
+        <div class="opt-section-title">🔒 SOLO PER TE</div>
+        <p class="section-note">Questi campi non saranno mai visibili ad altri. Sono un diario privato — solo per aiutarti a conoscerti meglio.</p>
+
+        <div class="private-badge">🔒 Visibile solo a te</div>
+        <div class="opt-section-title" style="font-size:10px;margin-top:4px;">IL TUO SOGNO</div>
+        <textarea class="free-text-area" placeholder="Quello che tieni nel cassetto. Anche se sembra impossibile..." maxlength="500"
+          oninput="AV.dreamText=this.value;markDone('private')">${AV.dreamText}</textarea>
+
+        <div class="private-badge" style="margin-top:8px;">🔒 Visibile solo a te</div>
+        <div class="opt-section-title" style="font-size:10px;margin-top:4px;">LA TUA FORZA</div>
+        <textarea class="free-text-area" placeholder="Qual è la cosa che ti ha reso più forte? Cosa hai superato che non avresti creduto possibile?" maxlength="500"
+          oninput="AV.strengthText=this.value">${AV.strengthText}</textarea>
+
+        <p class="section-note" style="margin-top:8px;">💛 Riconoscere la propria forza è il primo passo per aiutare gli altri a trovare la loro.</p>
+      `;
+      break;
+
+    default:
+      panel.innerHTML = '<div class="section-note">Seleziona una categoria.</div>';
+  }
 }
 
-function addSection(panel, title, opts, key, colorOpts) {
-  const titleEl = document.createElement('div');
-  titleEl.className = 'opt-section-title';
-  titleEl.textContent = title;
-  panel.appendChild(titleEl);
+// ── HELPERS ──
+function addOptButtons(panel, title, opts, key) {
+  const t = document.createElement('div');
+  t.className='opt-section-title'; t.textContent=title;
+  panel.appendChild(t);
+  const g = document.createElement('div');
+  g.className='opt-grid';
+  opts.forEach(o => {
+    const b = document.createElement('div');
+    b.className='opt-btn'+(AV[key]===o.val?' sel':'');
+    b.textContent=o.label;
+    b.onclick=()=>{ AV[key]=o.val; renderRightPanel(); updatePreview(); markDone(currentCat); };
+    g.appendChild(b);
+  });
+  panel.appendChild(g);
+}
 
-  if(colorOpts) {
-    const grid = document.createElement('div');
-    grid.className = 'color-grid';
-    colorOpts.forEach(o => {
-      const sw = document.createElement('div');
-      sw.className = 'color-swatch' + (AV[key]===o.val?' sel':'');
-      sw.style.background = o.val;
-      sw.title = o.label;
-      if(o.val==='#fde8c8'||o.val==='#e8e0d8') sw.style.border='2px solid rgba(255,255,255,.2)';
-      sw.onclick = () => { AV[key]=o.val; renderRightPanel(); updatePreview(); markDone(currentCat); };
-      grid.appendChild(sw);
-    });
-    panel.appendChild(grid);
-  } else {
-    const grid = document.createElement('div');
-    grid.className = 'opt-grid';
-    opts.forEach(o => {
-      const btn = document.createElement('div');
-      btn.className = 'opt-btn' + (AV[key]===o.val?' sel':'');
-      btn.textContent = o.label;
-      btn.onclick = () => { AV[key]=o.val; renderRightPanel(); updatePreview(); markDone(currentCat); };
-      grid.appendChild(btn);
-    });
-    panel.appendChild(grid);
+function addColors(panel, title, opts, key) {
+  const t = document.createElement('div');
+  t.className='opt-section-title'; t.textContent=title;
+  panel.appendChild(t);
+  const g = document.createElement('div');
+  g.className='color-grid';
+  opts.forEach(o => {
+    const s = document.createElement('div');
+    s.className='color-swatch'+(AV[key]===o.val?' sel':'');
+    s.style.background=o.val; s.title=o.label;
+    if(o.val==='#fde8c8'||o.val==='#e8e0d8') s.style.border='2px solid rgba(255,255,255,.2)';
+    s.onclick=()=>{ AV[key]=o.val; renderRightPanel(); updatePreview(); markDone(currentCat); };
+    g.appendChild(s);
+  });
+  panel.appendChild(g);
+}
+
+function addTagCloud(panel, title, note, tags, key, max, allowCustom) {
+  const t = document.createElement('div');
+  t.className='opt-section-title'; t.textContent=title;
+  panel.appendChild(t);
+  const n = document.createElement('p');
+  n.className='section-note'; n.textContent=note;
+  panel.appendChild(n);
+
+  const counter = document.createElement('div');
+  counter.className='counter-badge';
+  counter.id='counter-'+key;
+  counter.textContent=(AV[key]||[]).length+'/'+max+' selezionati';
+  panel.appendChild(counter);
+
+  const cloud = document.createElement('div');
+  cloud.className='tag-cloud';
+
+  tags.forEach(tag => {
+    const el = document.createElement('div');
+    el.className='tag'+((AV[key]||[]).includes(tag)?' sel':'');
+    el.textContent=tag;
+    el.onclick=()=>{
+      const arr = AV[key]||[];
+      const idx = arr.indexOf(tag);
+      if(idx>-1) { arr.splice(idx,1); }
+      else if(arr.length<max) { arr.push(tag); }
+      AV[key]=arr;
+      markDone(currentCat);
+      renderRightPanel();
+      updatePreview();
+    };
+    cloud.appendChild(el);
+  });
+  panel.appendChild(cloud);
+
+  if(allowCustom) {
+    const sep = document.createElement('div');
+    sep.className='opt-section-title';
+    sep.style.marginTop='12px';
+    sep.textContent='OPPURE SCRIVINE UNA TUA';
+    panel.appendChild(sep);
+    const row = document.createElement('div');
+    row.style.cssText='display:flex;gap:8px;';
+    const inp = document.createElement('input');
+    inp.className='name-input';
+    inp.placeholder='Scrivi una parola che ti descrive...';
+    inp.style.flex='1';
+    const btn = document.createElement('button');
+    btn.className='opt-btn';
+    btn.textContent='+ Aggiungi';
+    btn.style.cssText='border-color:rgba(212,168,83,.4);color:var(--gold);white-space:nowrap;';
+    btn.onclick=()=>{
+      const val=inp.value.trim();
+      if(!val) return;
+      const arr=AV[key]||[];
+      if(arr.length>=max) return;
+      if(!arr.includes(val)) { arr.push(val); AV[key]=arr; }
+      inp.value='';
+      markDone(currentCat);
+      renderRightPanel();
+      updatePreview();
+    };
+    row.appendChild(inp); row.appendChild(btn);
+    panel.appendChild(row);
   }
+}
+
+function addMoodCards(panel, title, note, opts, key) {
+  const t = document.createElement('div');
+  t.className='opt-section-title'; t.textContent=title;
+  panel.appendChild(t);
+  const n = document.createElement('p');
+  n.className='section-note'; n.textContent=note;
+  panel.appendChild(n);
+  const grid = document.createElement('div');
+  grid.className='mood-grid';
+  opts.forEach(o => {
+    const card = document.createElement('div');
+    card.className='mood-card'+(AV[key]===o.val?' sel':'');
+    card.innerHTML=`<span class="mood-icon">${o.icon}</span>${o.label}`;
+    card.onclick=()=>{ AV[key]=o.val; markDone(currentCat); renderRightPanel(); updatePreview(); };
+    grid.appendChild(card);
+  });
+  panel.appendChild(grid);
 }
 
 function markDone(cat) {
@@ -552,19 +834,118 @@ function markDone(cat) {
 }
 
 function updateCompletion() {
-  const cats = ['name','gender','face','hair','eyes','brows','nose','mouth','skin','cloth','accessory','personality'];
-  const done = cats.filter(c => document.getElementById('cat-'+c)?.classList.contains('done')).length;
-  const pct = Math.round((done/cats.length)*100);
-  document.getElementById('completion-pct').textContent = pct+'% completato';
+  const required = ['name','gender','hair','eyes','skin','personality'];
+  const all = CATS.filter(c=>!c.separator).map(c=>c.id);
+  const done = all.filter(c => document.getElementById('cat-'+c)?.classList.contains('done')).length;
+  const reqDone = required.filter(c => document.getElementById('cat-'+c)?.classList.contains('done')).length;
+  const pct = Math.round((done/all.length)*100);
+  const el = document.getElementById('completion-pct');
+  if(reqDone===required.length) {
+    el.textContent = pct+'% completato ✦';
+    el.style.color='rgba(212,168,83,.8)';
+  } else {
+    el.textContent = pct+'% — continua a scoprirti';
+  }
 }
 
-// ══ SVG AVATAR ═════════════════════════════════
 function updatePreview() {
   const svg = document.getElementById('avatar-svg');
-  svg.innerHTML = buildAvatarSVG(AV, 260, 340);
-  document.getElementById('preview-name').textContent = AV.name || '—';
-  document.getElementById('preview-code').textContent = buildCode();
+  if(svg) svg.innerHTML = buildAvatarSVG(AV, 260, 340);
+  const nameEl = document.getElementById('preview-name');
+  if(nameEl) nameEl.textContent = AV.name || '—';
+  const subEl = document.getElementById('preview-sub');
+  if(subEl) {
+    const tags = (AV.personality||[]).slice(0,2).join(' · ');
+    subEl.textContent = tags || '';
+    subEl.style.cssText='font-family:var(--serif);font-style:italic;font-size:11px;color:rgba(212,168,83,.5);letter-spacing:.1em;margin-top:4px;text-align:center;';
+  }
+  const codeEl = document.getElementById('preview-code');
+  if(codeEl) codeEl.textContent = buildCode();
 }
+
+function buildCode() {
+  const d = AV;
+  return 'SK-'+[
+    d.gender?.[0]?.toUpperCase()||'N',
+    d.face?.[0]?.toUpperCase()||'O',
+    d.hair?.[0]?.toUpperCase()||'W',
+    d.hairColor?.slice(1,4)?.toUpperCase()||'000',
+    d.eyes?.[0]?.toUpperCase()||'R',
+    d.eyeColor?.slice(1,4)?.toUpperCase()||'000',
+    d.skin?.slice(1,4)?.toUpperCase()||'F0C',
+    d.cloth?.[0]?.toUpperCase()||'H',
+    d.clothColor?.slice(1,4)?.toUpperCase()||'000',
+    d.accessory?.[0]?.toUpperCase()||'N',
+    (d.personality||[]).map(p=>p?.[0]).join('').slice(0,4)||'X',
+    (d.values||[]).map(v=>v?.[0]).join('').slice(0,3)||'Y',
+  ].join('-');
+}
+
+function randomize() {
+  const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+  const pickVal = arr => pick(arr).val||pick(arr);
+  AV.gender      = pickVal(OPTS.gender);
+  AV.face        = pickVal(OPTS.face);
+  AV.hair        = pickVal(OPTS.hair);
+  AV.hairColor   = pickVal(OPTS.hairColors);
+  AV.eyes        = pickVal(OPTS.eyes);
+  AV.eyeColor    = pickVal(OPTS.eyeColors);
+  AV.brows       = pickVal(OPTS.brows);
+  AV.nose        = pickVal(OPTS.nose);
+  AV.mouth       = pickVal(OPTS.mouth);
+  AV.skin        = pickVal(OPTS.skin);
+  AV.cloth       = pickVal(OPTS.cloth);
+  AV.clothColor  = pickVal(OPTS.clothColors);
+  AV.accessory   = pickVal(OPTS.accessory);
+  // Identità random
+  const shuffleArr = arr => [...arr].sort(()=>Math.random()-.5);
+  AV.personality = shuffleArr(OPTS.personality).slice(0,3);
+  AV.passions    = shuffleArr(OPTS.passions).slice(0,3);
+  AV.values      = shuffleArr(OPTS.values).slice(0,2);
+  AV.lifePhase   = pickVal(OPTS.lifePhase);
+  AV.socialStyle = pickVal(OPTS.socialStyle);
+  AV.gift        = pickVal(OPTS.gift);
+  AV.silenceMode = pickVal(OPTS.silenceMode);
+  AV.favoriteArea= pickVal(OPTS.favoriteArea);
+  CATS.filter(c=>!c.separator).forEach(c=>document.getElementById('cat-'+c.id)?.classList.add('done'));
+  updateCompletion();
+  renderRightPanel();
+  updatePreview();
+}
+
+function saveAvatar() {
+  if(!AV.name.trim()) {
+    selectCat('name');
+    const inp = document.getElementById('name-inp');
+    if(inp) { inp.style.borderColor='rgba(200,80,80,.7)'; inp.focus(); }
+    return;
+  }
+  const saved = { ...AV, code: buildCode(), savedAt: new Date().toISOString() };
+  localStorage.setItem('sekai_avatar_preview', JSON.stringify(saved));
+  if(window.onAvatarSaved) window.onAvatarSaved(saved);
+  else alert('Personaggio salvato!\nCodice: '+saved.code);
+}
+
+// ── CSS EXTRA LEFT PANEL ──
+const extraStyle = document.createElement('style');
+extraStyle.textContent = `
+  .cat-separator {
+    padding:10px 20px 6px;
+    font-family:var(--serif);font-size:9px;
+    color:rgba(212,168,83,.35);letter-spacing:.25em;
+    border-top:1px solid rgba(255,255,255,.04);
+    margin-top:4px;cursor:default;
+  }
+  #preview-sub { min-height:16px; }
+`;
+document.head.appendChild(extraStyle);
+
+// ── INIT ──
+window.addEventListener('DOMContentLoaded', () => {
+  initLeftPanel();
+  selectCat('name');
+  updatePreview();
+});
 
 function buildAvatarSVG(d, W, H) {
   const cx = W/2, cy = H*0.44;
@@ -704,7 +1085,7 @@ function buildBody(d, cx, cy, faceH, cloth, clothL, skin) {
       <!-- Colletto bianco -->
       <path d="M${cx-20},${bodyY-10} L${cx},${bodyY+20} L${cx+20},${bodyY-10}" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="3.5"/>
       <!-- Bottoni -->
-      ${[0,22,44,66].map(y=>`<circle cx="${cx}" cy="${bodyY+${y}}" r="3" fill="rgba(255,255,255,0.6)"/>`).join('')}
+      <circle cx='${cx}' cy='${bodyY}' r='3' fill='rgba(255,255,255,0.6)'/><circle cx='${cx}' cy='${bodyY+22}' r='3' fill='rgba(255,255,255,0.6)'/><circle cx='${cx}' cy='${bodyY+44}' r='3' fill='rgba(255,255,255,0.6)'/><circle cx='${cx}' cy='${bodyY+66}' r='3' fill='rgba(255,255,255,0.6)'/>
       <!-- Maniche -->
       <path d="M${cx-58},${bodyY} Q${cx-82},${bodyY+35} ${cx-78},${bodyY+88} L${cx-55},${bodyY+92} Q${cx-56},${bodyY+40} ${cx-44},${bodyY+18}" fill="${c}"/>
       <path d="M${cx+58},${bodyY} Q${cx+82},${bodyY+35} ${cx+78},${bodyY+88} L${cx+55},${bodyY+92} Q${cx+56},${bodyY+40} ${cx+44},${bodyY+18}" fill="${c}"/>
@@ -1137,26 +1518,8 @@ function randomize() {
 }
 
 // ── SALVA ──────────────────────────────────────
-function saveAvatar() {
-  if(!AV.name.trim()) {
-    selectCat('name');
-    document.querySelector('.name-input')?.focus();
-    document.querySelector('.name-input')?.style && (document.querySelector('.name-input').style.borderColor='rgba(200,80,80,.7)');
-    return;
-  }
-  const code = buildCode();
-  const saved = { ...AV, code, savedAt: new Date().toISOString() };
-  // In Sekai: invia al backend. Qui: localStorage + callback
-  localStorage.setItem('sekai_avatar_preview', JSON.stringify(saved));
-  if(window.onAvatarSaved) window.onAvatarSaved(saved);
-  else alert('Avatar salvato!\nCodice univoco: ' + code);
-}
 
-// ── INIT ───────────────────────────────────────
-window.addEventListener('DOMContentLoaded', () => {
-  selectCat('name');
-  updatePreview();
-});
+
 </script>
 </body>
 </html>
