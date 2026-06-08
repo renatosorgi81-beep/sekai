@@ -1570,52 +1570,30 @@ function goArea(id) {
 }
 
 function launchAreaPage(page) {
-  // Nascondi subito intro (z-index 1000 coprirebbe l'iframe)
+  // 1. Nascondi tutto ciò che potrebbe stare sopra
   const intro = document.getElementById('intro');
-  if(intro) {
-    intro.style.display = 'none';
-  }
+  if(intro) intro.style.display = 'none';
 
-  // Crea o riutilizza iframe con z-index sopra tutto
-  let areaFrame = document.getElementById('area-frame');
-  if(!areaFrame) {
-    areaFrame = document.createElement('iframe');
-    areaFrame.id = 'area-frame';
-    areaFrame.style.cssText = [
-      'position:fixed',
-      'inset:0',
-      'width:100%',
-      'height:100%',
-      'border:none',
-      'z-index:2000',
-      'background:#0a0a0a',
-    ].join(';');
-    document.body.appendChild(areaFrame);
-  }
-  areaFrame.style.display = 'block';
-  areaFrame.src = page + '?t=' + Date.now();
+  const mapUi = document.getElementById('map-ui');
+  if(mapUi) mapUi.style.display = 'none';
 
-  // Rimuovi handler precedente se esiste
-  if(window._areaHandler) {
-    window.removeEventListener('message', window._areaHandler);
-  }
+  // 2. Mostra iframe già presente nel DOM
+  const fr = document.getElementById('area-frame');
+  if(!fr) { console.error('area-frame not found'); return; }
 
-  // Ascolta messaggi dall'area
+  fr.style.display = 'block';
+  fr.src = page + '?v=' + Date.now();
+
+  // 3. Handler messaggi
+  if(window._areaHandler) window.removeEventListener('message', window._areaHandler);
   window._areaHandler = function(e) {
     if(e.data?.type === 'BACK_TO_MAP') {
-      areaFrame.style.display = 'none';
-      areaFrame.src = '';
-      // Ripristina intro con mappa
-      const intr = document.getElementById('intro');
-      if(intr) {
-        intr.style.display = 'block';
-        intr.style.opacity = '1';
-      }
+      fr.style.display = 'none';
+      fr.src = 'about:blank';
+      if(intro) { intro.style.display = 'block'; intro.style.opacity = '1'; }
       showMapUI();
     }
-    if(e.data?.type === 'OPEN_PROFILE') {
-      openProfileFromMap();
-    }
+    if(e.data?.type === 'OPEN_PROFILE') openProfileFromMap();
   };
   window.addEventListener('message', window._areaHandler);
 }
@@ -3327,5 +3305,12 @@ function returnToIntroUI() {
   </div>
 </div>
 
+
+<!-- AREA IFRAME — nascosto, attivato da launchAreaPage -->
+<iframe id="area-frame"
+  src=""
+  style="position:fixed;inset:0;width:100%;height:100%;border:none;z-index:2000;display:none;background:#0d0a18;"
+  allow="autoplay">
+</iframe>
 </body>
 </html>
