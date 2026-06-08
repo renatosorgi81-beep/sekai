@@ -1542,11 +1542,41 @@ function goArea(id) {
 
   // Aree con pagina dedicata
   if(id === 'village') {
-    launchAreaPage('village.html');
+    launchVillage();
     return;
   }
   // Altre aree — mondo canvas esistente
   launchWorld();
+}
+
+
+function launchVillage() {
+  // Nascondi tutto
+  ['intro','map-ui','welcome-screen','avatar-screen','reg-screen'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.style.display = 'none';
+  });
+
+  const fr = document.getElementById('area-frame');
+  if(!fr) { console.error('NO AREA-FRAME'); return; }
+
+  // TEST: usa srcdoc per eliminare problemi di caricamento file
+  fr.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;border:none;z-index:9999;display:block;background:red;';
+  fr.removeAttribute('src');
+  fr.srcdoc = `<!DOCTYPE html><html><head><style>body{margin:0;background:#0d0a18;display:flex;align-items:center;justify-content:center;flex-direction:column;height:100vh;font-family:serif;color:#d4a853;}</style></head><body><div style="font-size:60px">世界</div><p style="font-size:20px;letter-spacing:.3em;margin-top:20px;">VILLAGGIO</p><p style="font-size:14px;opacity:.5;margin-top:10px;">Iframe funziona</p><button onclick="window.parent.postMessage({type:'BACK_TO_MAP'},'*')" style="margin-top:30px;padding:12px 28px;background:rgba(212,168,83,.15);border:1px solid rgba(212,168,83,.4);color:#d4a853;font-family:serif;font-size:14px;cursor:pointer;border-radius:3px;">← Torna alla mappa</button></body></html>`;
+
+  if(window._areaHandler) window.removeEventListener('message', window._areaHandler);
+  window._areaHandler = function(e) {
+    if(e.data?.type === 'BACK_TO_MAP') {
+      fr.style.display = 'none';
+      fr.srcdoc = '';
+      const intro = document.getElementById('intro');
+      if(intro) { intro.style.display = 'block'; intro.style.opacity = '1'; }
+      showMapUI();
+    }
+  };
+  window.addEventListener('message', window._areaHandler);
+  console.log('launchVillage called, iframe srcdoc set');
 }
 
 function launchAreaPage(page) {
