@@ -2666,27 +2666,33 @@ function showAvatarScreen() {
     if (e.data && e.data.type === 'AVATAR_SAVED') {
       const saved = e.data.avatar;
       if(e.data.svgString) saved.svgString = e.data.svgString;
+
       if (currentUser) {
-        // Salva avatar in Supabase
-        // avatar saved via postMessage handler
-        if(!result.error) {
-          currentUser.avatar = saved;
-          currentUser.has_avatar = true;
-          currentUser.avatarSVG = saved.svgString || '';
-          localStorage.setItem('sekai_session', JSON.stringify(currentUser));
-        }
+        currentUser.avatar = saved;
+        currentUser.has_avatar = true;
+        // Salva su Supabase in background
+        SekaiDB.saveAvatar(currentUser.id, saved)
+          .then(() => {
+            console.log('Avatar salvato su Supabase');
+          })
+          .catch(err => {
+            console.warn('Supabase non disponibile, salvataggio locale:', err);
+          });
+        // Salva sempre in sessione locale
+        SekaiDB.saveSession(currentUser);
       }
+      window.removeEventListener('message', window._avatarSavedHandler);
       hideAvatarScreen();
       showWelcomeScreen();
-      window.removeEventListener('message', window._avatarSavedHandler);
     }
+
     if (e.data && e.data.type === 'AVATAR_CLOSE') {
+      window.removeEventListener('message', window._avatarSavedHandler);
       hideAvatarScreen();
       returnToIntroUI();
-      window.removeEventListener('message', window._avatarSavedHandler);
     }
   };
-  window.addEventListener('message', window._avatarSavedHandler);
+window.addEventListener('message', window._avatarSavedHandler);
 }
 
 function hideAvatarScreen() {
