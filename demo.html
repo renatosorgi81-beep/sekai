@@ -5,7 +5,1468 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>Sekai — 世界</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Zen+Kaku+Gothic+New:wght@300;400&display=swap" rel="stylesheet">
+<style>
+
+
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Zen+Kaku+Gothic+New:wght@300;400&display=swap');
+:root{--serif:'Cormorant Garamond',serif;--jp:'Zen Kaku Gothic New',sans-serif;--gold:#d4a853;--cream:#f5ead0;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
+
+/* ══ VIDEO ══ */
+#intro{position:fixed;inset:0;z-index:1000;transition:opacity 2.5s ease;}
+#bg-video{position:absolute;top:-4%;left:-4%;width:108%;height:108%;object-fit:cover;z-index:0;filter:blur(1px) saturate(1.4) contrast(1.08) brightness(1.05);transform:scale(1.06);}
+#intro-overlay{position:absolute;inset:0;z-index:1;background:radial-gradient(ellipse 90% 80% at 50% 50%,rgba(0,0,0,.05) 0%,rgba(0,0,0,.12) 55%,rgba(0,0,0,.55) 100%);}
+
+
+/* ══ FRASI ROTANTI ══ */
+#phrase-box {
+  min-height: 52px;
+  display:flex;align-items:center;justify-content:center;
+  max-width:520px;padding:0 24px;
+}
+#phrase-text {
+  font-family:var(--serif);
+  font-style:italic;
+  font-size:clamp(13px,1.6vw,17px);
+  color:rgba(255,255,255,.62);
+  letter-spacing:.12em;
+  text-align:center;
+  line-height:1.7;
+  text-shadow:0 1px 8px rgba(0,0,0,.5);
+  opacity:0;
+  transition:opacity 1.2s ease;
+}
+#phrase-text.visible { opacity:1; }
+
+/* ══ INTRO UI ══ */
+#intro-ui {
+  position:absolute;inset:0;z-index:10;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:32px;
+  transition:opacity 0.6s ease;
+}
+
+#intro-logo { text-align:center; display:flex; flex-direction:column; align-items:center; gap:10px; }
+
+.logo-jp {
+  font-family:var(--jp);font-weight:300;
+  font-size:clamp(64px,12vw,120px);
+  color:rgba(255,255,255,.94);
+  letter-spacing:.5em;text-indent:.5em;
+  text-shadow:0 2px 20px rgba(0,0,0,.35);
+  animation:fadeUp 1.8s ease both;
+}
+.logo-sub {
+  font-family:var(--serif);font-weight:300;
+  font-size:clamp(10px,1.3vw,15px);
+  color:rgba(255,255,255,.45);
+  letter-spacing:.85em;text-indent:.85em;
+  animation:fadeUp 1.8s .2s ease both;
+}
+.logo-tag {
+  font-family:var(--serif);font-style:italic;
+  font-size:clamp(12px,1.4vw,16px);
+  color:rgba(255,255,255,.45);
+  letter-spacing:.15em;margin-top:4px;
+  animation:fadeUp 1.8s .4s ease both;
+}
+
+#start-btn {
+  background:transparent;border:none;
+  border-bottom:1px solid rgba(255,255,255,.28);
+  padding:6px 2px;
+  color:rgba(255,255,255,.5);
+  font-family:var(--serif);font-style:italic;
+  font-size:clamp(12px,1.3vw,15px);
+  letter-spacing:.35em;
+  cursor:pointer;
+  transition:all .4s ease;
+  animation:fadeUp 1.8s .7s ease both;
+}
+#start-btn:hover {
+  color:rgba(255,255,255,.88);
+  border-bottom-color:rgba(255,255,255,.65);
+  letter-spacing:.45em;
+}
+
+/* ══ MAPPA AREE ══ */
+#map-ui-title {
+  font-family:var(--serif);font-style:italic;
+  font-size:clamp(15px,2vw,21px);
+  color:rgba(255,255,255,.7);
+  letter-spacing:.25em;
+  text-shadow:0 1px 8px rgba(0,0,0,.5);
+}
+#map-icons {
+  display:flex;flex-wrap:wrap;
+  justify-content:center;
+  gap:16px;max-width:580px;padding:0 20px;
+}
+.hs {
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  cursor:pointer;
+  transition:transform .25s ease;
+}
+.hs:hover { transform:translateY(-4px); }
+.hs-dot {
+  width:60px;height:60px;
+  background:rgba(255,255,255,.13);
+  border:1.5px solid rgba(255,255,255,.4);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;
+  backdrop-filter:blur(8px);
+  box-shadow:0 4px 16px rgba(0,0,0,.2);
+  transition:all .3s;
+  animation:ring 3s ease-out infinite;
+}
+.hs:nth-child(2) .hs-dot{animation-delay:.4s}
+.hs:nth-child(3) .hs-dot{animation-delay:.8s}
+.hs:nth-child(4) .hs-dot{animation-delay:1.2s}
+.hs:nth-child(5) .hs-dot{animation-delay:1.6s}
+.hs:nth-child(6) .hs-dot{animation-delay:2.0s}
+.hs:nth-child(7) .hs-dot{animation-delay:2.4s}
+@keyframes ring {
+  0%,70%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.3);}
+  35%{box-shadow:0 0 0 10px rgba(255,255,255,0);}
+}
+.hs:hover .hs-dot {
+  background:rgba(255,255,255,.28);
+  border-color:rgba(255,255,255,.85);
+}
+.hs-lbl {
+  font-family:var(--serif);font-style:italic;
+  font-size:11px;color:rgba(255,255,255,.65);
+  letter-spacing:.1em;text-align:center;
+  max-width:70px;line-height:1.3;
+}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+@keyframes hsIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+
+
+
+
+/* ══ PULSANTE CHIUDI UNIVERSALE ══ */
+.screen-close-btn {
+  position:absolute;top:14px;right:14px;z-index:10;
+  background:transparent;border:none;
+  color:rgba(245,234,208,.3);font-size:18px;
+  cursor:pointer;padding:6px 10px;
+  border-radius:50%;transition:all .3s;
+  line-height:1;
+}
+.screen-close-btn:hover {
+  color:rgba(245,234,208,.85);
+  background:rgba(255,255,255,.06);
+}
+
+/* ══ WELCOME SCREEN ══ */
+#welcome-screen {
+  position:fixed;inset:0;z-index:850;
+  display:flex;align-items:center;justify-content:center;
+  padding:20px;
+}
+#wc-bg {
+  position:absolute;inset:0;
+  background:rgba(8,6,18,.94);
+  backdrop-filter:blur(20px);
+}
+#wc-box {
+  position:relative;z-index:1;
+  display:flex;flex-direction:column;align-items:center;
+  gap:20px;text-align:center;
+  max-width:340px;width:100%;
+  animation:fadeUp .8s ease both;
+}
+#wc-top { display:flex;flex-direction:column;gap:6px; }
+#wc-greeting {
+  font-family:var(--serif);font-style:italic;
+  font-size:14px;color:rgba(245,234,208,.45);
+  letter-spacing:.25em;
+}
+#wc-charname {
+  font-family:var(--jp);font-size:32px;font-weight:300;
+  color:var(--gold);letter-spacing:.3em;
+  text-shadow:0 0 30px rgba(212,168,83,.4);
+}
+#wc-personality {
+  font-family:var(--serif);font-style:italic;
+  font-size:13px;color:rgba(245,234,208,.4);
+  letter-spacing:.15em;
+}
+
+/* Avatar preview */
+#wc-avatar-wrap {
+  position:relative;
+  display:flex;align-items:center;justify-content:center;
+}
+#wc-canvas {
+  border-radius:8px;
+  filter:drop-shadow(0 8px 32px rgba(0,0,0,.6));
+  position:relative;z-index:1;
+}
+#wc-glow {
+  position:absolute;
+  width:180px;height:180px;
+  background:radial-gradient(circle,rgba(212,168,83,.15) 0%,transparent 70%);
+  animation:wcGlow 3s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes wcGlow {
+  0%,100%{transform:scale(1);opacity:.6;}
+  50%{transform:scale(1.2);opacity:1;}
+}
+
+#wc-bottom { display:flex;flex-direction:column;gap:10px;align-items:center; }
+#wc-tagline {
+  font-family:var(--serif);font-style:italic;
+  font-size:13px;color:rgba(245,234,208,.35);
+  letter-spacing:.1em;line-height:1.6;
+  max-width:260px;
+}
+#wc-enter-btn {
+  padding:14px 48px;
+  background:rgba(212,168,83,.15);
+  border:1.5px solid rgba(212,168,83,.55);
+  border-radius:3px;
+  color:var(--gold);
+  font-family:var(--serif);font-size:15px;letter-spacing:.25em;
+  cursor:pointer;transition:all .35s;
+  animation:pulse-gold 2.5s ease-in-out infinite;
+}
+#wc-enter-btn:hover {
+  background:rgba(212,168,83,.28);
+  border-color:rgba(212,168,83,.9);
+  box-shadow:0 0 24px rgba(212,168,83,.2);
+}
+#wc-edit-btn {
+  background:transparent;border:none;
+  font-family:var(--serif);font-style:italic;
+  font-size:12px;color:rgba(245,234,208,.3);
+  letter-spacing:.15em;cursor:pointer;
+  transition:color .3s;padding:4px;
+}
+#wc-edit-btn:hover { color:rgba(245,234,208,.65); }
+
+/* ══ AVATAR SCREEN ══ */
+#avatar-screen {
+  position:fixed;inset:0;z-index:800;
+  background:var(--bg,#0d0a18);
+}
+#av-app {
+  width:100%;height:100%;
+  display:grid;
+  grid-template-columns:300px 1fr 260px;
+  grid-template-rows:56px 1fr 66px;
+}
+/* Close button */
+#av-close-btn {
+  position:fixed;top:14px;right:14px;z-index:820;
+  background:transparent;border:none;
+  color:rgba(245,234,208,.35);font-size:18px;
+  cursor:pointer;padding:6px 10px;border-radius:50%;
+  transition:all .3s;line-height:1;
+}
+#av-close-btn:hover{color:rgba(245,234,208,.85);background:rgba(255,255,255,.06);}
+
+
+:root {
+  --gold:#d4a853;--cream:#f5ead0;
+  --serif:'Cormorant Garamond',serif;
+  --jp:'Zen Kaku Gothic New',sans-serif;
+  --bg:#0d0a18;--panel:#16112a;--border:rgba(212,168,83,.2);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+
+
+/* LAYOUT */
+#app {
+  display:grid;
+  grid-template-columns:320px 1fr 280px;
+  grid-template-rows:60px 1fr 70px;
+  height:100vh;
+  gap:0;
+}
+
+/* HEADER */
+#header {
+  grid-column:1/-1;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;
+  background:rgba(13,10,24,.95);
+  border-bottom:1px solid var(--border);
+}
+.h-logo {font-family:var(--jp);font-size:20px;color:var(--gold);letter-spacing:.3em;}
+.h-title {font-family:var(--serif);font-style:italic;font-size:15px;color:rgba(245,234,208,.5);letter-spacing:.15em;}
+.h-step {font-family:var(--serif);font-size:12px;color:rgba(245,234,208,.3);letter-spacing:.2em;}
+
+/* PREVIEW CENTRALE */
+#preview-panel {
+  background:linear-gradient(180deg,#1a1235 0%,#0d0a1a 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:16px;position:relative;overflow:hidden;
+  border-left:1px solid var(--border);
+  border-right:1px solid var(--border);
+}
+#preview-bg-glow {
+  position:absolute;
+  width:300px;height:300px;
+  background:radial-gradient(circle,rgba(212,168,83,.08) 0%,transparent 70%);
+  border-radius:50%;
+  animation:glowPulse 4s ease-in-out infinite;
+}
+@keyframes glowPulse{0%,100%{transform:scale(1);opacity:.6;}50%{transform:scale(1.15);opacity:1;}}
+#avatar-svg-wrap {
+  position:relative;z-index:1;
+  filter:drop-shadow(0 12px 40px rgba(0,0,0,.7));
+}
+#avatar-svg {width:260px;height:340px;}
+#preview-name {
+  font-family:var(--jp);font-size:18px;color:var(--gold);
+  letter-spacing:.3em;position:relative;z-index:1;
+  min-height:26px;text-align:center;
+}
+#preview-code {
+  font-family:monospace;font-size:9px;
+  color:rgba(212,168,83,.25);letter-spacing:.1em;
+  position:relative;z-index:1;
+}
+
+/* PANNELLO SINISTRO — categorie */
+#left-panel {
+  background:var(--panel);
+  display:flex;flex-direction:column;
+  border-right:1px solid var(--border);
+  overflow-y:auto;
+}
+#left-panel::-webkit-scrollbar{width:3px;}
+#left-panel::-webkit-scrollbar-thumb{background:rgba(212,168,83,.2);}
+
+.category {
+  padding:16px 20px;
+  border-bottom:1px solid rgba(255,255,255,.05);
+  cursor:pointer;transition:all .25s;
+  display:flex;align-items:center;gap:12px;
+}
+.category:hover,.category.active {
+  background:rgba(212,168,83,.08);
+}
+.category.active .cat-label { color:var(--gold); }
+.cat-icon {font-size:18px;width:24px;text-align:center;}
+.cat-label {font-family:var(--serif);font-size:13px;letter-spacing:.12em;color:rgba(245,234,208,.6);transition:color .25s;}
+.cat-check {margin-left:auto;font-size:11px;color:var(--gold);opacity:0;}
+.category.done .cat-check {opacity:1;}
+
+/* PANNELLO DESTRO — opzioni */
+#right-panel {
+  background:var(--panel);
+  display:flex;flex-direction:column;
+  overflow-y:auto;padding:20px 16px;gap:16px;
+}
+#right-panel::-webkit-scrollbar{width:3px;}
+#right-panel::-webkit-scrollbar-thumb{background:rgba(212,168,83,.2);}
+
+.opt-section-title {
+  font-family:var(--serif);font-size:11px;
+  color:rgba(212,168,83,.6);letter-spacing:.25em;
+  padding-bottom:8px;border-bottom:1px solid var(--border);
+}
+
+/* Griglia opzioni */
+.opt-grid {display:flex;flex-wrap:wrap;gap:8px;}
+
+.opt-btn {
+  padding:7px 12px;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:3px;
+  font-family:var(--serif);font-size:12px;
+  color:rgba(245,234,208,.55);letter-spacing:.08em;
+  cursor:pointer;transition:all .2s;
+  white-space:nowrap;
+}
+.opt-btn:hover {border-color:rgba(212,168,83,.35);color:var(--cream);}
+.opt-btn.sel {
+  background:rgba(212,168,83,.14);
+  border-color:rgba(212,168,83,.65);
+  color:var(--gold);
+}
+
+/* Palette colori */
+.color-grid {display:flex;flex-wrap:wrap;gap:8px;}
+.color-swatch {
+  width:30px;height:30px;border-radius:50%;
+  cursor:pointer;transition:all .2s;
+  border:2px solid transparent;
+  box-shadow:0 2px 6px rgba(0,0,0,.4);
+}
+.color-swatch:hover {transform:scale(1.15);}
+.color-swatch.sel {
+  border-color:#fff;
+  transform:scale(1.22);
+  box-shadow:0 0 10px rgba(255,255,255,.3);
+}
+
+/* Input nome */
+.name-input {
+  width:100%;padding:10px 14px;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(212,168,83,.25);
+  border-radius:3px;color:var(--cream);
+  font-family:var(--serif);font-size:15px;
+  letter-spacing:.1em;outline:none;
+  transition:border .3s;
+}
+.name-input:focus {border-color:rgba(212,168,83,.6);}
+.name-input::placeholder{color:rgba(245,234,208,.2);}
+
+/* FOOTER */
+#footer {
+  grid-column:1/-1;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;
+  background:rgba(13,10,24,.95);
+  border-top:1px solid var(--border);
+  gap:16px;
+}
+#unique-badge {
+  font-family:var(--serif);font-size:11px;
+  color:rgba(212,168,83,.5);letter-spacing:.1em;
+}
+#save-btn {
+  padding:12px 40px;
+  background:linear-gradient(135deg,rgba(212,168,83,.2),rgba(212,168,83,.1));
+  border:1.5px solid rgba(212,168,83,.6);
+  border-radius:3px;color:var(--gold);
+  font-family:var(--serif);font-size:14px;letter-spacing:.25em;
+  cursor:pointer;transition:all .35s;
+}
+#save-btn:hover {
+  background:rgba(212,168,83,.28);
+  border-color:var(--gold);
+  box-shadow:0 0 20px rgba(212,168,83,.2);
+}
+#random-btn {
+  padding:12px 20px;
+  background:transparent;
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:3px;color:rgba(245,234,208,.4);
+  font-family:var(--serif);font-size:12px;letter-spacing:.15em;
+  cursor:pointer;transition:all .3s;
+}
+#random-btn:hover {border-color:rgba(255,255,255,.3);color:var(--cream);}
+
+/* Responsive mobile */
+@media(max-width:768px){
+  #app{grid-template-columns:1fr;grid-template-rows:50px auto 1fr auto 60px;overflow-y:auto;}
+  #left-panel{display:flex;flex-direction:row;overflow-x:auto;overflow-y:hidden;border-right:none;border-bottom:1px solid var(--border);}
+  .category{padding:12px 14px;border-bottom:none;border-right:1px solid rgba(255,255,255,.05);flex-shrink:0;}
+  .cat-label{font-size:11px;}
+  #preview-panel{min-height:280px;border:none;border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+  #avatar-svg{width:180px;height:240px;}
+}
+
+
+
+/* ── TOPBAR MAPPA ── */
+#map-ui-topbar {
+  position:absolute;top:0;left:0;right:0;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 20px;
+  background:linear-gradient(to bottom,rgba(0,0,0,.35),transparent);
+  z-index:20;
+}
+#map-ui-user {
+  display:flex;align-items:center;gap:10px;
+}
+#map-ui-avatar-mini {
+  width:36px;height:36px;border-radius:50%;
+  background:rgba(212,168,83,.15);
+  border:1.5px solid rgba(212,168,83,.4);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--jp);font-size:14px;color:var(--gold);
+  overflow:hidden;
+}
+#map-ui-username {
+  font-family:var(--serif);font-size:13px;
+  color:rgba(245,234,208,.7);letter-spacing:.15em;
+}
+#map-profile-btn {
+  background:rgba(212,168,83,.12);
+  border:1px solid rgba(212,168,83,.35);
+  border-radius:20px;
+  padding:7px 16px;
+  font-family:var(--serif);font-size:12px;
+  color:rgba(212,168,83,.8);letter-spacing:.12em;
+  cursor:pointer;transition:all .3s;
+}
+#map-profile-btn:hover {
+  background:rgba(212,168,83,.22);
+  border-color:rgba(212,168,83,.7);
+  color:var(--gold);
+}
+
+/* ══ PANNELLO PROFILO ══ */
+#profile-panel {
+  position:fixed;inset:0;z-index:600;
+  pointer-events:none;
+}
+#profile-panel.open { pointer-events:all; }
+
+#profile-overlay {
+  position:absolute;inset:0;
+  background:rgba(0,0,0,0);
+  transition:background .4s ease;
+}
+#profile-panel.open #profile-overlay {
+  background:rgba(0,0,0,0.45);
+  backdrop-filter:blur(4px);
+}
+
+#profile-drawer {
+  position:absolute;right:0;top:0;bottom:0;
+  width:min(380px, 92vw);
+  background:linear-gradient(180deg,#16112a 0%,#0d0a1a 100%);
+  border-left:1px solid rgba(212,168,83,.2);
+  display:flex;flex-direction:column;gap:0;
+  transform:translateX(100%);
+  transition:transform .4s cubic-bezier(.4,0,.2,1);
+  overflow-y:auto;
+  box-shadow:-8px 0 40px rgba(0,0,0,.5);
+}
+#profile-drawer::-webkit-scrollbar{width:3px;}
+#profile-drawer::-webkit-scrollbar-thumb{background:rgba(212,168,83,.2);}
+
+#profile-panel.open #profile-drawer {
+  transform:translateX(0);
+}
+
+.profile-close {
+  position:absolute;top:14px;left:14px;
+  background:transparent;border:none;
+  color:rgba(245,234,208,.3);font-size:18px;
+  cursor:pointer;padding:6px 10px;
+  border-radius:50%;transition:all .3s;z-index:1;
+}
+.profile-close:hover{color:rgba(245,234,208,.85);background:rgba(255,255,255,.06);}
+
+/* Avatar preview */
+#prof-avatar-wrap {
+  display:flex;flex-direction:column;align-items:center;
+  padding:50px 20px 20px;
+  background:linear-gradient(180deg,rgba(212,168,83,.06) 0%,transparent 100%);
+  border-bottom:1px solid rgba(212,168,83,.12);
+  gap:8px;
+}
+#prof-name {
+  font-family:var(--jp);font-size:20px;color:var(--gold);
+  letter-spacing:.3em;text-shadow:0 0 20px rgba(212,168,83,.3);
+  text-align:center;
+}
+#prof-code {
+  font-family:monospace;font-size:9px;
+  color:rgba(212,168,83,.25);letter-spacing:.08em;
+  text-align:center;
+}
+
+/* Tabs */
+#prof-tabs {
+  display:flex;border-bottom:1px solid rgba(212,168,83,.15);
+  flex-shrink:0;
+}
+.prof-tab {
+  flex:1;padding:12px 8px;
+  background:transparent;border:none;
+  font-family:var(--serif);font-size:12px;letter-spacing:.15em;
+  color:rgba(245,234,208,.4);cursor:pointer;
+  transition:all .25s;
+  border-bottom:2px solid transparent;margin-bottom:-1px;
+}
+.prof-tab:hover{color:var(--cream);}
+.prof-tab.active{color:var(--gold);border-bottom-color:var(--gold);}
+
+/* Content */
+.prof-content {
+  display:none;flex-direction:column;gap:12px;
+  padding:20px 20px;flex:1;
+}
+.prof-content.active{display:flex;}
+
+/* Identità */
+.prof-section {
+  display:flex;flex-direction:column;gap:6px;
+}
+.prof-section-title {
+  font-family:var(--serif);font-size:10px;
+  color:rgba(212,168,83,.5);letter-spacing:.25em;
+  text-transform:uppercase;
+}
+.prof-tags {
+  display:flex;flex-wrap:wrap;gap:5px;
+}
+.prof-tag {
+  padding:4px 10px;
+  background:rgba(212,168,83,.08);
+  border:1px solid rgba(212,168,83,.2);
+  border-radius:20px;
+  font-family:var(--serif);font-size:11px;
+  color:rgba(245,234,208,.65);letter-spacing:.06em;
+}
+.prof-empty {
+  font-family:var(--serif);font-style:italic;font-size:12px;
+  color:rgba(245,234,208,.25);letter-spacing:.1em;
+}
+
+/* Stats */
+.prof-stat {
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05);
+}
+.prof-stat-label {
+  font-family:var(--serif);font-size:12px;
+  color:rgba(245,234,208,.45);letter-spacing:.1em;
+}
+.prof-stat-value {
+  font-family:var(--serif);font-size:13px;
+  color:var(--gold);letter-spacing:.1em;
+}
+
+/* Action buttons */
+.prof-action-btn {
+  display:flex;align-items:center;gap:14px;
+  padding:14px 16px;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:4px;
+  cursor:pointer;transition:all .25s;text-align:left;
+  width:100%;
+}
+.prof-action-btn:hover {
+  background:rgba(212,168,83,.1);
+  border-color:rgba(212,168,83,.35);
+}
+.prof-action-btn > span { font-size:22px;flex-shrink:0; }
+.prof-action-title {
+  font-family:var(--serif);font-size:13px;
+  color:var(--cream);letter-spacing:.1em;margin-bottom:3px;
+}
+.prof-action-sub {
+  font-family:var(--serif);font-style:italic;font-size:11px;
+  color:rgba(245,234,208,.4);letter-spacing:.06em;
+}
+.prof-action-btn.danger:hover {
+  background:rgba(200,60,60,.1);
+  border-color:rgba(200,60,60,.35);
+}
+.prof-action-btn.danger .prof-action-title { color:rgba(220,120,120,.8); }
+.prof-action-btn:disabled {
+  opacity:.4;cursor:not-allowed;
+}
+.prof-action-btn:disabled:hover {
+  background:rgba(255,255,255,.04);
+  border-color:rgba(255,255,255,.08);
+}
+
+/* ══ WORLD ══ */
+#world{position:fixed;inset:0;display:none;}
+#wc{position:absolute;inset:0;width:100%;height:100%;}
+#hud{position:absolute;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:linear-gradient(to bottom,rgba(0,0,0,.28),transparent);pointer-events:none;}
+.hclock{font-family:var(--serif);font-size:13px;color:rgba(245,234,208,.8);letter-spacing:.15em;}
+.haname{font-family:var(--serif);font-style:italic;font-size:clamp(12px,1.4vw,16px);color:rgba(245,234,208,.7);letter-spacing:.2em;}
+.hctrl{display:flex;gap:10px;pointer-events:all;}
+.cb{background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.15);border-radius:50%;width:36px;height:36px;font-size:15px;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.cb:hover{background:rgba(212,168,83,.2);border-color:rgba(212,168,83,.6);transform:scale(1.1);}
+#area-nav{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);display:flex;gap:20px;z-index:50;}
+.na{background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.2);border-radius:50%;width:44px;height:44px;font-size:22px;color:rgba(245,234,208,.7);cursor:pointer;transition:all .3s;backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;}
+.na:hover{background:rgba(212,168,83,.2);border-color:rgba(212,168,83,.6);color:var(--cream);transform:scale(1.1);}
+#map{position:fixed;inset:0;z-index:500;background:rgba(13,10,20,.88);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;}
+#mp{background:rgba(18,14,32,.97);border:1px solid rgba(212,168,83,.3);padding:36px;max-width:660px;width:90%;text-align:center;}
+#mp h2{font-family:var(--serif);font-size:26px;color:var(--gold);letter-spacing:.3em;margin-bottom:28px;font-weight:300;}
+#mg{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px;}
+.ma{background:rgba(255,255,255,.04);border:1px solid rgba(212,168,83,.2);padding:16px 8px;cursor:pointer;transition:all .3s;display:flex;flex-direction:column;align-items:center;gap:7px;}
+.ma:hover{background:rgba(212,168,83,.12);border-color:rgba(212,168,83,.6);transform:translateY(-2px);}
+.mi{font-size:26px;}
+.ml{font-family:var(--serif);font-size:10px;color:rgba(245,234,208,.65);letter-spacing:.12em;text-align:center;line-height:1.4;}
+#mc{background:transparent;border:1px solid rgba(212,168,83,.4);color:rgba(245,234,208,.6);font-family:var(--serif);font-size:13px;letter-spacing:.2em;padding:10px 28px;cursor:pointer;transition:all .3s;}
+#mc:hover{border-color:rgba(212,168,83,.8);color:var(--cream);}
+#tr{position:fixed;inset:0;z-index:400;display:flex;align-items:center;justify-content:center;pointer-events:none;background:transparent;transition:background 1s ease;}
+#tr.f{background:rgba(13,10,20,.95);}
+#tt{font-family:var(--serif);font-style:italic;font-size:clamp(16px,2.5vw,28px);color:var(--gold);letter-spacing:.4em;opacity:0;text-shadow:0 0 40px rgba(212,168,83,.4);transition:opacity .8s ease;}
+#tr.f #tt{opacity:1;}
+#tip{position:absolute;bottom:80px;left:50%;transform:translateX(-50%);font-family:var(--serif);font-style:italic;font-size:12px;color:rgba(245,234,208,.38);letter-spacing:.2em;z-index:50;pointer-events:none;transition:opacity 2s;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:600px){#mg{grid-template-columns:repeat(2,1fr);} #hotspots{gap:12px;} .hs-dot{width:54px;height:54px;font-size:22px;}}
+
+/* ══ REGISTRAZIONE ══ */
+#reg-screen {
+  position:fixed;inset:0;z-index:900;
+  display:flex;align-items:center;justify-content:center;
+  padding:20px;
+}
+#reg-overlay {
+  position:absolute;inset:0;
+  background:rgba(8,6,18,0.92);
+  backdrop-filter:blur(16px);
+}
+#reg-box {
+  position:relative;z-index:1;
+  width:100%;max-width:420px;
+  background:rgba(20,16,35,0.98);
+  border:1px solid rgba(212,168,83,0.25);
+  border-radius:6px;
+  padding:36px 32px;
+  max-height:90vh;overflow-y:auto;
+  box-shadow:0 20px 60px rgba(0,0,0,0.5);
+}
+
+/* Header */
+#reg-header {
+  text-align:center;margin-bottom:28px;
+}
+.reg-logo-jp {
+  font-family:var(--jp);font-weight:300;
+  font-size:42px;color:var(--gold);
+  letter-spacing:.4em;text-indent:.4em;
+  text-shadow:0 0 30px rgba(212,168,83,0.3);
+}
+.reg-logo-sub {
+  font-family:var(--serif);font-size:11px;
+  color:rgba(212,168,83,0.6);letter-spacing:.7em;
+  margin-top:4px;
+}
+.reg-tagline {
+  font-family:var(--serif);font-style:italic;
+  font-size:15px;color:rgba(245,234,208,0.55);
+  letter-spacing:.15em;margin-top:10px;
+}
+
+/* Tabs */
+#reg-tabs {
+  display:flex;border-bottom:1px solid rgba(212,168,83,0.2);
+  margin-bottom:24px;
+}
+.rtab {
+  flex:1;padding:10px;
+  background:transparent;border:none;
+  font-family:var(--serif);font-size:14px;
+  letter-spacing:.15em;
+  color:rgba(245,234,208,0.4);
+  cursor:pointer;transition:all .3s;
+  border-bottom:2px solid transparent;
+  margin-bottom:-1px;
+}
+.rtab.active {
+  color:var(--gold);
+  border-bottom-color:var(--gold);
+}
+
+/* Campi form */
+.reg-form { display:flex;flex-direction:column;gap:16px; }
+.field-group { display:flex;flex-direction:column;gap:6px; }
+.field-group label {
+  font-family:var(--serif);font-size:12px;
+  color:rgba(245,234,208,0.55);letter-spacing:.15em;
+}
+.field-group input {
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:3px;
+  padding:11px 14px;
+  color:rgba(245,234,208,0.9);
+  font-family:var(--serif);font-size:14px;
+  outline:none;transition:border .3s;
+}
+.field-group input:focus {
+  border-color:rgba(212,168,83,0.5);
+  background:rgba(255,255,255,0.08);
+}
+.field-group input::placeholder { color:rgba(245,234,208,0.25); }
+
+/* Checkbox */
+.field-check {
+  display:flex;align-items:flex-start;gap:10px;
+}
+.field-check input[type="checkbox"] {
+  width:16px;height:16px;margin-top:2px;
+  accent-color:var(--gold);cursor:pointer;flex-shrink:0;
+}
+.field-check label {
+  font-family:var(--serif);font-size:12px;
+  color:rgba(245,234,208,0.5);line-height:1.5;cursor:pointer;
+}
+.reg-link { color:var(--gold);text-decoration:none; }
+.reg-link:hover { text-decoration:underline; }
+
+/* Pulsante principale */
+.reg-btn {
+  display:flex;align-items:center;justify-content:center;gap:12px;
+  padding:14px 24px;
+  background:linear-gradient(135deg, rgba(212,168,83,0.15), rgba(212,168,83,0.08));
+  border:1px solid rgba(212,168,83,0.5);
+  border-radius:3px;
+  color:var(--gold);
+  font-family:var(--serif);font-size:15px;letter-spacing:.2em;
+  cursor:pointer;transition:all .3s;
+  margin-top:4px;width:100%;
+}
+.reg-btn:hover {
+  background:rgba(212,168,83,0.22);
+  border-color:rgba(212,168,83,0.85);
+  box-shadow:0 4px 20px rgba(212,168,83,0.15);
+}
+.reg-btn-price {
+  font-size:13px;opacity:.7;
+  border-left:1px solid rgba(212,168,83,0.3);
+  padding-left:12px;margin-left:4px;
+}
+.reg-btn-secondary {
+  background:transparent;border:none;
+  color:rgba(245,234,208,0.3);
+  font-family:var(--serif);font-style:italic;
+  font-size:12px;letter-spacing:.1em;
+  cursor:pointer;transition:color .3s;
+  text-align:center;padding:8px;
+}
+.reg-btn-secondary:hover { color:rgba(245,234,208,0.6); }
+
+/* Errori */
+.reg-error {
+  font-family:var(--serif);font-size:12px;
+  color:#e07070;letter-spacing:.1em;text-align:center;
+  min-height:18px;
+}
+
+/* Pagamento */
+#payment-info {
+  text-align:center;padding:20px;
+  background:rgba(212,168,83,0.06);
+  border:1px solid rgba(212,168,83,0.2);
+  border-radius:4px;margin-bottom:8px;
+}
+.payment-amount {
+  font-family:var(--jp);font-size:44px;
+  color:var(--gold);letter-spacing:.05em;
+  text-shadow:0 0 20px rgba(212,168,83,0.3);
+}
+.payment-desc {
+  font-family:var(--serif);font-style:italic;
+  font-size:13px;color:rgba(245,234,208,0.5);
+  margin-top:6px;letter-spacing:.1em;
+}
+.payment-features {
+  list-style:none;margin-top:16px;
+  display:flex;flex-direction:column;gap:7px;text-align:left;
+}
+.payment-features li {
+  font-family:var(--serif);font-size:13px;
+  color:rgba(245,234,208,0.65);letter-spacing:.08em;
+}
+.payment-note {
+  font-family:var(--serif);font-style:italic;
+  font-size:12px;color:rgba(245,234,208,0.35);
+  text-align:center;letter-spacing:.08em;line-height:1.6;
+  margin-bottom:8px;
+}
+
+
+/* X chiudi registrazione */
+#reg-close {
+  position:absolute;top:16px;right:16px;
+  background:transparent;border:none;
+  color:rgba(245,234,208,.35);
+  font-size:18px;cursor:pointer;
+  line-height:1;padding:4px 8px;
+  transition:color .3s;
+  border-radius:50%;
+}
+#reg-close:hover { color:rgba(245,234,208,.85); }
+
+/* Scrollbar */
+#reg-box::-webkit-scrollbar{width:4px;}
+#reg-box::-webkit-scrollbar-track{background:transparent;}
+#reg-box::-webkit-scrollbar-thumb{background:rgba(212,168,83,0.3);border-radius:2px;}
+
+
+
+</style>
 <script>
+// ══════════════════════════════════════════════
+// SEKAI — Database Layer (Supabase)
+// Includi questo file in demo.html e avatar-builder.html
+// ══════════════════════════════════════════════
+
+const SUPABASE_URL  = 'https://oegkgicuigpcwoneradf.supabase.co';
+const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lZ2tnaWN1aWdwY3dvbmVyYWRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NjQ3OTQsImV4cCI6MjA5NjQ0MDc5NH0.rRaCqvdX5lmgEgZDjGutZHvnO2Bwy_vp5c-URZANyAE';
+
+// ── CHIAMATA API BASE ──
+async function sbFetch(path, options = {}) {
+  const url = `${SUPABASE_URL}/rest/v1/${path}`;
+  const headers = {
+    'apikey': SUPABASE_KEY,
+    'Authorization': `Bearer ${SUPABASE_KEY}`,
+    'Content-Type': 'application/json',
+    'Prefer': options.prefer || 'return=representation',
+    ...options.headers,
+  };
+  const res = await fetch(url, { ...options, headers });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Supabase error: ${res.status} ${err}`);
+  }
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
+
+// ══ UTENTI ═════════════════════════════════════
+
+const SekaiDB = {
+
+  // ── Registrazione ──
+  async register(email, password, username, birthDate) {
+    // 1. Verifica email non esistente
+    const existing = await sbFetch(`users?email=eq.${encodeURIComponent(email)}&select=id`);
+    if (existing && existing.length > 0) throw new Error('Email già registrata.');
+
+    // 2. Verifica username non esistente
+    const existingUser = await sbFetch(`users?username=eq.${encodeURIComponent(username)}&select=id`);
+    if (existingUser && existingUser.length > 0) throw new Error('Nome utente già in uso.');
+
+    // 3. Crea utente (password hashata lato client con SHA-256 semplice)
+    const pwHash = await hashPassword(password);
+    const users = await sbFetch('users', {
+      method: 'POST',
+      body: JSON.stringify({
+        email,
+        username,
+        birth_date: birthDate,
+        password_hash: pwHash,
+        paid: false,
+        has_avatar: false,
+      }),
+    });
+    return users[0];
+  },
+
+  // ── Login ──
+  async login(email, password) {
+    const pwHash = await hashPassword(password);
+
+    // Account demo speciale
+    if (email === 'renatosorgi81@gmail.com' && password === 'tecno5181') {
+      const users = await sbFetch(`users?email=eq.${encodeURIComponent(email)}&select=*`);
+      if (!users || users.length === 0) throw new Error('Account demo non trovato. Esegui prima il setup SQL.');
+      const user = users[0];
+      // Carica avatar se esiste
+      user.avatar = await SekaiDB.getAvatar(user.id);
+      await SekaiDB.updateLastSeen(user.id);
+      return user;
+    }
+
+    const users = await sbFetch(
+      `users?email=eq.${encodeURIComponent(email)}&password_hash=eq.${encodeURIComponent(pwHash)}&select=*`
+    );
+    if (!users || users.length === 0) throw new Error('Email o password errati.');
+    const user = users[0];
+    user.avatar = await SekaiDB.getAvatar(user.id);
+    await SekaiDB.updateLastSeen(user.id);
+    return user;
+  },
+
+  // ── Aggiorna ultimo accesso ──
+  async updateLastSeen(userId) {
+    await sbFetch(`users?id=eq.${userId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ last_seen: new Date().toISOString() }),
+      prefer: 'return=minimal',
+    });
+  },
+
+  // ── Segna come pagante ──
+  async setPaid(userId) {
+    await sbFetch(`users?id=eq.${userId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ paid: true, paid_at: new Date().toISOString() }),
+      prefer: 'return=minimal',
+    });
+  },
+
+  // ══ AVATAR ═══════════════════════════════════
+
+  // ── Salva avatar ──
+  async saveAvatar(userId, avatarData) {
+    const payload = {
+      user_id: userId,
+      name: avatarData.name,
+      gender: avatarData.gender,
+      face: avatarData.face,
+      hair: avatarData.hair,
+      hair_color: avatarData.hairColor,
+      eyes: avatarData.eyes,
+      eye_color: avatarData.eyeColor,
+      brows: avatarData.brows,
+      nose: avatarData.nose,
+      mouth: avatarData.mouth,
+      skin: avatarData.skin,
+      cloth: avatarData.cloth,
+      cloth_color: avatarData.clothColor,
+      accessory: avatarData.accessory,
+      svg_string: avatarData.svgString || '',
+      personality: avatarData.personality || [],
+      passions: avatarData.passions || [],
+      values: avatarData.values || [],
+      life_phase: avatarData.lifePhase || '',
+      social_style: avatarData.socialStyle || '',
+      gift: avatarData.gift || '',
+      silence_mode: avatarData.silenceMode || '',
+      favorite_area: avatarData.favoriteArea || '',
+      love_text: avatarData.loveText || '',
+      learning_text: avatarData.learningText || '',
+      understand_text: avatarData.understandText || '',
+      dream_text: avatarData.dreamText || '',
+      strength_text: avatarData.strengthText || '',
+      avatar_code: avatarData.code || '',
+      updated_at: new Date().toISOString(),
+    };
+
+    // Upsert — crea o aggiorna
+    const result = await sbFetch('avatars', {
+      method: 'POST',
+      headers: { 'Prefer': 'resolution=merge-duplicates,return=representation' },
+      body: JSON.stringify(payload),
+    });
+
+    // Aggiorna flag has_avatar sull'utente
+    await sbFetch(`users?id=eq.${userId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ has_avatar: true }),
+      prefer: 'return=minimal',
+    });
+
+    return result;
+  },
+
+  // ── Carica avatar ──
+  async getAvatar(userId) {
+    const data = await sbFetch(`avatars?user_id=eq.${userId}&select=*`);
+    if (!data || data.length === 0) return null;
+    const av = data[0];
+    // Rimappa i campi snake_case → camelCase per il frontend
+    return {
+      name: av.name,
+      gender: av.gender,
+      face: av.face,
+      hair: av.hair,
+      hairColor: av.hair_color,
+      eyes: av.eyes,
+      eyeColor: av.eye_color,
+      brows: av.brows,
+      nose: av.nose,
+      mouth: av.mouth,
+      skin: av.skin,
+      cloth: av.cloth,
+      clothColor: av.cloth_color,
+      accessory: av.accessory,
+      svgString: av.svg_string,
+      personality: av.personality || [],
+      passions: av.passions || [],
+      values: av.values || [],
+      lifePhase: av.life_phase,
+      socialStyle: av.social_style,
+      gift: av.gift,
+      silenceMode: av.silence_mode,
+      favoriteArea: av.favorite_area,
+      loveText: av.love_text,
+      learningText: av.learning_text,
+      understandText: av.understand_text,
+      dreamText: av.dream_text,
+      strengthText: av.strength_text,
+      code: av.avatar_code,
+      lastAppearanceChange: av.last_appearance_change,
+      sekaiJoinedAt: av.created_at,  // data primo ingresso in Sekai
+    };
+  },
+
+  // ── Verifica se può cambiare aspetto (ogni 30 giorni) ──
+  canChangeAppearance(avatar) {
+    if (!avatar?.lastAppearanceChange) return true;
+    const last = new Date(avatar.lastAppearanceChange);
+    const now = new Date();
+    const diffDays = (now - last) / (1000 * 60 * 60 * 24);
+    return diffDays >= 30;
+  },
+
+  daysUntilAppearanceChange(avatar) {
+    if (!avatar?.lastAppearanceChange) return 0;
+    const last = new Date(avatar.lastAppearanceChange);
+    const now = new Date();
+    const diffDays = (now - last) / (1000 * 60 * 60 * 24);
+    return Math.max(0, Math.ceil(30 - diffDays));
+  },
+
+  // ══ SEGNALAZIONI ══════════════════════════════
+
+  async sendReport(reporterId, reportedUserId, contentType, contentText, reason) {
+    return await sbFetch('reports', {
+      method: 'POST',
+      body: JSON.stringify({
+        reporter_id: reporterId,
+        reported_user_id: reportedUserId,
+        content_type: contentType,
+        content_text: contentText,
+        reason,
+        status: 'pending',
+      }),
+    });
+  },
+
+  // ══ ADMIN ═════════════════════════════════════
+
+  async getReports(status = 'pending') {
+    return await sbFetch(`reports?status=eq.${status}&select=*&order=created_at.desc`);
+  },
+
+  async updateReport(reportId, status, adminNote) {
+    return await sbFetch(`reports?id=eq.${reportId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status, admin_note: adminNote }),
+    });
+  },
+
+  async banUser(userId) {
+    return await sbFetch(`users?id=eq.${userId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ banned: true, banned_at: new Date().toISOString() }),
+    });
+  },
+
+  // ══ SESSIONE LOCALE ════════════════════════════
+
+  saveSession(user) {
+    const session = {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      paid: user.paid,
+      has_avatar: user.has_avatar,
+      avatar: user.avatar || null,
+      savedAt: new Date().toISOString(),
+    };
+    localStorage.setItem('sekai_session_v2', JSON.stringify(session));
+    return session;
+  },
+
+  loadSession() {
+    const raw = localStorage.getItem('sekai_session_v2');
+    if (!raw) return null;
+    try {
+      const s = JSON.parse(raw);
+      // Sessione valida per 7 giorni
+      const age = (new Date() - new Date(s.savedAt)) / (1000 * 60 * 60 * 24);
+      if (age > 7) { localStorage.removeItem('sekai_session_v2'); return null; }
+      return s;
+    } catch(e) { return null; }
+  },
+
+  clearSession() {
+    localStorage.removeItem('sekai_session_v2');
+  },
+};
+
+// ── HASH PASSWORD (SHA-256 browser) ──
+async function hashPassword(password) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password + 'sekai_salt_2025');
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+</script>
+</head>
+<body>
+
+<div id="intro">
+  <video id="bg-video" autoplay muted loop playsinline>
+    <source src="bg.mp4" type="video/mp4">
+  </video>
+  <div id="intro-overlay"></div>
+
+  <!-- SCHERMATA UNICA INTRO -->
+  <div id="intro-ui">
+    <div id="intro-logo">
+      <div class="logo-jp">世界</div>
+      <p class="logo-sub">S E K A I</p>
+      <p class="logo-tag">Un luogo dove il tempo respira piano</p>
+    </div>
+    <div id="phrase-box">
+      <p id="phrase-text"></p>
+    </div>
+    <button id="start-btn" onclick="unlockAndStart()">tocca per iniziare</button>
+    <p id="already-started" style="display:none;font-family:var(--serif);font-style:italic;font-size:13px;color:rgba(255,255,255,.45);letter-spacing:.2em;cursor:pointer;" onclick="showRegScreen()">entra nel tuo account →</p>
+  </div>
+
+  <!-- MAPPA AREE (appare dopo login) -->
+  
+
+<!-- REGISTRAZIONE -->
+
+<div id="reg-screen" style="display:none;">
+  <div id="reg-overlay"></div>
+  <div id="reg-box">
+
+    <!-- X chiudi -->
+    <button id="reg-close" onclick="closeReg()" title="Chiudi">✕</button>
+
+    <!-- Header -->
+    <div id="reg-header">
+      <div class="reg-logo-jp">世界</div>
+      <p class="reg-logo-sub">S E K A I</p>
+      <p class="reg-tagline">Unisciti al mondo</p>
+    </div>
+
+    <!-- Tab switcher -->
+    <div id="reg-tabs">
+      <button class="rtab active" id="tab-register" onclick="switchTab('register')">Registrati</button>
+      <button class="rtab" id="tab-login" onclick="switchTab('login')">Accedi</button>
+    </div>
+
+    <!-- FORM REGISTRAZIONE -->
+    <div id="form-register" class="reg-form">
+      <div class="field-group">
+        <label>Nome utente</label>
+        <input type="text" id="r-username" placeholder="Come vuoi essere chiamato?" maxlength="20">
+      </div>
+      <div class="field-group">
+        <label>Email</label>
+        <input type="email" id="r-email" placeholder="La tua email">
+      </div>
+      <div class="field-group">
+        <label>Password</label>
+        <input type="password" id="r-password" placeholder="Minimo 8 caratteri">
+      </div>
+      <div class="field-group">
+        <label>Data di nascita</label>
+        <input type="date" id="r-birth" max="">
+      </div>
+      <div class="field-check">
+        <input type="checkbox" id="r-terms">
+        <label for="r-terms">Ho letto e accetto i <a href="#" class="reg-link">Termini di servizio</a></label>
+      </div>
+      <div class="field-check">
+        <input type="checkbox" id="r-age">
+        <label for="r-age">Confermo di avere almeno 13 anni</label>
+      </div>
+      <button class="reg-btn" onclick="doRegister()">
+        <span>Continua al pagamento</span>
+        <span class="reg-btn-price">€ 9,90</span>
+      </button>
+      <p id="reg-error" class="reg-error"></p>
+    </div>
+
+    <!-- FORM LOGIN -->
+    <div id="form-login" class="reg-form" style="display:none;">
+      <div class="field-group">
+        <label>Email</label>
+        <input type="email" id="l-email" placeholder="La tua email">
+      </div>
+      <div class="field-group">
+        <label>Password</label>
+        <input type="password" id="l-password" placeholder="La tua password">
+      </div>
+      <button class="reg-btn" onclick="doLogin()">
+        <span>Entra in Sekai</span>
+      </button>
+      <p id="login-error" class="reg-error"></p>
+    </div>
+
+    <!-- PAGAMENTO (appare dopo registrazione) -->
+    <div id="form-payment" class="reg-form" style="display:none;">
+      <div id="payment-info">
+        <div class="payment-amount">€ 9,90</div>
+        <p class="payment-desc">Accesso completo a Sekai — una tantum</p>
+        <ul class="payment-features">
+          <li>✦ Accesso a tutte le 7 aree del mondo</li>
+          <li>✦ Avatar personalizzabile</li>
+          <li>✦ Casa nel villaggio</li>
+          <li>✦ Community e amicizie</li>
+          <li>✦ Aggiornamenti futuri inclusi</li>
+        </ul>
+      </div>
+      <p class="payment-note">Il sistema di pagamento sarà disponibile a breve.<br>Registrati ora e ti avviseremo non appena sarà attivo.</p>
+      <button class="reg-btn" onclick="doPaymentPlaceholder()">
+        <span>Procedi al pagamento</span>
+      </button>
+      <button class="reg-btn-secondary" onclick="skipPaymentDev()">
+        Accedi in anteprima (test)
+      </button>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- CREAZIONE AVATAR — carica avatar-builder.html in iframe -->
+
+<div id="avatar-screen" style="display:none;position:fixed;inset:0;z-index:800;">
+  <iframe id="avatar-iframe"
+    src="avatar-builder.html"
+    style="width:100%;height:100%;border:none;display:block;"
+    allow="autoplay">
+  </iframe>
+</div>
+
+<!-- SCHERMATA BENVENUTO (dopo login con avatar già creato) -->
+
+<div id="welcome-screen" style="display:none;">
+  <div id="wc-bg"></div>
+  <div id="wc-box">
+    <button class="screen-close-btn" style="position:absolute;top:-16px;right:-16px;" onclick="closeWelcomeScreen()" title="Chiudi">✕</button>
+    <div id="wc-top">
+      <p id="wc-greeting">Bentornato in Sekai</p>
+      <h2 id="wc-charname"></h2>
+      <p id="wc-personality"></p>
+    </div>
+    <div id="wc-avatar-wrap">
+      <svg id="wc-svg" viewBox="0 0 200 270"
+        style="width:200px;height:270px;filter:drop-shadow(0 8px 32px rgba(0,0,0,.6));">
+      </svg>
+      <div id="wc-glow"></div>
+    </div>
+    <div id="wc-bottom">
+      <p id="wc-tagline"></p>
+      <button id="wc-enter-btn" onclick="enterFromWelcome()">✦ Entra nel mondo</button>
+      <button id="wc-edit-btn" onclick="editAvatar()">Modifica personaggio</button>
+    </div>
+  </div>
+</div>
+
+<!-- MONDO -->
+
+<div id="world">
+  <canvas id="wc"></canvas>
+  <div id="hud">
+    <div class="hclock"><span id="ci">🌅</span> <span id="ct"></span></div>
+    <div class="haname" id="an"></div>
+    <div class="hctrl">
+      <button class="cb" id="sb" onclick="toggleSnd()" title="Suoni">🔇</button>
+      <button class="cb" onclick="openMap()" title="Mappa">🗺️</button>
+      <button class="cb" onclick="openProfile()" title="Il tuo profilo" id="profile-btn">👤</button>
+    </div>
+  </div>
+  <div id="area-nav">
+    <button class="na" onclick="navArea(-1)">‹</button>
+    <button class="na" onclick="navArea(1)">›</button>
+  </div>
+  <div id="tip">← esplora le aree con le frecce →</div>
+</div>
+
+<!-- PANNELLO PROFILO -->
+<div id="profile-panel">
+  <div id="profile-overlay" onclick="closeProfile()"></div>
+  <div id="profile-drawer">
+
+    <button class="profile-close" onclick="closeProfile()">✕</button>
+
+    <!-- AVATAR PREVIEW -->
+    <div id="prof-avatar-wrap">
+      <svg id="prof-svg" viewBox="0 0 200 260"
+        style="width:160px;height:208px;filter:drop-shadow(0 6px 20px rgba(0,0,0,.5));">
+      </svg>
+      <div id="prof-name"></div>
+      <div id="prof-code"></div>
+    </div>
+
+    <!-- TABS -->
+    <div id="prof-tabs">
+      <button class="prof-tab active" onclick="profTab('info')">Identità</button>
+      <button class="prof-tab" onclick="profTab('stats')">Sekai</button>
+      <button class="prof-tab" onclick="profTab('actions')">Azioni</button>
+    </div>
+
+    <!-- TAB IDENTITÀ -->
+    <div id="prof-info" class="prof-content active">
+      <div id="prof-identity"></div>
+    </div>
+
+    <!-- TAB STATISTICHE -->
+    <div id="prof-stats" class="prof-content">
+      <div id="prof-stats-content"></div>
+    </div>
+
+    <!-- TAB AZIONI -->
+    <div id="prof-actions" class="prof-content">
+      <button class="prof-action-btn" onclick="editIdentity()">
+        <span>✏️</span>
+        <div>
+          <div class="prof-action-title">Modifica identità</div>
+          <div class="prof-action-sub">Personalità, passioni, valori e campi liberi</div>
+        </div>
+      </button>
+      <button class="prof-action-btn" id="edit-appearance-btn" onclick="editAppearance()">
+        <span>🎨</span>
+        <div>
+          <div class="prof-action-title">Modifica aspetto</div>
+          <div class="prof-action-sub" id="appearance-sub">Capelli, occhi, vestiti e accessori</div>
+        </div>
+      </button>
+      <button class="prof-action-btn" onclick="openMap();closeProfile()">
+        <span>🗺️</span>
+        <div>
+          <div class="prof-action-title">Esplora il mondo</div>
+          <div class="prof-action-sub">Scegli dove andare</div>
+        </div>
+      </button>
+      <button class="prof-action-btn danger" onclick="doLogout()">
+        <span>🚪</span>
+        <div>
+          <div class="prof-action-title">Esci da Sekai</div>
+          <div class="prof-action-sub">Torni alla schermata iniziale</div>
+        </div>
+      </button>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- AREA IFRAME — nascosto, attivato da launchAreaPage -->
+
+<div id="map-ui" style="display:none; position:fixed; inset:0; z-index:1500; flex-direction:column; align-items:center; justify-content:center; gap:28px;">
+  <video id="map-bg-video" autoplay muted loop playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.55;z-index:0;">
+    <source src="bg.mp4" type="video/mp4">
+  </video>
+  <div style="position:absolute;inset:0;background:rgba(5,3,15,.55);z-index:1;"></div>
+    <div id="map-ui-topbar" style="position:absolute;top:0;left:0;right:0;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:linear-gradient(to bottom,rgba(0,0,0,.35),transparent);">
+      <div id="map-ui-user" style="display:flex;align-items:center;gap:10px;">
+        <div id="map-ui-avatar-mini" style="width:36px;height:36px;border-radius:50%;background:rgba(212,168,83,.15);border:1.5px solid rgba(212,168,83,.4);display:flex;align-items:center;justify-content:center;font-family:serif;font-size:14px;color:rgba(212,168,83,.7);overflow:hidden;"></div>
+        <div id="map-ui-username" style="font-family:'Cormorant Garamond',serif;font-size:13px;color:rgba(245,234,208,.7);letter-spacing:.15em;"></div>
+      </div>
+      <button id="map-profile-btn" onclick="openProfileFromMap()" style="background:rgba(212,168,83,.12);border:1px solid rgba(212,168,83,.35);border-radius:20px;padding:7px 16px;font-family:serif;font-size:12px;color:rgba(212,168,83,.8);letter-spacing:.12em;cursor:pointer;">👤 Il mio profilo</button>
+    </div>
+    <p id="map-ui-title" style="position:relative;z-index:10;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(15px,2vw,21px);color:rgba(255,255,255,.7);letter-spacing:.25em;text-shadow:0 1px 8px rgba(0,0,0,.5);">Dove vuoi andare?</p>
+    <div id="map-icons" style="position:relative;z-index:10;display:flex;flex-wrap:wrap;justify-content:center;gap:16px;max-width:580px;padding:0 20px;">
+      <div class="hs" onclick="goArea('village')"><div class="hs-dot">🏘️</div><span class="hs-lbl">Villaggio</span></div>
+      <div class="hs" onclick="goArea('forest')"><div class="hs-dot">🌲</div><span class="hs-lbl">Foresta</span></div>
+      <div class="hs" onclick="goArea('lake')"><div class="hs-dot">🌙</div><span class="hs-lbl">Lago della Luna</span></div>
+      <div class="hs" onclick="goArea('library')"><div class="hs-dot">📚</div><span class="hs-lbl">Biblioteca</span></div>
+      <div class="hs" onclick="goArea('hill')"><div class="hs-dot">⭐</div><span class="hs-lbl">Collina Stelle</span></div>
+      <div class="hs" onclick="goArea('port')"><div class="hs-dot">⛵</div><span class="hs-lbl">Porto</span></div>
+      <div class="hs" onclick="goArea('garden')"><div class="hs-dot">🌸</div><span class="hs-lbl">Giardino</span></div>
+    </div>
+</div>
+
+<!-- AREA IFRAME -->
+
+<!-- AREA IFRAME -->
+<iframe id="area-frame" src="" style="position:fixed;inset:0;width:100%;height:100%;border:none;z-index:9999;display:none;background:#0d0a18;" allow="autoplay"></iframe>
+
+<script>
+'use strict';
+
 // ══ AVATAR DATA ══
 const AV = {
   // ASPETTO VISIVO
@@ -1292,1465 +2753,9 @@ function buildMusic() {
   document.getElementById('sb').textContent = '🔊';
 }
 
-</script>
-<style>
 
 
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Zen+Kaku+Gothic+New:wght@300;400&display=swap');
-:root{--serif:'Cormorant Garamond',serif;--jp:'Zen Kaku Gothic New',sans-serif;--gold:#d4a853;--cream:#f5ead0;}
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
 
-/* ══ VIDEO ══ */
-#intro{position:fixed;inset:0;z-index:1000;transition:opacity 2.5s ease;}
-#bg-video{position:absolute;top:-4%;left:-4%;width:108%;height:108%;object-fit:cover;z-index:0;filter:blur(1px) saturate(1.4) contrast(1.08) brightness(1.05);transform:scale(1.06);}
-#intro-overlay{position:absolute;inset:0;z-index:1;background:radial-gradient(ellipse 90% 80% at 50% 50%,rgba(0,0,0,.05) 0%,rgba(0,0,0,.12) 55%,rgba(0,0,0,.55) 100%);}
-
-
-/* ══ FRASI ROTANTI ══ */
-#phrase-box {
-  min-height: 52px;
-  display:flex;align-items:center;justify-content:center;
-  max-width:520px;padding:0 24px;
-}
-#phrase-text {
-  font-family:var(--serif);
-  font-style:italic;
-  font-size:clamp(13px,1.6vw,17px);
-  color:rgba(255,255,255,.62);
-  letter-spacing:.12em;
-  text-align:center;
-  line-height:1.7;
-  text-shadow:0 1px 8px rgba(0,0,0,.5);
-  opacity:0;
-  transition:opacity 1.2s ease;
-}
-#phrase-text.visible { opacity:1; }
-
-/* ══ INTRO UI ══ */
-#intro-ui {
-  position:absolute;inset:0;z-index:10;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:32px;
-  transition:opacity 0.6s ease;
-}
-
-#intro-logo { text-align:center; display:flex; flex-direction:column; align-items:center; gap:10px; }
-
-.logo-jp {
-  font-family:var(--jp);font-weight:300;
-  font-size:clamp(64px,12vw,120px);
-  color:rgba(255,255,255,.94);
-  letter-spacing:.5em;text-indent:.5em;
-  text-shadow:0 2px 20px rgba(0,0,0,.35);
-  animation:fadeUp 1.8s ease both;
-}
-.logo-sub {
-  font-family:var(--serif);font-weight:300;
-  font-size:clamp(10px,1.3vw,15px);
-  color:rgba(255,255,255,.45);
-  letter-spacing:.85em;text-indent:.85em;
-  animation:fadeUp 1.8s .2s ease both;
-}
-.logo-tag {
-  font-family:var(--serif);font-style:italic;
-  font-size:clamp(12px,1.4vw,16px);
-  color:rgba(255,255,255,.45);
-  letter-spacing:.15em;margin-top:4px;
-  animation:fadeUp 1.8s .4s ease both;
-}
-
-#start-btn {
-  background:transparent;border:none;
-  border-bottom:1px solid rgba(255,255,255,.28);
-  padding:6px 2px;
-  color:rgba(255,255,255,.5);
-  font-family:var(--serif);font-style:italic;
-  font-size:clamp(12px,1.3vw,15px);
-  letter-spacing:.35em;
-  cursor:pointer;
-  transition:all .4s ease;
-  animation:fadeUp 1.8s .7s ease both;
-}
-#start-btn:hover {
-  color:rgba(255,255,255,.88);
-  border-bottom-color:rgba(255,255,255,.65);
-  letter-spacing:.45em;
-}
-
-/* ══ MAPPA AREE ══ */
-#map-ui-title {
-  font-family:var(--serif);font-style:italic;
-  font-size:clamp(15px,2vw,21px);
-  color:rgba(255,255,255,.7);
-  letter-spacing:.25em;
-  text-shadow:0 1px 8px rgba(0,0,0,.5);
-}
-#map-icons {
-  display:flex;flex-wrap:wrap;
-  justify-content:center;
-  gap:16px;max-width:580px;padding:0 20px;
-}
-.hs {
-  display:flex;flex-direction:column;align-items:center;gap:8px;
-  cursor:pointer;
-  transition:transform .25s ease;
-}
-.hs:hover { transform:translateY(-4px); }
-.hs-dot {
-  width:60px;height:60px;
-  background:rgba(255,255,255,.13);
-  border:1.5px solid rgba(255,255,255,.4);
-  border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-size:24px;
-  backdrop-filter:blur(8px);
-  box-shadow:0 4px 16px rgba(0,0,0,.2);
-  transition:all .3s;
-  animation:ring 3s ease-out infinite;
-}
-.hs:nth-child(2) .hs-dot{animation-delay:.4s}
-.hs:nth-child(3) .hs-dot{animation-delay:.8s}
-.hs:nth-child(4) .hs-dot{animation-delay:1.2s}
-.hs:nth-child(5) .hs-dot{animation-delay:1.6s}
-.hs:nth-child(6) .hs-dot{animation-delay:2.0s}
-.hs:nth-child(7) .hs-dot{animation-delay:2.4s}
-@keyframes ring {
-  0%,70%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.3);}
-  35%{box-shadow:0 0 0 10px rgba(255,255,255,0);}
-}
-.hs:hover .hs-dot {
-  background:rgba(255,255,255,.28);
-  border-color:rgba(255,255,255,.85);
-}
-.hs-lbl {
-  font-family:var(--serif);font-style:italic;
-  font-size:11px;color:rgba(255,255,255,.65);
-  letter-spacing:.1em;text-align:center;
-  max-width:70px;line-height:1.3;
-}
-
-@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
-@keyframes hsIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
-
-
-
-
-/* ══ PULSANTE CHIUDI UNIVERSALE ══ */
-.screen-close-btn {
-  position:absolute;top:14px;right:14px;z-index:10;
-  background:transparent;border:none;
-  color:rgba(245,234,208,.3);font-size:18px;
-  cursor:pointer;padding:6px 10px;
-  border-radius:50%;transition:all .3s;
-  line-height:1;
-}
-.screen-close-btn:hover {
-  color:rgba(245,234,208,.85);
-  background:rgba(255,255,255,.06);
-}
-
-/* ══ WELCOME SCREEN ══ */
-#welcome-screen {
-  position:fixed;inset:0;z-index:850;
-  display:flex;align-items:center;justify-content:center;
-  padding:20px;
-}
-#wc-bg {
-  position:absolute;inset:0;
-  background:rgba(8,6,18,.94);
-  backdrop-filter:blur(20px);
-}
-#wc-box {
-  position:relative;z-index:1;
-  display:flex;flex-direction:column;align-items:center;
-  gap:20px;text-align:center;
-  max-width:340px;width:100%;
-  animation:fadeUp .8s ease both;
-}
-#wc-top { display:flex;flex-direction:column;gap:6px; }
-#wc-greeting {
-  font-family:var(--serif);font-style:italic;
-  font-size:14px;color:rgba(245,234,208,.45);
-  letter-spacing:.25em;
-}
-#wc-charname {
-  font-family:var(--jp);font-size:32px;font-weight:300;
-  color:var(--gold);letter-spacing:.3em;
-  text-shadow:0 0 30px rgba(212,168,83,.4);
-}
-#wc-personality {
-  font-family:var(--serif);font-style:italic;
-  font-size:13px;color:rgba(245,234,208,.4);
-  letter-spacing:.15em;
-}
-
-/* Avatar preview */
-#wc-avatar-wrap {
-  position:relative;
-  display:flex;align-items:center;justify-content:center;
-}
-#wc-canvas {
-  border-radius:8px;
-  filter:drop-shadow(0 8px 32px rgba(0,0,0,.6));
-  position:relative;z-index:1;
-}
-#wc-glow {
-  position:absolute;
-  width:180px;height:180px;
-  background:radial-gradient(circle,rgba(212,168,83,.15) 0%,transparent 70%);
-  animation:wcGlow 3s ease-in-out infinite;
-  pointer-events:none;
-}
-@keyframes wcGlow {
-  0%,100%{transform:scale(1);opacity:.6;}
-  50%{transform:scale(1.2);opacity:1;}
-}
-
-#wc-bottom { display:flex;flex-direction:column;gap:10px;align-items:center; }
-#wc-tagline {
-  font-family:var(--serif);font-style:italic;
-  font-size:13px;color:rgba(245,234,208,.35);
-  letter-spacing:.1em;line-height:1.6;
-  max-width:260px;
-}
-#wc-enter-btn {
-  padding:14px 48px;
-  background:rgba(212,168,83,.15);
-  border:1.5px solid rgba(212,168,83,.55);
-  border-radius:3px;
-  color:var(--gold);
-  font-family:var(--serif);font-size:15px;letter-spacing:.25em;
-  cursor:pointer;transition:all .35s;
-  animation:pulse-gold 2.5s ease-in-out infinite;
-}
-#wc-enter-btn:hover {
-  background:rgba(212,168,83,.28);
-  border-color:rgba(212,168,83,.9);
-  box-shadow:0 0 24px rgba(212,168,83,.2);
-}
-#wc-edit-btn {
-  background:transparent;border:none;
-  font-family:var(--serif);font-style:italic;
-  font-size:12px;color:rgba(245,234,208,.3);
-  letter-spacing:.15em;cursor:pointer;
-  transition:color .3s;padding:4px;
-}
-#wc-edit-btn:hover { color:rgba(245,234,208,.65); }
-
-/* ══ AVATAR SCREEN ══ */
-#avatar-screen {
-  position:fixed;inset:0;z-index:800;
-  background:var(--bg,#0d0a18);
-}
-#av-app {
-  width:100%;height:100%;
-  display:grid;
-  grid-template-columns:300px 1fr 260px;
-  grid-template-rows:56px 1fr 66px;
-}
-/* Close button */
-#av-close-btn {
-  position:fixed;top:14px;right:14px;z-index:820;
-  background:transparent;border:none;
-  color:rgba(245,234,208,.35);font-size:18px;
-  cursor:pointer;padding:6px 10px;border-radius:50%;
-  transition:all .3s;line-height:1;
-}
-#av-close-btn:hover{color:rgba(245,234,208,.85);background:rgba(255,255,255,.06);}
-
-
-:root {
-  --gold:#d4a853;--cream:#f5ead0;
-  --serif:'Cormorant Garamond',serif;
-  --jp:'Zen Kaku Gothic New',sans-serif;
-  --bg:#0d0a18;--panel:#16112a;--border:rgba(212,168,83,.2);
-}
-*{margin:0;padding:0;box-sizing:border-box;}
-
-
-/* LAYOUT */
-#app {
-  display:grid;
-  grid-template-columns:320px 1fr 280px;
-  grid-template-rows:60px 1fr 70px;
-  height:100vh;
-  gap:0;
-}
-
-/* HEADER */
-#header {
-  grid-column:1/-1;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 28px;
-  background:rgba(13,10,24,.95);
-  border-bottom:1px solid var(--border);
-}
-.h-logo {font-family:var(--jp);font-size:20px;color:var(--gold);letter-spacing:.3em;}
-.h-title {font-family:var(--serif);font-style:italic;font-size:15px;color:rgba(245,234,208,.5);letter-spacing:.15em;}
-.h-step {font-family:var(--serif);font-size:12px;color:rgba(245,234,208,.3);letter-spacing:.2em;}
-
-/* PREVIEW CENTRALE */
-#preview-panel {
-  background:linear-gradient(180deg,#1a1235 0%,#0d0a1a 100%);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:16px;position:relative;overflow:hidden;
-  border-left:1px solid var(--border);
-  border-right:1px solid var(--border);
-}
-#preview-bg-glow {
-  position:absolute;
-  width:300px;height:300px;
-  background:radial-gradient(circle,rgba(212,168,83,.08) 0%,transparent 70%);
-  border-radius:50%;
-  animation:glowPulse 4s ease-in-out infinite;
-}
-@keyframes glowPulse{0%,100%{transform:scale(1);opacity:.6;}50%{transform:scale(1.15);opacity:1;}}
-#avatar-svg-wrap {
-  position:relative;z-index:1;
-  filter:drop-shadow(0 12px 40px rgba(0,0,0,.7));
-}
-#avatar-svg {width:260px;height:340px;}
-#preview-name {
-  font-family:var(--jp);font-size:18px;color:var(--gold);
-  letter-spacing:.3em;position:relative;z-index:1;
-  min-height:26px;text-align:center;
-}
-#preview-code {
-  font-family:monospace;font-size:9px;
-  color:rgba(212,168,83,.25);letter-spacing:.1em;
-  position:relative;z-index:1;
-}
-
-/* PANNELLO SINISTRO — categorie */
-#left-panel {
-  background:var(--panel);
-  display:flex;flex-direction:column;
-  border-right:1px solid var(--border);
-  overflow-y:auto;
-}
-#left-panel::-webkit-scrollbar{width:3px;}
-#left-panel::-webkit-scrollbar-thumb{background:rgba(212,168,83,.2);}
-
-.category {
-  padding:16px 20px;
-  border-bottom:1px solid rgba(255,255,255,.05);
-  cursor:pointer;transition:all .25s;
-  display:flex;align-items:center;gap:12px;
-}
-.category:hover,.category.active {
-  background:rgba(212,168,83,.08);
-}
-.category.active .cat-label { color:var(--gold); }
-.cat-icon {font-size:18px;width:24px;text-align:center;}
-.cat-label {font-family:var(--serif);font-size:13px;letter-spacing:.12em;color:rgba(245,234,208,.6);transition:color .25s;}
-.cat-check {margin-left:auto;font-size:11px;color:var(--gold);opacity:0;}
-.category.done .cat-check {opacity:1;}
-
-/* PANNELLO DESTRO — opzioni */
-#right-panel {
-  background:var(--panel);
-  display:flex;flex-direction:column;
-  overflow-y:auto;padding:20px 16px;gap:16px;
-}
-#right-panel::-webkit-scrollbar{width:3px;}
-#right-panel::-webkit-scrollbar-thumb{background:rgba(212,168,83,.2);}
-
-.opt-section-title {
-  font-family:var(--serif);font-size:11px;
-  color:rgba(212,168,83,.6);letter-spacing:.25em;
-  padding-bottom:8px;border-bottom:1px solid var(--border);
-}
-
-/* Griglia opzioni */
-.opt-grid {display:flex;flex-wrap:wrap;gap:8px;}
-
-.opt-btn {
-  padding:7px 12px;
-  background:rgba(255,255,255,.04);
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:3px;
-  font-family:var(--serif);font-size:12px;
-  color:rgba(245,234,208,.55);letter-spacing:.08em;
-  cursor:pointer;transition:all .2s;
-  white-space:nowrap;
-}
-.opt-btn:hover {border-color:rgba(212,168,83,.35);color:var(--cream);}
-.opt-btn.sel {
-  background:rgba(212,168,83,.14);
-  border-color:rgba(212,168,83,.65);
-  color:var(--gold);
-}
-
-/* Palette colori */
-.color-grid {display:flex;flex-wrap:wrap;gap:8px;}
-.color-swatch {
-  width:30px;height:30px;border-radius:50%;
-  cursor:pointer;transition:all .2s;
-  border:2px solid transparent;
-  box-shadow:0 2px 6px rgba(0,0,0,.4);
-}
-.color-swatch:hover {transform:scale(1.15);}
-.color-swatch.sel {
-  border-color:#fff;
-  transform:scale(1.22);
-  box-shadow:0 0 10px rgba(255,255,255,.3);
-}
-
-/* Input nome */
-.name-input {
-  width:100%;padding:10px 14px;
-  background:rgba(255,255,255,.05);
-  border:1px solid rgba(212,168,83,.25);
-  border-radius:3px;color:var(--cream);
-  font-family:var(--serif);font-size:15px;
-  letter-spacing:.1em;outline:none;
-  transition:border .3s;
-}
-.name-input:focus {border-color:rgba(212,168,83,.6);}
-.name-input::placeholder{color:rgba(245,234,208,.2);}
-
-/* FOOTER */
-#footer {
-  grid-column:1/-1;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 28px;
-  background:rgba(13,10,24,.95);
-  border-top:1px solid var(--border);
-  gap:16px;
-}
-#unique-badge {
-  font-family:var(--serif);font-size:11px;
-  color:rgba(212,168,83,.5);letter-spacing:.1em;
-}
-#save-btn {
-  padding:12px 40px;
-  background:linear-gradient(135deg,rgba(212,168,83,.2),rgba(212,168,83,.1));
-  border:1.5px solid rgba(212,168,83,.6);
-  border-radius:3px;color:var(--gold);
-  font-family:var(--serif);font-size:14px;letter-spacing:.25em;
-  cursor:pointer;transition:all .35s;
-}
-#save-btn:hover {
-  background:rgba(212,168,83,.28);
-  border-color:var(--gold);
-  box-shadow:0 0 20px rgba(212,168,83,.2);
-}
-#random-btn {
-  padding:12px 20px;
-  background:transparent;
-  border:1px solid rgba(255,255,255,.1);
-  border-radius:3px;color:rgba(245,234,208,.4);
-  font-family:var(--serif);font-size:12px;letter-spacing:.15em;
-  cursor:pointer;transition:all .3s;
-}
-#random-btn:hover {border-color:rgba(255,255,255,.3);color:var(--cream);}
-
-/* Responsive mobile */
-@media(max-width:768px){
-  #app{grid-template-columns:1fr;grid-template-rows:50px auto 1fr auto 60px;overflow-y:auto;}
-  #left-panel{display:flex;flex-direction:row;overflow-x:auto;overflow-y:hidden;border-right:none;border-bottom:1px solid var(--border);}
-  .category{padding:12px 14px;border-bottom:none;border-right:1px solid rgba(255,255,255,.05);flex-shrink:0;}
-  .cat-label{font-size:11px;}
-  #preview-panel{min-height:280px;border:none;border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
-  #avatar-svg{width:180px;height:240px;}
-}
-
-
-
-/* ── TOPBAR MAPPA ── */
-#map-ui-topbar {
-  position:absolute;top:0;left:0;right:0;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:14px 20px;
-  background:linear-gradient(to bottom,rgba(0,0,0,.35),transparent);
-  z-index:20;
-}
-#map-ui-user {
-  display:flex;align-items:center;gap:10px;
-}
-#map-ui-avatar-mini {
-  width:36px;height:36px;border-radius:50%;
-  background:rgba(212,168,83,.15);
-  border:1.5px solid rgba(212,168,83,.4);
-  display:flex;align-items:center;justify-content:center;
-  font-family:var(--jp);font-size:14px;color:var(--gold);
-  overflow:hidden;
-}
-#map-ui-username {
-  font-family:var(--serif);font-size:13px;
-  color:rgba(245,234,208,.7);letter-spacing:.15em;
-}
-#map-profile-btn {
-  background:rgba(212,168,83,.12);
-  border:1px solid rgba(212,168,83,.35);
-  border-radius:20px;
-  padding:7px 16px;
-  font-family:var(--serif);font-size:12px;
-  color:rgba(212,168,83,.8);letter-spacing:.12em;
-  cursor:pointer;transition:all .3s;
-}
-#map-profile-btn:hover {
-  background:rgba(212,168,83,.22);
-  border-color:rgba(212,168,83,.7);
-  color:var(--gold);
-}
-
-/* ══ PANNELLO PROFILO ══ */
-#profile-panel {
-  position:fixed;inset:0;z-index:600;
-  pointer-events:none;
-}
-#profile-panel.open { pointer-events:all; }
-
-#profile-overlay {
-  position:absolute;inset:0;
-  background:rgba(0,0,0,0);
-  transition:background .4s ease;
-}
-#profile-panel.open #profile-overlay {
-  background:rgba(0,0,0,0.45);
-  backdrop-filter:blur(4px);
-}
-
-#profile-drawer {
-  position:absolute;right:0;top:0;bottom:0;
-  width:min(380px, 92vw);
-  background:linear-gradient(180deg,#16112a 0%,#0d0a1a 100%);
-  border-left:1px solid rgba(212,168,83,.2);
-  display:flex;flex-direction:column;gap:0;
-  transform:translateX(100%);
-  transition:transform .4s cubic-bezier(.4,0,.2,1);
-  overflow-y:auto;
-  box-shadow:-8px 0 40px rgba(0,0,0,.5);
-}
-#profile-drawer::-webkit-scrollbar{width:3px;}
-#profile-drawer::-webkit-scrollbar-thumb{background:rgba(212,168,83,.2);}
-
-#profile-panel.open #profile-drawer {
-  transform:translateX(0);
-}
-
-.profile-close {
-  position:absolute;top:14px;left:14px;
-  background:transparent;border:none;
-  color:rgba(245,234,208,.3);font-size:18px;
-  cursor:pointer;padding:6px 10px;
-  border-radius:50%;transition:all .3s;z-index:1;
-}
-.profile-close:hover{color:rgba(245,234,208,.85);background:rgba(255,255,255,.06);}
-
-/* Avatar preview */
-#prof-avatar-wrap {
-  display:flex;flex-direction:column;align-items:center;
-  padding:50px 20px 20px;
-  background:linear-gradient(180deg,rgba(212,168,83,.06) 0%,transparent 100%);
-  border-bottom:1px solid rgba(212,168,83,.12);
-  gap:8px;
-}
-#prof-name {
-  font-family:var(--jp);font-size:20px;color:var(--gold);
-  letter-spacing:.3em;text-shadow:0 0 20px rgba(212,168,83,.3);
-  text-align:center;
-}
-#prof-code {
-  font-family:monospace;font-size:9px;
-  color:rgba(212,168,83,.25);letter-spacing:.08em;
-  text-align:center;
-}
-
-/* Tabs */
-#prof-tabs {
-  display:flex;border-bottom:1px solid rgba(212,168,83,.15);
-  flex-shrink:0;
-}
-.prof-tab {
-  flex:1;padding:12px 8px;
-  background:transparent;border:none;
-  font-family:var(--serif);font-size:12px;letter-spacing:.15em;
-  color:rgba(245,234,208,.4);cursor:pointer;
-  transition:all .25s;
-  border-bottom:2px solid transparent;margin-bottom:-1px;
-}
-.prof-tab:hover{color:var(--cream);}
-.prof-tab.active{color:var(--gold);border-bottom-color:var(--gold);}
-
-/* Content */
-.prof-content {
-  display:none;flex-direction:column;gap:12px;
-  padding:20px 20px;flex:1;
-}
-.prof-content.active{display:flex;}
-
-/* Identità */
-.prof-section {
-  display:flex;flex-direction:column;gap:6px;
-}
-.prof-section-title {
-  font-family:var(--serif);font-size:10px;
-  color:rgba(212,168,83,.5);letter-spacing:.25em;
-  text-transform:uppercase;
-}
-.prof-tags {
-  display:flex;flex-wrap:wrap;gap:5px;
-}
-.prof-tag {
-  padding:4px 10px;
-  background:rgba(212,168,83,.08);
-  border:1px solid rgba(212,168,83,.2);
-  border-radius:20px;
-  font-family:var(--serif);font-size:11px;
-  color:rgba(245,234,208,.65);letter-spacing:.06em;
-}
-.prof-empty {
-  font-family:var(--serif);font-style:italic;font-size:12px;
-  color:rgba(245,234,208,.25);letter-spacing:.1em;
-}
-
-/* Stats */
-.prof-stat {
-  display:flex;justify-content:space-between;align-items:center;
-  padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05);
-}
-.prof-stat-label {
-  font-family:var(--serif);font-size:12px;
-  color:rgba(245,234,208,.45);letter-spacing:.1em;
-}
-.prof-stat-value {
-  font-family:var(--serif);font-size:13px;
-  color:var(--gold);letter-spacing:.1em;
-}
-
-/* Action buttons */
-.prof-action-btn {
-  display:flex;align-items:center;gap:14px;
-  padding:14px 16px;
-  background:rgba(255,255,255,.04);
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:4px;
-  cursor:pointer;transition:all .25s;text-align:left;
-  width:100%;
-}
-.prof-action-btn:hover {
-  background:rgba(212,168,83,.1);
-  border-color:rgba(212,168,83,.35);
-}
-.prof-action-btn > span { font-size:22px;flex-shrink:0; }
-.prof-action-title {
-  font-family:var(--serif);font-size:13px;
-  color:var(--cream);letter-spacing:.1em;margin-bottom:3px;
-}
-.prof-action-sub {
-  font-family:var(--serif);font-style:italic;font-size:11px;
-  color:rgba(245,234,208,.4);letter-spacing:.06em;
-}
-.prof-action-btn.danger:hover {
-  background:rgba(200,60,60,.1);
-  border-color:rgba(200,60,60,.35);
-}
-.prof-action-btn.danger .prof-action-title { color:rgba(220,120,120,.8); }
-.prof-action-btn:disabled {
-  opacity:.4;cursor:not-allowed;
-}
-.prof-action-btn:disabled:hover {
-  background:rgba(255,255,255,.04);
-  border-color:rgba(255,255,255,.08);
-}
-
-/* ══ WORLD ══ */
-#world{position:fixed;inset:0;display:none;}
-#wc{position:absolute;inset:0;width:100%;height:100%;}
-#hud{position:absolute;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:linear-gradient(to bottom,rgba(0,0,0,.28),transparent);pointer-events:none;}
-.hclock{font-family:var(--serif);font-size:13px;color:rgba(245,234,208,.8);letter-spacing:.15em;}
-.haname{font-family:var(--serif);font-style:italic;font-size:clamp(12px,1.4vw,16px);color:rgba(245,234,208,.7);letter-spacing:.2em;}
-.hctrl{display:flex;gap:10px;pointer-events:all;}
-.cb{background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.15);border-radius:50%;width:36px;height:36px;font-size:15px;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
-.cb:hover{background:rgba(212,168,83,.2);border-color:rgba(212,168,83,.6);transform:scale(1.1);}
-#area-nav{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);display:flex;gap:20px;z-index:50;}
-.na{background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.2);border-radius:50%;width:44px;height:44px;font-size:22px;color:rgba(245,234,208,.7);cursor:pointer;transition:all .3s;backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;}
-.na:hover{background:rgba(212,168,83,.2);border-color:rgba(212,168,83,.6);color:var(--cream);transform:scale(1.1);}
-#map{position:fixed;inset:0;z-index:500;background:rgba(13,10,20,.88);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;}
-#mp{background:rgba(18,14,32,.97);border:1px solid rgba(212,168,83,.3);padding:36px;max-width:660px;width:90%;text-align:center;}
-#mp h2{font-family:var(--serif);font-size:26px;color:var(--gold);letter-spacing:.3em;margin-bottom:28px;font-weight:300;}
-#mg{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px;}
-.ma{background:rgba(255,255,255,.04);border:1px solid rgba(212,168,83,.2);padding:16px 8px;cursor:pointer;transition:all .3s;display:flex;flex-direction:column;align-items:center;gap:7px;}
-.ma:hover{background:rgba(212,168,83,.12);border-color:rgba(212,168,83,.6);transform:translateY(-2px);}
-.mi{font-size:26px;}
-.ml{font-family:var(--serif);font-size:10px;color:rgba(245,234,208,.65);letter-spacing:.12em;text-align:center;line-height:1.4;}
-#mc{background:transparent;border:1px solid rgba(212,168,83,.4);color:rgba(245,234,208,.6);font-family:var(--serif);font-size:13px;letter-spacing:.2em;padding:10px 28px;cursor:pointer;transition:all .3s;}
-#mc:hover{border-color:rgba(212,168,83,.8);color:var(--cream);}
-#tr{position:fixed;inset:0;z-index:400;display:flex;align-items:center;justify-content:center;pointer-events:none;background:transparent;transition:background 1s ease;}
-#tr.f{background:rgba(13,10,20,.95);}
-#tt{font-family:var(--serif);font-style:italic;font-size:clamp(16px,2.5vw,28px);color:var(--gold);letter-spacing:.4em;opacity:0;text-shadow:0 0 40px rgba(212,168,83,.4);transition:opacity .8s ease;}
-#tr.f #tt{opacity:1;}
-#tip{position:absolute;bottom:80px;left:50%;transform:translateX(-50%);font-family:var(--serif);font-style:italic;font-size:12px;color:rgba(245,234,208,.38);letter-spacing:.2em;z-index:50;pointer-events:none;transition:opacity 2s;}
-
-@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
-@media(max-width:600px){#mg{grid-template-columns:repeat(2,1fr);} #hotspots{gap:12px;} .hs-dot{width:54px;height:54px;font-size:22px;}}
-
-/* ══ REGISTRAZIONE ══ */
-#reg-screen {
-  position:fixed;inset:0;z-index:900;
-  display:flex;align-items:center;justify-content:center;
-  padding:20px;
-}
-#reg-overlay {
-  position:absolute;inset:0;
-  background:rgba(8,6,18,0.92);
-  backdrop-filter:blur(16px);
-}
-#reg-box {
-  position:relative;z-index:1;
-  width:100%;max-width:420px;
-  background:rgba(20,16,35,0.98);
-  border:1px solid rgba(212,168,83,0.25);
-  border-radius:6px;
-  padding:36px 32px;
-  max-height:90vh;overflow-y:auto;
-  box-shadow:0 20px 60px rgba(0,0,0,0.5);
-}
-
-/* Header */
-#reg-header {
-  text-align:center;margin-bottom:28px;
-}
-.reg-logo-jp {
-  font-family:var(--jp);font-weight:300;
-  font-size:42px;color:var(--gold);
-  letter-spacing:.4em;text-indent:.4em;
-  text-shadow:0 0 30px rgba(212,168,83,0.3);
-}
-.reg-logo-sub {
-  font-family:var(--serif);font-size:11px;
-  color:rgba(212,168,83,0.6);letter-spacing:.7em;
-  margin-top:4px;
-}
-.reg-tagline {
-  font-family:var(--serif);font-style:italic;
-  font-size:15px;color:rgba(245,234,208,0.55);
-  letter-spacing:.15em;margin-top:10px;
-}
-
-/* Tabs */
-#reg-tabs {
-  display:flex;border-bottom:1px solid rgba(212,168,83,0.2);
-  margin-bottom:24px;
-}
-.rtab {
-  flex:1;padding:10px;
-  background:transparent;border:none;
-  font-family:var(--serif);font-size:14px;
-  letter-spacing:.15em;
-  color:rgba(245,234,208,0.4);
-  cursor:pointer;transition:all .3s;
-  border-bottom:2px solid transparent;
-  margin-bottom:-1px;
-}
-.rtab.active {
-  color:var(--gold);
-  border-bottom-color:var(--gold);
-}
-
-/* Campi form */
-.reg-form { display:flex;flex-direction:column;gap:16px; }
-.field-group { display:flex;flex-direction:column;gap:6px; }
-.field-group label {
-  font-family:var(--serif);font-size:12px;
-  color:rgba(245,234,208,0.55);letter-spacing:.15em;
-}
-.field-group input {
-  background:rgba(255,255,255,0.05);
-  border:1px solid rgba(255,255,255,0.12);
-  border-radius:3px;
-  padding:11px 14px;
-  color:rgba(245,234,208,0.9);
-  font-family:var(--serif);font-size:14px;
-  outline:none;transition:border .3s;
-}
-.field-group input:focus {
-  border-color:rgba(212,168,83,0.5);
-  background:rgba(255,255,255,0.08);
-}
-.field-group input::placeholder { color:rgba(245,234,208,0.25); }
-
-/* Checkbox */
-.field-check {
-  display:flex;align-items:flex-start;gap:10px;
-}
-.field-check input[type="checkbox"] {
-  width:16px;height:16px;margin-top:2px;
-  accent-color:var(--gold);cursor:pointer;flex-shrink:0;
-}
-.field-check label {
-  font-family:var(--serif);font-size:12px;
-  color:rgba(245,234,208,0.5);line-height:1.5;cursor:pointer;
-}
-.reg-link { color:var(--gold);text-decoration:none; }
-.reg-link:hover { text-decoration:underline; }
-
-/* Pulsante principale */
-.reg-btn {
-  display:flex;align-items:center;justify-content:center;gap:12px;
-  padding:14px 24px;
-  background:linear-gradient(135deg, rgba(212,168,83,0.15), rgba(212,168,83,0.08));
-  border:1px solid rgba(212,168,83,0.5);
-  border-radius:3px;
-  color:var(--gold);
-  font-family:var(--serif);font-size:15px;letter-spacing:.2em;
-  cursor:pointer;transition:all .3s;
-  margin-top:4px;width:100%;
-}
-.reg-btn:hover {
-  background:rgba(212,168,83,0.22);
-  border-color:rgba(212,168,83,0.85);
-  box-shadow:0 4px 20px rgba(212,168,83,0.15);
-}
-.reg-btn-price {
-  font-size:13px;opacity:.7;
-  border-left:1px solid rgba(212,168,83,0.3);
-  padding-left:12px;margin-left:4px;
-}
-.reg-btn-secondary {
-  background:transparent;border:none;
-  color:rgba(245,234,208,0.3);
-  font-family:var(--serif);font-style:italic;
-  font-size:12px;letter-spacing:.1em;
-  cursor:pointer;transition:color .3s;
-  text-align:center;padding:8px;
-}
-.reg-btn-secondary:hover { color:rgba(245,234,208,0.6); }
-
-/* Errori */
-.reg-error {
-  font-family:var(--serif);font-size:12px;
-  color:#e07070;letter-spacing:.1em;text-align:center;
-  min-height:18px;
-}
-
-/* Pagamento */
-#payment-info {
-  text-align:center;padding:20px;
-  background:rgba(212,168,83,0.06);
-  border:1px solid rgba(212,168,83,0.2);
-  border-radius:4px;margin-bottom:8px;
-}
-.payment-amount {
-  font-family:var(--jp);font-size:44px;
-  color:var(--gold);letter-spacing:.05em;
-  text-shadow:0 0 20px rgba(212,168,83,0.3);
-}
-.payment-desc {
-  font-family:var(--serif);font-style:italic;
-  font-size:13px;color:rgba(245,234,208,0.5);
-  margin-top:6px;letter-spacing:.1em;
-}
-.payment-features {
-  list-style:none;margin-top:16px;
-  display:flex;flex-direction:column;gap:7px;text-align:left;
-}
-.payment-features li {
-  font-family:var(--serif);font-size:13px;
-  color:rgba(245,234,208,0.65);letter-spacing:.08em;
-}
-.payment-note {
-  font-family:var(--serif);font-style:italic;
-  font-size:12px;color:rgba(245,234,208,0.35);
-  text-align:center;letter-spacing:.08em;line-height:1.6;
-  margin-bottom:8px;
-}
-
-
-/* X chiudi registrazione */
-#reg-close {
-  position:absolute;top:16px;right:16px;
-  background:transparent;border:none;
-  color:rgba(245,234,208,.35);
-  font-size:18px;cursor:pointer;
-  line-height:1;padding:4px 8px;
-  transition:color .3s;
-  border-radius:50%;
-}
-#reg-close:hover { color:rgba(245,234,208,.85); }
-
-/* Scrollbar */
-#reg-box::-webkit-scrollbar{width:4px;}
-#reg-box::-webkit-scrollbar-track{background:transparent;}
-#reg-box::-webkit-scrollbar-thumb{background:rgba(212,168,83,0.3);border-radius:2px;}
-
-
-</style>
-<script>
-// ══════════════════════════════════════════════
-// SEKAI — Database Layer (Supabase)
-// Includi questo file in demo.html e avatar-builder.html
-// ══════════════════════════════════════════════
-
-const SUPABASE_URL  = 'https://oegkgicuigpcwoneradf.supabase.co';
-const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lZ2tnaWN1aWdwY3dvbmVyYWRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NjQ3OTQsImV4cCI6MjA5NjQ0MDc5NH0.rRaCqvdX5lmgEgZDjGutZHvnO2Bwy_vp5c-URZANyAE';
-
-// ── CHIAMATA API BASE ──
-async function sbFetch(path, options = {}) {
-  const url = `${SUPABASE_URL}/rest/v1/${path}`;
-  const headers = {
-    'apikey': SUPABASE_KEY,
-    'Authorization': `Bearer ${SUPABASE_KEY}`,
-    'Content-Type': 'application/json',
-    'Prefer': options.prefer || 'return=representation',
-    ...options.headers,
-  };
-  const res = await fetch(url, { ...options, headers });
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Supabase error: ${res.status} ${err}`);
-  }
-  const text = await res.text();
-  return text ? JSON.parse(text) : null;
-}
-
-// ══ UTENTI ═════════════════════════════════════
-
-const SekaiDB = {
-
-  // ── Registrazione ──
-  async register(email, password, username, birthDate) {
-    // 1. Verifica email non esistente
-    const existing = await sbFetch(`users?email=eq.${encodeURIComponent(email)}&select=id`);
-    if (existing && existing.length > 0) throw new Error('Email già registrata.');
-
-    // 2. Verifica username non esistente
-    const existingUser = await sbFetch(`users?username=eq.${encodeURIComponent(username)}&select=id`);
-    if (existingUser && existingUser.length > 0) throw new Error('Nome utente già in uso.');
-
-    // 3. Crea utente (password hashata lato client con SHA-256 semplice)
-    const pwHash = await hashPassword(password);
-    const users = await sbFetch('users', {
-      method: 'POST',
-      body: JSON.stringify({
-        email,
-        username,
-        birth_date: birthDate,
-        password_hash: pwHash,
-        paid: false,
-        has_avatar: false,
-      }),
-    });
-    return users[0];
-  },
-
-  // ── Login ──
-  async login(email, password) {
-    const pwHash = await hashPassword(password);
-
-    // Account demo speciale
-    if (email === 'renatosorgi81@gmail.com' && password === 'tecno5181') {
-      const users = await sbFetch(`users?email=eq.${encodeURIComponent(email)}&select=*`);
-      if (!users || users.length === 0) throw new Error('Account demo non trovato. Esegui prima il setup SQL.');
-      const user = users[0];
-      // Carica avatar se esiste
-      user.avatar = await SekaiDB.getAvatar(user.id);
-      await SekaiDB.updateLastSeen(user.id);
-      return user;
-    }
-
-    const users = await sbFetch(
-      `users?email=eq.${encodeURIComponent(email)}&password_hash=eq.${encodeURIComponent(pwHash)}&select=*`
-    );
-    if (!users || users.length === 0) throw new Error('Email o password errati.');
-    const user = users[0];
-    user.avatar = await SekaiDB.getAvatar(user.id);
-    await SekaiDB.updateLastSeen(user.id);
-    return user;
-  },
-
-  // ── Aggiorna ultimo accesso ──
-  async updateLastSeen(userId) {
-    await sbFetch(`users?id=eq.${userId}`, {
-      method: 'PATCH',
-      body: JSON.stringify({ last_seen: new Date().toISOString() }),
-      prefer: 'return=minimal',
-    });
-  },
-
-  // ── Segna come pagante ──
-  async setPaid(userId) {
-    await sbFetch(`users?id=eq.${userId}`, {
-      method: 'PATCH',
-      body: JSON.stringify({ paid: true, paid_at: new Date().toISOString() }),
-      prefer: 'return=minimal',
-    });
-  },
-
-  // ══ AVATAR ═══════════════════════════════════
-
-  // ── Salva avatar ──
-  async saveAvatar(userId, avatarData) {
-    const payload = {
-      user_id: userId,
-      name: avatarData.name,
-      gender: avatarData.gender,
-      face: avatarData.face,
-      hair: avatarData.hair,
-      hair_color: avatarData.hairColor,
-      eyes: avatarData.eyes,
-      eye_color: avatarData.eyeColor,
-      brows: avatarData.brows,
-      nose: avatarData.nose,
-      mouth: avatarData.mouth,
-      skin: avatarData.skin,
-      cloth: avatarData.cloth,
-      cloth_color: avatarData.clothColor,
-      accessory: avatarData.accessory,
-      svg_string: avatarData.svgString || '',
-      personality: avatarData.personality || [],
-      passions: avatarData.passions || [],
-      values: avatarData.values || [],
-      life_phase: avatarData.lifePhase || '',
-      social_style: avatarData.socialStyle || '',
-      gift: avatarData.gift || '',
-      silence_mode: avatarData.silenceMode || '',
-      favorite_area: avatarData.favoriteArea || '',
-      love_text: avatarData.loveText || '',
-      learning_text: avatarData.learningText || '',
-      understand_text: avatarData.understandText || '',
-      dream_text: avatarData.dreamText || '',
-      strength_text: avatarData.strengthText || '',
-      avatar_code: avatarData.code || '',
-      updated_at: new Date().toISOString(),
-    };
-
-    // Upsert — crea o aggiorna
-    const result = await sbFetch('avatars', {
-      method: 'POST',
-      headers: { 'Prefer': 'resolution=merge-duplicates,return=representation' },
-      body: JSON.stringify(payload),
-    });
-
-    // Aggiorna flag has_avatar sull'utente
-    await sbFetch(`users?id=eq.${userId}`, {
-      method: 'PATCH',
-      body: JSON.stringify({ has_avatar: true }),
-      prefer: 'return=minimal',
-    });
-
-    return result;
-  },
-
-  // ── Carica avatar ──
-  async getAvatar(userId) {
-    const data = await sbFetch(`avatars?user_id=eq.${userId}&select=*`);
-    if (!data || data.length === 0) return null;
-    const av = data[0];
-    // Rimappa i campi snake_case → camelCase per il frontend
-    return {
-      name: av.name,
-      gender: av.gender,
-      face: av.face,
-      hair: av.hair,
-      hairColor: av.hair_color,
-      eyes: av.eyes,
-      eyeColor: av.eye_color,
-      brows: av.brows,
-      nose: av.nose,
-      mouth: av.mouth,
-      skin: av.skin,
-      cloth: av.cloth,
-      clothColor: av.cloth_color,
-      accessory: av.accessory,
-      svgString: av.svg_string,
-      personality: av.personality || [],
-      passions: av.passions || [],
-      values: av.values || [],
-      lifePhase: av.life_phase,
-      socialStyle: av.social_style,
-      gift: av.gift,
-      silenceMode: av.silence_mode,
-      favoriteArea: av.favorite_area,
-      loveText: av.love_text,
-      learningText: av.learning_text,
-      understandText: av.understand_text,
-      dreamText: av.dream_text,
-      strengthText: av.strength_text,
-      code: av.avatar_code,
-      lastAppearanceChange: av.last_appearance_change,
-      sekaiJoinedAt: av.created_at,  // data primo ingresso in Sekai
-    };
-  },
-
-  // ── Verifica se può cambiare aspetto (ogni 30 giorni) ──
-  canChangeAppearance(avatar) {
-    if (!avatar?.lastAppearanceChange) return true;
-    const last = new Date(avatar.lastAppearanceChange);
-    const now = new Date();
-    const diffDays = (now - last) / (1000 * 60 * 60 * 24);
-    return diffDays >= 30;
-  },
-
-  daysUntilAppearanceChange(avatar) {
-    if (!avatar?.lastAppearanceChange) return 0;
-    const last = new Date(avatar.lastAppearanceChange);
-    const now = new Date();
-    const diffDays = (now - last) / (1000 * 60 * 60 * 24);
-    return Math.max(0, Math.ceil(30 - diffDays));
-  },
-
-  // ══ SEGNALAZIONI ══════════════════════════════
-
-  async sendReport(reporterId, reportedUserId, contentType, contentText, reason) {
-    return await sbFetch('reports', {
-      method: 'POST',
-      body: JSON.stringify({
-        reporter_id: reporterId,
-        reported_user_id: reportedUserId,
-        content_type: contentType,
-        content_text: contentText,
-        reason,
-        status: 'pending',
-      }),
-    });
-  },
-
-  // ══ ADMIN ═════════════════════════════════════
-
-  async getReports(status = 'pending') {
-    return await sbFetch(`reports?status=eq.${status}&select=*&order=created_at.desc`);
-  },
-
-  async updateReport(reportId, status, adminNote) {
-    return await sbFetch(`reports?id=eq.${reportId}`, {
-      method: 'PATCH',
-      body: JSON.stringify({ status, admin_note: adminNote }),
-    });
-  },
-
-  async banUser(userId) {
-    return await sbFetch(`users?id=eq.${userId}`, {
-      method: 'PATCH',
-      body: JSON.stringify({ banned: true, banned_at: new Date().toISOString() }),
-    });
-  },
-
-  // ══ SESSIONE LOCALE ════════════════════════════
-
-  saveSession(user) {
-    const session = {
-      id: user.id,
-      email: user.email,
-      username: user.username,
-      paid: user.paid,
-      has_avatar: user.has_avatar,
-      avatar: user.avatar || null,
-      savedAt: new Date().toISOString(),
-    };
-    localStorage.setItem('sekai_session_v2', JSON.stringify(session));
-    return session;
-  },
-
-  loadSession() {
-    const raw = localStorage.getItem('sekai_session_v2');
-    if (!raw) return null;
-    try {
-      const s = JSON.parse(raw);
-      // Sessione valida per 7 giorni
-      const age = (new Date() - new Date(s.savedAt)) / (1000 * 60 * 60 * 24);
-      if (age > 7) { localStorage.removeItem('sekai_session_v2'); return null; }
-      return s;
-    } catch(e) { return null; }
-  },
-
-  clearSession() {
-    localStorage.removeItem('sekai_session_v2');
-  },
-};
-
-// ── HASH PASSWORD (SHA-256 browser) ──
-async function hashPassword(password) {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(password + 'sekai_salt_2025');
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
-</script>
-</head>
-<body>
-
-<div id="intro">
-  <video id="bg-video" autoplay muted loop playsinline>
-    <source src="bg.mp4" type="video/mp4">
-  </video>
-  <div id="intro-overlay"></div>
-
-  <!-- SCHERMATA UNICA INTRO -->
-  <div id="intro-ui">
-    <div id="intro-logo">
-      <div class="logo-jp">世界</div>
-      <p class="logo-sub">S E K A I</p>
-      <p class="logo-tag">Un luogo dove il tempo respira piano</p>
-    </div>
-    <div id="phrase-box">
-      <p id="phrase-text"></p>
-    </div>
-    <button id="start-btn" onclick="unlockAndStart()">tocca per iniziare</button>
-    <p id="already-started" style="display:none;font-family:var(--serif);font-style:italic;font-size:13px;color:rgba(255,255,255,.45);letter-spacing:.2em;cursor:pointer;" onclick="showRegScreen()">entra nel tuo account →</p>
-  </div>
-
-  <!-- MAPPA AREE (appare dopo login) -->
-  
-
-<!-- REGISTRAZIONE -->
-
-<div id="reg-screen" style="display:none;">
-  <div id="reg-overlay"></div>
-  <div id="reg-box">
-
-    <!-- X chiudi -->
-    <button id="reg-close" onclick="closeReg()" title="Chiudi">✕</button>
-
-    <!-- Header -->
-    <div id="reg-header">
-      <div class="reg-logo-jp">世界</div>
-      <p class="reg-logo-sub">S E K A I</p>
-      <p class="reg-tagline">Unisciti al mondo</p>
-    </div>
-
-    <!-- Tab switcher -->
-    <div id="reg-tabs">
-      <button class="rtab active" id="tab-register" onclick="switchTab('register')">Registrati</button>
-      <button class="rtab" id="tab-login" onclick="switchTab('login')">Accedi</button>
-    </div>
-
-    <!-- FORM REGISTRAZIONE -->
-    <div id="form-register" class="reg-form">
-      <div class="field-group">
-        <label>Nome utente</label>
-        <input type="text" id="r-username" placeholder="Come vuoi essere chiamato?" maxlength="20">
-      </div>
-      <div class="field-group">
-        <label>Email</label>
-        <input type="email" id="r-email" placeholder="La tua email">
-      </div>
-      <div class="field-group">
-        <label>Password</label>
-        <input type="password" id="r-password" placeholder="Minimo 8 caratteri">
-      </div>
-      <div class="field-group">
-        <label>Data di nascita</label>
-        <input type="date" id="r-birth" max="">
-      </div>
-      <div class="field-check">
-        <input type="checkbox" id="r-terms">
-        <label for="r-terms">Ho letto e accetto i <a href="#" class="reg-link">Termini di servizio</a></label>
-      </div>
-      <div class="field-check">
-        <input type="checkbox" id="r-age">
-        <label for="r-age">Confermo di avere almeno 13 anni</label>
-      </div>
-      <button class="reg-btn" onclick="doRegister()">
-        <span>Continua al pagamento</span>
-        <span class="reg-btn-price">€ 9,90</span>
-      </button>
-      <p id="reg-error" class="reg-error"></p>
-    </div>
-
-    <!-- FORM LOGIN -->
-    <div id="form-login" class="reg-form" style="display:none;">
-      <div class="field-group">
-        <label>Email</label>
-        <input type="email" id="l-email" placeholder="La tua email">
-      </div>
-      <div class="field-group">
-        <label>Password</label>
-        <input type="password" id="l-password" placeholder="La tua password">
-      </div>
-      <button class="reg-btn" onclick="doLogin()">
-        <span>Entra in Sekai</span>
-      </button>
-      <p id="login-error" class="reg-error"></p>
-    </div>
-
-    <!-- PAGAMENTO (appare dopo registrazione) -->
-    <div id="form-payment" class="reg-form" style="display:none;">
-      <div id="payment-info">
-        <div class="payment-amount">€ 9,90</div>
-        <p class="payment-desc">Accesso completo a Sekai — una tantum</p>
-        <ul class="payment-features">
-          <li>✦ Accesso a tutte le 7 aree del mondo</li>
-          <li>✦ Avatar personalizzabile</li>
-          <li>✦ Casa nel villaggio</li>
-          <li>✦ Community e amicizie</li>
-          <li>✦ Aggiornamenti futuri inclusi</li>
-        </ul>
-      </div>
-      <p class="payment-note">Il sistema di pagamento sarà disponibile a breve.<br>Registrati ora e ti avviseremo non appena sarà attivo.</p>
-      <button class="reg-btn" onclick="doPaymentPlaceholder()">
-        <span>Procedi al pagamento</span>
-      </button>
-      <button class="reg-btn-secondary" onclick="skipPaymentDev()">
-        Accedi in anteprima (test)
-      </button>
-    </div>
-
-  </div>
-</div>
-
-
-<!-- CREAZIONE AVATAR — carica avatar-builder.html in iframe -->
-
-<div id="avatar-screen" style="display:none;position:fixed;inset:0;z-index:800;">
-  <iframe id="avatar-iframe"
-    src="avatar-builder.html"
-    style="width:100%;height:100%;border:none;display:block;"
-    allow="autoplay">
-  </iframe>
-</div>
-
-<!-- SCHERMATA BENVENUTO (dopo login con avatar già creato) -->
-
-<div id="welcome-screen" style="display:none;">
-  <div id="wc-bg"></div>
-  <div id="wc-box">
-    <button class="screen-close-btn" style="position:absolute;top:-16px;right:-16px;" onclick="closeWelcomeScreen()" title="Chiudi">✕</button>
-    <div id="wc-top">
-      <p id="wc-greeting">Bentornato in Sekai</p>
-      <h2 id="wc-charname"></h2>
-      <p id="wc-personality"></p>
-    </div>
-    <div id="wc-avatar-wrap">
-      <svg id="wc-svg" viewBox="0 0 200 270"
-        style="width:200px;height:270px;filter:drop-shadow(0 8px 32px rgba(0,0,0,.6));">
-      </svg>
-      <div id="wc-glow"></div>
-    </div>
-    <div id="wc-bottom">
-      <p id="wc-tagline"></p>
-      <button id="wc-enter-btn" onclick="enterFromWelcome()">✦ Entra nel mondo</button>
-      <button id="wc-edit-btn" onclick="editAvatar()">Modifica personaggio</button>
-    </div>
-  </div>
-</div>
-
-<!-- MONDO -->
-
-<div id="world">
-  <canvas id="wc"></canvas>
-  <div id="hud">
-    <div class="hclock"><span id="ci">🌅</span> <span id="ct"></span></div>
-    <div class="haname" id="an"></div>
-    <div class="hctrl">
-      <button class="cb" id="sb" onclick="toggleSnd()" title="Suoni">🔇</button>
-      <button class="cb" onclick="openMap()" title="Mappa">🗺️</button>
-      <button class="cb" onclick="openProfile()" title="Il tuo profilo" id="profile-btn">👤</button>
-    </div>
-  </div>
-  <div id="area-nav">
-    <button class="na" onclick="navArea(-1)">‹</button>
-    <button class="na" onclick="navArea(1)">›</button>
-  </div>
-  <div id="tip">← esplora le aree con le frecce →</div>
-</div>
-
-<!-- PANNELLO PROFILO -->
-<div id="profile-panel">
-  <div id="profile-overlay" onclick="closeProfile()"></div>
-  <div id="profile-drawer">
-
-    <button class="profile-close" onclick="closeProfile()">✕</button>
-
-    <!-- AVATAR PREVIEW -->
-    <div id="prof-avatar-wrap">
-      <svg id="prof-svg" viewBox="0 0 200 260"
-        style="width:160px;height:208px;filter:drop-shadow(0 6px 20px rgba(0,0,0,.5));">
-      </svg>
-      <div id="prof-name"></div>
-      <div id="prof-code"></div>
-    </div>
-
-    <!-- TABS -->
-    <div id="prof-tabs">
-      <button class="prof-tab active" onclick="profTab('info')">Identità</button>
-      <button class="prof-tab" onclick="profTab('stats')">Sekai</button>
-      <button class="prof-tab" onclick="profTab('actions')">Azioni</button>
-    </div>
-
-    <!-- TAB IDENTITÀ -->
-    <div id="prof-info" class="prof-content active">
-      <div id="prof-identity"></div>
-    </div>
-
-    <!-- TAB STATISTICHE -->
-    <div id="prof-stats" class="prof-content">
-      <div id="prof-stats-content"></div>
-    </div>
-
-    <!-- TAB AZIONI -->
-    <div id="prof-actions" class="prof-content">
-      <button class="prof-action-btn" onclick="editIdentity()">
-        <span>✏️</span>
-        <div>
-          <div class="prof-action-title">Modifica identità</div>
-          <div class="prof-action-sub">Personalità, passioni, valori e campi liberi</div>
-        </div>
-      </button>
-      <button class="prof-action-btn" id="edit-appearance-btn" onclick="editAppearance()">
-        <span>🎨</span>
-        <div>
-          <div class="prof-action-title">Modifica aspetto</div>
-          <div class="prof-action-sub" id="appearance-sub">Capelli, occhi, vestiti e accessori</div>
-        </div>
-      </button>
-      <button class="prof-action-btn" onclick="openMap();closeProfile()">
-        <span>🗺️</span>
-        <div>
-          <div class="prof-action-title">Esplora il mondo</div>
-          <div class="prof-action-sub">Scegli dove andare</div>
-        </div>
-      </button>
-      <button class="prof-action-btn danger" onclick="doLogout()">
-        <span>🚪</span>
-        <div>
-          <div class="prof-action-title">Esci da Sekai</div>
-          <div class="prof-action-sub">Torni alla schermata iniziale</div>
-        </div>
-      </button>
-    </div>
-
-  </div>
-</div>
-
-
-<!-- AREA IFRAME — nascosto, attivato da launchAreaPage -->
-
-<div id="map-ui" style="display:none; position:fixed; inset:0; z-index:1500; flex-direction:column; align-items:center; justify-content:center; gap:28px;">
-  <video id="map-bg-video" autoplay muted loop playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.55;z-index:0;">
-    <source src="bg.mp4" type="video/mp4">
-  </video>
-  <div style="position:absolute;inset:0;background:rgba(5,3,15,.55);z-index:1;"></div>
-    <div id="map-ui-topbar" style="position:absolute;top:0;left:0;right:0;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:linear-gradient(to bottom,rgba(0,0,0,.35),transparent);">
-      <div id="map-ui-user" style="display:flex;align-items:center;gap:10px;">
-        <div id="map-ui-avatar-mini" style="width:36px;height:36px;border-radius:50%;background:rgba(212,168,83,.15);border:1.5px solid rgba(212,168,83,.4);display:flex;align-items:center;justify-content:center;font-family:serif;font-size:14px;color:rgba(212,168,83,.7);overflow:hidden;"></div>
-        <div id="map-ui-username" style="font-family:'Cormorant Garamond',serif;font-size:13px;color:rgba(245,234,208,.7);letter-spacing:.15em;"></div>
-      </div>
-      <button id="map-profile-btn" onclick="openProfileFromMap()" style="background:rgba(212,168,83,.12);border:1px solid rgba(212,168,83,.35);border-radius:20px;padding:7px 16px;font-family:serif;font-size:12px;color:rgba(212,168,83,.8);letter-spacing:.12em;cursor:pointer;">👤 Il mio profilo</button>
-    </div>
-    <p id="map-ui-title" style="position:relative;z-index:10;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(15px,2vw,21px);color:rgba(255,255,255,.7);letter-spacing:.25em;text-shadow:0 1px 8px rgba(0,0,0,.5);">Dove vuoi andare?</p>
-    <div id="map-icons" style="position:relative;z-index:10;display:flex;flex-wrap:wrap;justify-content:center;gap:16px;max-width:580px;padding:0 20px;">
-      <div class="hs" onclick="goArea('village')"><div class="hs-dot">🏘️</div><span class="hs-lbl">Villaggio</span></div>
-      <div class="hs" onclick="goArea('forest')"><div class="hs-dot">🌲</div><span class="hs-lbl">Foresta</span></div>
-      <div class="hs" onclick="goArea('lake')"><div class="hs-dot">🌙</div><span class="hs-lbl">Lago della Luna</span></div>
-      <div class="hs" onclick="goArea('library')"><div class="hs-dot">📚</div><span class="hs-lbl">Biblioteca</span></div>
-      <div class="hs" onclick="goArea('hill')"><div class="hs-dot">⭐</div><span class="hs-lbl">Collina Stelle</span></div>
-      <div class="hs" onclick="goArea('port')"><div class="hs-dot">⛵</div><span class="hs-lbl">Porto</span></div>
-      <div class="hs" onclick="goArea('garden')"><div class="hs-dot">🌸</div><span class="hs-lbl">Giardino</span></div>
-    </div>
-</div>
-
-<!-- AREA IFRAME -->
-
-<!-- AREA IFRAME -->
-<iframe id="area-frame" src="" style="position:fixed;inset:0;width:100%;height:100%;border:none;z-index:9999;display:none;background:#0d0a18;" allow="autoplay"></iframe>
-
-<script>
 'use strict';
 
 // ══ STATO ══
@@ -3211,6 +3216,7 @@ window.addEventListener('DOMContentLoaded', () => {
   initIntro();
   startPhrases();
 });
+
 
 </script>
 </body>
