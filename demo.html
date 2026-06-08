@@ -1163,27 +1163,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
   </div>
 
   <!-- MAPPA AREE (appare dopo login) -->
-  <div id="map-ui" style="display:none; position:absolute; inset:0; z-index:15; flex-direction:column; align-items:center; justify-content:center; gap:28px;">
-    <!-- Barra profilo nella mappa -->
-    <div id="map-ui-topbar">
-      <div id="map-ui-user">
-        <div id="map-ui-avatar-mini"></div>
-        <div id="map-ui-username"></div>
-      </div>
-      <button id="map-profile-btn" onclick="openProfileFromMap()">👤 Il mio profilo</button>
-    </div>
-    <p id="map-ui-title">Dove vuoi andare?</p>
-    <div id="map-icons">
-      <div class="hs" onclick="goArea('village')"><div class="hs-dot">🏘️</div><span class="hs-lbl">Villaggio</span></div>
-      <div class="hs" onclick="goArea('forest')"><div class="hs-dot">🌲</div><span class="hs-lbl">Foresta</span></div>
-      <div class="hs" onclick="goArea('lake')"><div class="hs-dot">🌙</div><span class="hs-lbl">Lago della Luna</span></div>
-      <div class="hs" onclick="goArea('library')"><div class="hs-dot">📚</div><span class="hs-lbl">Biblioteca</span></div>
-      <div class="hs" onclick="goArea('hill')"><div class="hs-dot">⭐</div><span class="hs-lbl">Collina Stelle</span></div>
-      <div class="hs" onclick="goArea('port')"><div class="hs-dot">⛵</div><span class="hs-lbl">Porto</span></div>
-      <div class="hs" onclick="goArea('garden')"><div class="hs-dot">🌸</div><span class="hs-lbl">Giardino</span></div>
-    </div>
-  </div>
-
+  
 
 <!-- REGISTRAZIONE -->
 <div id="reg-screen" style="display:none;">
@@ -3314,6 +3294,31 @@ function returnToIntroUI() {
 
 
 <!-- AREA IFRAME — nascosto, attivato da launchAreaPage -->
+<div id="map-ui" style="display:none; position:fixed; inset:0; z-index:1500; flex-direction:column; align-items:center; justify-content:center; gap:28px;">
+    <!-- Barra profilo nella mappa -->
+    <video style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.6;" autoplay muted loop playsinline><source src="bg.mp4" type="video/mp4"></video>
+    <div style="position:absolute;inset:0;background:rgba(8,5,20,.45);"></div>
+    <div id="map-ui-topbar" style="position:relative;z-index:2;">
+      <div id="map-ui-user">
+        <div id="map-ui-avatar-mini"></div>
+        <div id="map-ui-username"></div>
+      </div>
+      <button id="map-profile-btn" onclick="openProfileFromMap()">👤 Il mio profilo</button>
+    </div>
+    </div>
+    <p id="map-ui-title" style="position:relative;z-index:2;">Dove vuoi andare?</p>
+    <div id="map-icons" style="position:relative;z-index:2;">
+      <div class="hs" onclick="goArea('village')"><div class="hs-dot">🏘️</div><span class="hs-lbl">Villaggio</span></div>
+      <div class="hs" onclick="goArea('forest')"><div class="hs-dot">🌲</div><span class="hs-lbl">Foresta</span></div>
+      <div class="hs" onclick="goArea('lake')"><div class="hs-dot">🌙</div><span class="hs-lbl">Lago della Luna</span></div>
+      <div class="hs" onclick="goArea('library')"><div class="hs-dot">📚</div><span class="hs-lbl">Biblioteca</span></div>
+      <div class="hs" onclick="goArea('hill')"><div class="hs-dot">⭐</div><span class="hs-lbl">Collina Stelle</span></div>
+      <div class="hs" onclick="goArea('port')"><div class="hs-dot">⛵</div><span class="hs-lbl">Porto</span></div>
+      <div class="hs" onclick="goArea('garden')"><div class="hs-dot">🌸</div><span class="hs-lbl">Giardino</span></div>
+    </div>
+  </div>
+
+
 <iframe id="area-frame"
   src=""
   style="position:fixed;inset:0;width:100%;height:100%;border:none;z-index:2000;display:none;background:#0d0a18;"
