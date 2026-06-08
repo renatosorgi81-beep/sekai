@@ -99,13 +99,49 @@ function loadSession(){
 
 // ══ STATO ══
 const session = loadSession();
+
+// Protezione accesso — solo utenti loggati e paganti
+if(!session || !session.id || !session.paid) {
+  window.addEventListener('DOMContentLoaded', function() {
+    document.body.style.background = '#0d0a18';
+    document.body.style.display = 'flex';
+    document.body.style.flexDirection = 'column';
+    document.body.style.alignItems = 'center';
+    document.body.style.justifyContent = 'center';
+    document.body.style.gap = '20px';
+    document.body.style.fontFamily = 'serif';
+    document.body.innerHTML = '';
+    const logo = document.createElement('div');
+    logo.textContent = '世界';
+    logo.style.cssText = 'font-size:48px;color:#d4a853;letter-spacing:.4em;';
+    const txt = document.createElement('p');
+    txt.textContent = 'Devi accedere a Sekai per entrare qui.';
+    txt.style.cssText = 'color:rgba(245,234,208,.5);letter-spacing:.2em;font-style:italic;';
+    const btn = document.createElement('button');
+    btn.textContent = '← Torna alla home';
+    btn.style.cssText = 'padding:12px 32px;background:rgba(212,168,83,.15);border:1px solid rgba(212,168,83,.5);border-radius:3px;color:#d4a853;font-family:serif;font-size:14px;letter-spacing:.2em;cursor:pointer;';
+    btn.onclick = function() {
+      if(window.parent && window.parent !== window) {
+        window.parent.postMessage({type:'BACK_TO_MAP'},'*');
+      } else {
+        window.location.href = 'demo.html';
+      }
+    };
+    document.body.appendChild(logo);
+    document.body.appendChild(txt);
+    document.body.appendChild(btn);
+  });
+  throw new Error('Non autorizzato');
+}
+
+
 const ME = {
-  id:   session?.id   || 'guest_'+Math.random().toString(36).slice(2),
-  name: session?.avatar?.name || session?.username || 'Visitatore',
-  av:   session?.avatar || {},
+  id:   session.id,
+  name: session.avatar?.name || session.username || 'Abitante',
+  av:   session.avatar || {},
   x: 0.35, tx: 0.35, dir: 'right',
   walking: false, wc: 0,
-  isGuest: !session?.id,
+  isGuest: false,
 };
 const others = new Map();
 let instance = 'village_001';
