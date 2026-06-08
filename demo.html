@@ -1356,7 +1356,7 @@ const DB = {
   },
   add(user) { this.users.push(user); this.save(); },
 };
-let currentUser = JSON.parse(localStorage.getItem('sekai_session') || 'null');
+let currentUser = SekaiDB.loadSession();
 
 // ══ STATO ══════════════════════════════════════
 const S = {
