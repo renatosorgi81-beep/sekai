@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Sekai — 世界</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="sekai-db.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Zen+Kaku+Gothic+New:wght@300;400&display=swap" rel="stylesheet">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Zen+Kaku+Gothic+New:wght@300;400&display=swap');
@@ -1528,7 +1530,7 @@ function setError(id, msg) {
   if (el) el.textContent = msg;
 }
 
-function doRegister() {
+async function doRegister() {
   const username = document.getElementById('r-username').value.trim();
   const email    = document.getElementById('r-email').value.trim();
   const password = document.getElementById('r-password').value;
@@ -1547,17 +1549,25 @@ function doRegister() {
   const bd = new Date(birth);
   const ageyrs = new Date().getFullYear() - bd.getFullYear();
   if (ageyrs < 13) return setError('reg-error', 'Devi avere almeno 13 anni.');
-  if (DB.find(email)) return setError('reg-error', 'Email già registrata. Accedi.');
 
-  const user = { username, email, password, birth, paid: false, joinDate: new Date().toISOString() };
-  DB.add(user);
-  currentUser = user;
+  // Mostra loading
+  const btn = document.querySelector('#form-register .reg-btn');
+  if(btn) { btn.textContent = 'Registrazione in corso...'; btn.disabled = true; }
 
-  document.getElementById('form-register').style.display = 'none';
-  document.getElementById('form-payment').style.display = 'flex';
-  document.getElementById('reg-tabs').style.display = 'none';
-  const tag = document.querySelector('.reg-tagline');
-  if (tag) tag.textContent = `Benvenuto, ${username} ✦`;
+  SekaiDB.register(email, password, username, birth)
+    .then(user => {
+      currentUser = SekaiDB.saveSession(user);
+      // Vai al pagamento
+      document.getElementById('form-register').style.display = 'none';
+      document.getElementById('form-payment').style.display = 'flex';
+      document.getElementById('reg-tabs').style.display = 'none';
+      const tag = document.querySelector('.reg-tagline');
+      if(tag) tag.textContent = `Benvenuto, ${username} ✦`;
+    })
+    .catch(err => {
+      setError('reg-error', err.message);
+      if(btn) { btn.textContent = 'Continua al pagamento'; btn.disabled = false; }
+    });
 }
 
 function doLogin() {
@@ -1568,50 +1578,50 @@ function doLogin() {
   if (!email)    return setError('login-error', 'Inserisci la tua email.');
   if (!password) return setError('login-error', 'Inserisci la password.');
 
-  const user = DB.find(email);
-  if (!user)                   return setError('login-error', 'Nessun account trovato.');
-  if (user.password !== password) return setError('login-error', 'Password errata.');
+  const btn = document.querySelector('#form-login .reg-btn');
+  if(btn) { btn.textContent = 'Accesso in corso...'; btn.disabled = true; }
 
-  currentUser = user;
-  localStorage.setItem('sekai_session', JSON.stringify(user));
+  SekaiDB.login(email, password)
+    .then(user => {
+      currentUser = SekaiDB.saveSession(user);
+      hideRegScreen();
+      document.getElementById('intro-ui').style.display = 'none';
 
-  hideRegScreen();
-  document.getElementById('intro-ui').style.display = 'none';
-
-  if (!user.paid) {
-    // Non ha pagato — mostra pagamento
-    showRegScreen();
-    document.getElementById('form-login').style.display = 'none';
-    document.getElementById('form-register').style.display = 'none';
-    document.getElementById('form-payment').style.display = 'flex';
-    document.getElementById('reg-tabs').style.display = 'none';
-  } else if (!user.hasAvatar) {
-    // Pagato ma senza avatar — crea avatar
-    showAvatarScreen();
-  } else {
-    // Ha tutto — mostra schermata benvenuto con avatar
-    showWelcomeScreen();
-  }
+      if (!user.paid) {
+        showRegScreen();
+        document.getElementById('form-login').style.display = 'none';
+        document.getElementById('form-register').style.display = 'none';
+        document.getElementById('form-payment').style.display = 'flex';
+        document.getElementById('reg-tabs').style.display = 'none';
+      } else if (!user.has_avatar) {
+        showAvatarScreen();
+      } else {
+        showWelcomeScreen();
+      }
+    })
+    .catch(err => {
+      setError('login-error', err.message);
+      if(btn) { btn.textContent = 'Entra in Sekai'; btn.disabled = false; }
+    });
 }
 
 function doPaymentPlaceholder() {
   alert('Pagamento disponibile a breve. Ti avviseremo via email: ' + (currentUser?.email || ''));
 }
 
-function skipPaymentDev() {
+async function skipPaymentDev() {
   if (currentUser) {
+    // Segna come pagato in Supabase
+    await sb.from('users').update({ paid: true, paid_at: new Date().toISOString() }).eq('id', currentUser.id);
     currentUser.paid = true;
-    DB.users = DB.users.map(u => u.email === currentUser.email ? currentUser : u);
-    DB.save();
     localStorage.setItem('sekai_session', JSON.stringify(currentUser));
   }
   hideRegScreen();
   document.getElementById('intro-ui').style.display = 'none';
-  // Se non ha ancora creato l'avatar → creazione avatar
-  if(!currentUser || !currentUser.hasAvatar) {
+  if(!currentUser || !currentUser.has_avatar) {
     showAvatarScreen();
   } else {
-    showMapUI();
+    showWelcomeScreen();
   }
 }
 
@@ -2655,14 +2665,16 @@ function showAvatarScreen() {
   window._avatarSavedHandler = function(e) {
     if (e.data && e.data.type === 'AVATAR_SAVED') {
       const saved = e.data.avatar;
+      if(e.data.svgString) saved.svgString = e.data.svgString;
       if (currentUser) {
-        currentUser.avatar = saved;
-        currentUser.hasAvatar = true;
-        // Salva anche SVG string se disponibile
-        if(e.data.svgString) currentUser.avatarSVG = e.data.svgString;
-        DB.users = DB.users.map(u => u.email === currentUser.email ? currentUser : u);
-        DB.save();
-        localStorage.setItem('sekai_session', JSON.stringify(currentUser));
+        // Salva avatar in Supabase
+        // avatar saved via postMessage handler
+        if(!result.error) {
+          currentUser.avatar = saved;
+          currentUser.has_avatar = true;
+          currentUser.avatarSVG = saved.svgString || '';
+          localStorage.setItem('sekai_session', JSON.stringify(currentUser));
+        }
       }
       hideAvatarScreen();
       showWelcomeScreen();
