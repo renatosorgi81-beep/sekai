@@ -320,6 +320,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;cursor:none;
 
 <div id="join-toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="sekai-db.js"></script>
 <script>
 'use strict';
@@ -385,19 +386,28 @@ window.addEventListener('DOMContentLoaded', async () => {
   ME.name = myAvatar.name || currentUser.username;
   ME.svgString = myAvatar.svgString || myAvatar.svgString || '';
 
-  // Scegli istanza
-  await joinInstance();
+  // Scegli istanza (con fallback in caso di errore)
+  try {
+    await joinInstance();
+  } catch(e) {
+    console.warn('joinInstance error:', e);
+    myInstance = 'village_001';
+    subscribeRealtime();
+    subscribeWhispers();
+  }
 
   // Avvia loop
   requestAnimationFrame(gameLoop);
 
-  // Nasconde loading
-  setTimeout(() => {
+  // Nasconde loading sempre — anche in caso di errori
+  const hideLoading = () => {
     document.getElementById('loading').classList.add('fade');
     setTimeout(() => document.getElementById('loading').style.display='none', 800);
     showToast(`Benvenuto, ${ME.name} ✦`);
     document.getElementById('chat-input-row').classList.add('visible');
-  }, 1500);
+    updatePresenceBar();
+  };
+  setTimeout(hideLoading, 1500);
 });
 
 function resize() {
@@ -1257,16 +1267,15 @@ function darken(hex, amt){return lighten(hex,-amt);}
 
 // ══ CLICK SU AVATAR ALTRUI ══════════════════════
 canvas.addEventListener('click', e => {
-  if(!window._avatarHitboxes) return;
+  if(!window._avatarHitboxes || window._avatarHitboxes.length === 0) return;
   const hb = window._avatarHitboxes.find(h =>
     e.clientX>=h.x && e.clientX<=h.x+h.w &&
     e.clientY>=h.y && e.clientY<=h.y+h.h
   );
-  if(hb) showProfilePopup(hb);
-  window._avatarHitboxes = [];
+  if(hb) showProfilePopup(hb, e);
 });
 
-function showProfilePopup(hb) {
+function showProfilePopup(hb, e) {
   const popup = document.getElementById('profile-popup');
   const d = hb.data || {};
   document.getElementById('popup-name').textContent = hb.name;
@@ -1280,8 +1289,8 @@ function showProfilePopup(hb) {
     <circle cx="130" cy="170" r="110" fill="rgba(212,168,83,.08)" stroke="rgba(212,168,83,.2)" stroke-width="1"/>
     <text x="130" y="195" text-anchor="middle" font-family="serif" font-size="80" fill="rgba(212,168,83,.5)">${hb.name[0]?.toUpperCase()||'?'}</text>`;
   // Posiziona vicino al click
-  const px = Math.min(e?.clientX||W/2, W-240);
-  const py = Math.max(10, (e?.clientY||H/2) - 200);
+  const px = Math.min((e?.clientX||W/2) - 110, W-240);
+  const py = Math.max(10, (e?.clientY||H/2) - 220);
   popup.style.left = px+'px';
   popup.style.top  = py+'px';
   popup.style.display = 'block';
