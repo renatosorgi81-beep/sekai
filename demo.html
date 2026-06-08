@@ -4,16 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Sekai — 世界</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
 // ══ PANNELLO PROFILO ══════════════════════════
 
-
 function openProfileFromMap() {
-  // Mostra profile panel anche dalla mappa
-  // Prima assicuriamoci che il panel sia accessibile
   const panel = document.getElementById('profile-panel');
   if(!panel) return;
-  // Porta il panel sopra la mappa
   panel.style.zIndex = '700';
   panel.classList.add('open');
   renderProfile();
@@ -22,6 +19,7 @@ function openProfileFromMap() {
 function openProfile() {
   const panel = document.getElementById('profile-panel');
   if(!panel) return;
+  panel.style.zIndex = '600';
   panel.classList.add('open');
   renderProfile();
 }
@@ -145,7 +143,7 @@ function renderIdentityTab(av) {
     <div style="font-family:var(--serif);font-style:italic;font-size:13px;color:rgba(245,234,208,.6);line-height:1.6;">${av.understandText}</div>
   </div>`;
 
-  if(!html) html = '<p class="prof-empty">Completa il tuo profilo nell'avatar builder.</p>';
+  if(!html) html = '<p class="prof-empty">Completa il tuo profilo nell\'avatar builder.</p>';
   container.innerHTML = html;
 }
 
