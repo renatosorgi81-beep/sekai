@@ -2008,21 +2008,7 @@ function enterWorld() {
   }
 }
 
-function goArea(id) {
-  S.area = id;
-  S.areaIdx = S.areas.indexOf(id);
-  // Fade out intro
-  introRunning = false;
-  const intro = document.getElementById('intro');
-  intro.style.transition = 'opacity 1s ease';
-  intro.style.opacity = '0';
-  setTimeout(() => {
-    intro.style.display = 'none';
-    const world = document.getElementById('world');
-    world.style.display = 'block';
-    initWorld();
-  }, 1000);
-}
+// goArea definita sopra
 
 // ══ REGISTRAZIONE ══════════════════════════════
 
