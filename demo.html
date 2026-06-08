@@ -1550,33 +1550,36 @@ function goArea(id) {
 }
 
 function launchAreaPage(page) {
-  // 1. Nascondi TUTTI gli elementi che potrebbero coprire
+  // Nascondi tutto
   ['intro','map-ui','welcome-screen','avatar-screen','reg-screen'].forEach(id => {
     const el = document.getElementById(id);
-    if(el) { el.style.display = 'none'; el.style.zIndex = '-1'; }
+    if(el) { el.style.display = 'none'; }
   });
-
-  // Nascondi anche world se visibile
   const world = document.getElementById('world');
   if(world) world.style.display = 'none';
 
-  // 2. Mostra iframe
+  // Mostra iframe
   const fr = document.getElementById('area-frame');
-  if(!fr) {
-    alert('ERRORE: area-frame non trovato nel DOM');
-    return;
-  }
+  if(!fr) return;
 
   fr.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;border:none;z-index:9999;display:block;background:#0d0a18;';
   fr.src = page + '?v=' + Date.now();
-  console.log('Launching area page:', page, '-> iframe src set');
 
-  // 3. Handler messaggi
+  // Passa la sessione all'iframe quando è pronto
+  fr.onload = function() {
+    const sess = SekaiDB.loadSession();
+    if(sess) {
+      fr.contentWindow.postMessage({ type:'SESSION_DATA', session: sess }, '*');
+    }
+  };
+
+  // Handler messaggi dall'area
   if(window._areaHandler) window.removeEventListener('message', window._areaHandler);
   window._areaHandler = function(e) {
     if(e.data?.type === 'BACK_TO_MAP') {
       fr.style.display = 'none';
       fr.src = 'about:blank';
+      const intro = document.getElementById('intro');
       if(intro) { intro.style.display = 'block'; intro.style.opacity = '1'; }
       showMapUI();
     }
