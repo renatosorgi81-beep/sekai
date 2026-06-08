@@ -15,7 +15,7 @@
 html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
 
 /* ══ VIDEO ══ */
-#intro{position:fixed;inset:0;z-index:1000;transition:opacity 2.5s ease;background:linear-gradient(180deg,#0d0a18 0%,#1a1030 100%);}
+#intro{position:fixed;inset:0;z-index:100;transition:opacity 2.5s ease;background:linear-gradient(180deg,#0d0a18 0%,#1a1030 100%);}
 #bg-video{position:absolute;top:-4%;left:-4%;width:108%;height:108%;object-fit:cover;z-index:0;filter:blur(1px) saturate(1.4) contrast(1.08) brightness(1.05);transform:scale(1.06);}
 #intro-overlay{position:absolute;inset:0;z-index:1;background:radial-gradient(ellipse 90% 80% at 50% 50%,rgba(0,0,0,.05) 0%,rgba(0,0,0,.12) 55%,rgba(0,0,0,.55) 100%);}
 
@@ -900,7 +900,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
 // ══════════════════════════════════════════════
 
 const SUPABASE_URL  = 'https://oegkgicuigpcwoneradf.supabase.co';
-const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lZ2tnaWN1aWdwY3dvbmVyYWRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NjQ3OTQsImV4cCI6MjA5NjQ0MDc5NH0.rRaCqvdX5lmgEgZDjGutZHvnO2Bwy_vp5c-URZANyAE';
+const SUPABASE_KEY  = 'sb_publishable_Stju01ob47IxTmuCsyBIBA_PZRHGZwl';
 
 // ── CHIAMATA API BASE ──
 async function sbFetch(path, options = {}) {
@@ -910,6 +910,7 @@ async function sbFetch(path, options = {}) {
     'Authorization': `Bearer ${SUPABASE_KEY}`,
     'Content-Type': 'application/json',
     'Prefer': options.prefer || 'return=representation',
+    'X-Client-Info': 'sekai-web/1.0',
     ...options.headers,
   };
   const res = await fetch(url, { ...options, headers });
