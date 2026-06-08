@@ -7,6 +7,18 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
 // ══ PANNELLO PROFILO ══════════════════════════
 
+
+function openProfileFromMap() {
+  // Mostra profile panel anche dalla mappa
+  // Prima assicuriamoci che il panel sia accessibile
+  const panel = document.getElementById('profile-panel');
+  if(!panel) return;
+  // Porta il panel sopra la mappa
+  panel.style.zIndex = '700';
+  panel.classList.add('open');
+  renderProfile();
+}
+
 function openProfile() {
   const panel = document.getElementById('profile-panel');
   if(!panel) return;
@@ -706,6 +718,45 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
 }
 
 
+
+/* ── TOPBAR MAPPA ── */
+#map-ui-topbar {
+  position:absolute;top:0;left:0;right:0;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 20px;
+  background:linear-gradient(to bottom,rgba(0,0,0,.35),transparent);
+  z-index:20;
+}
+#map-ui-user {
+  display:flex;align-items:center;gap:10px;
+}
+#map-ui-avatar-mini {
+  width:36px;height:36px;border-radius:50%;
+  background:rgba(212,168,83,.15);
+  border:1.5px solid rgba(212,168,83,.4);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--jp);font-size:14px;color:var(--gold);
+  overflow:hidden;
+}
+#map-ui-username {
+  font-family:var(--serif);font-size:13px;
+  color:rgba(245,234,208,.7);letter-spacing:.15em;
+}
+#map-profile-btn {
+  background:rgba(212,168,83,.12);
+  border:1px solid rgba(212,168,83,.35);
+  border-radius:20px;
+  padding:7px 16px;
+  font-family:var(--serif);font-size:12px;
+  color:rgba(212,168,83,.8);letter-spacing:.12em;
+  cursor:pointer;transition:all .3s;
+}
+#map-profile-btn:hover {
+  background:rgba(212,168,83,.22);
+  border-color:rgba(212,168,83,.7);
+  color:var(--gold);
+}
+
 /* ══ PANNELLO PROFILO ══ */
 #profile-panel {
   position:fixed;inset:0;z-index:600;
@@ -1113,6 +1164,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
 
   <!-- MAPPA AREE (appare dopo login) -->
   <div id="map-ui" style="display:none; position:absolute; inset:0; z-index:15; flex-direction:column; align-items:center; justify-content:center; gap:28px;">
+    <!-- Barra profilo nella mappa -->
+    <div id="map-ui-topbar">
+      <div id="map-ui-user">
+        <div id="map-ui-avatar-mini"></div>
+        <div id="map-ui-username"></div>
+      </div>
+      <button id="map-profile-btn" onclick="openProfileFromMap()">👤 Il mio profilo</button>
+    </div>
     <p id="map-ui-title">Dove vuoi andare?</p>
     <div id="map-icons">
       <div class="hs" onclick="goArea('village')"><div class="hs-dot">🏘️</div><span class="hs-lbl">Villaggio</span></div>
@@ -1846,12 +1905,27 @@ function unlockAndStart() {
 function showMapUI() {
   const m = document.getElementById('map-ui');
   m.style.display = 'flex';
-  // Fade in
   m.style.opacity = '0';
   requestAnimationFrame(() => requestAnimationFrame(() => {
     m.style.transition = 'opacity 0.8s ease';
     m.style.opacity = '1';
   }));
+
+  // Popola topbar con dati utente
+  const av = currentUser?.avatar;
+  const nameEl = document.getElementById('map-ui-username');
+  if(nameEl) nameEl.textContent = av?.name || currentUser?.username || '';
+
+  // Mini avatar — prima lettera del nome
+  const miniEl = document.getElementById('map-ui-avatar-mini');
+  if(miniEl) {
+    if(currentUser?.avatarSVG || av?.svgString) {
+      // Usa SVG scalato
+      miniEl.innerHTML = `<svg viewBox="0 0 260 340" style="width:36px;height:47px;margin-top:5px;">${currentUser?.avatarSVG || av?.svgString || ''}</svg>`;
+    } else {
+      miniEl.textContent = (av?.name || currentUser?.username || '?')[0].toUpperCase();
+    }
+  }
 }
 
 function enterWorld() {
