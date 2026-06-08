@@ -190,6 +190,7 @@ const SekaiDB = {
       strengthText: av.strength_text,
       code: av.avatar_code,
       lastAppearanceChange: av.last_appearance_change,
+      sekaiJoinedAt: av.created_at,  // data primo ingresso in Sekai
     };
   },
 
