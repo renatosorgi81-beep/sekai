@@ -2765,6 +2765,20 @@ let W=window.innerWidth, H=window.innerHeight;
 let it = 0;          // intro time counter
 let iPetals = [];    // intro petals
 let iStars = [];     // intro stars
+const PHRASES = [
+  'Un luogo dove il tempo respira piano.',
+  'Ogni incontro lascia una traccia nel mondo.',
+  'La tua storia merita di essere vissuta.',
+  'Qui non si corre. Si cammina.',
+  'Il silenzio ha il suo linguaggio.',
+  'Sei esattamente dove devi essere.',
+  'Ogni giorno porta qualcosa di nuovo.',
+  'Le connessioni vere nascono lentamente.',
+  'Portati qualcosa di bello nella vita reale.',
+  'Un posto per essere se stessi.',
+];
+let phraseIdx = 0;
+
 
 // ══ SHOWMAPUI — unica versione ══
 function showMapUI() {
