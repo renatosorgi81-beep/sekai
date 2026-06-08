@@ -4,7 +4,244 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Sekai — 世界</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+// ══ PANNELLO PROFILO ══════════════════════════
+
+function openProfile() {
+  const panel = document.getElementById('profile-panel');
+  if(!panel) return;
+  panel.classList.add('open');
+  renderProfile();
+}
+
+function closeProfile() {
+  document.getElementById('profile-panel')?.classList.remove('open');
+}
+
+function profTab(tab) {
+  document.querySelectorAll('.prof-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.prof-content').forEach(c => c.classList.remove('active'));
+  document.querySelector(`.prof-tab[onclick="profTab('${tab}')"]`)?.classList.add('active');
+  document.getElementById('prof-'+tab)?.classList.add('active');
+}
+
+function renderProfile() {
+  const av = currentUser?.avatar;
+  if(!av) return;
+
+  // ── Avatar SVG ──
+  const profSvg = document.getElementById('prof-svg');
+  if(profSvg) {
+    if(currentUser.avatarSVG) {
+      profSvg.innerHTML = currentUser.avatarSVG;
+    } else if(av.svgString) {
+      profSvg.innerHTML = av.svgString;
+    } else {
+      profSvg.innerHTML = `
+        <circle cx="100" cy="110" r="85" fill="rgba(212,168,83,0.08)"
+          stroke="rgba(212,168,83,0.2)" stroke-width="1"/>
+        <text x="100" y="125" text-anchor="middle"
+          font-family="serif" font-size="70" fill="rgba(212,168,83,0.6)">
+          ${(av.name||'?')[0].toUpperCase()}
+        </text>`;
+    }
+  }
+
+  // ── Nome e codice ──
+  document.getElementById('prof-name').textContent = av.name || currentUser.username;
+  document.getElementById('prof-code').textContent = av.code || '';
+
+  // ── Identità ──
+  renderIdentityTab(av);
+
+  // ── Statistiche ──
+  renderStatsTab();
+
+  // ── Aspetto modificabile ──
+  checkAppearanceEdit(av);
+}
+
+function renderIdentityTab(av) {
+  const container = document.getElementById('prof-identity');
+  if(!container) return;
+
+  const sections = [
+    { title:'🌿 Personalità', data: av.personality },
+    { title:'🔥 Passioni',    data: av.passions },
+    { title:'⭐ Valori',      data: av.values },
+    { title:'🎁 I tuoi doni', data: av.gift },
+    { title:'🌙 Nel silenzio',data: av.silenceMode },
+    { title:'🗺️ I tuoi posti',data: av.favoriteArea },
+  ];
+
+  // Fase di vita
+  const lifeLabels = {
+    searching:'Sto cercando me stesso', selflov:'Sto imparando a volermi bene',
+    healing:'Sto superando qualcosa di difficile', building:'Sto costruendo qualcosa di nuovo',
+    sharing:'Sto condividendo ciò che ho imparato', living:'Sto semplicemente vivendo',
+    unknown:"Non lo so ancora — e va bene così",
+  };
+
+  let html = '';
+
+  // Fase di vita
+  const phases = Array.isArray(av.lifePhase) ? av.lifePhase : (av.lifePhase ? [av.lifePhase] : []);
+  if(phases.length > 0) {
+    html += `<div class="prof-section">
+      <div class="prof-section-title">🌱 Dove sei adesso</div>
+      <div class="prof-tags">
+        ${phases.map(p => `<span class="prof-tag">${lifeLabels[p]||p}</span>`).join('')}
+      </div>
+    </div>`;
+  }
+
+  // Stile sociale
+  const socialLabels = {
+    listen:'Ascolto prima di tutto', tell:'Racconto e condivido',
+    both:'Ascolto e racconto', observe:'Osservo prima', open:'Mi avvicino subito',
+    slow:'Ho bisogno di tempo',
+  };
+  const socials = Array.isArray(av.socialStyle) ? av.socialStyle : (av.socialStyle ? [av.socialStyle] : []);
+  if(socials.length > 0) {
+    html += `<div class="prof-section">
+      <div class="prof-section-title">🤝 Con gli altri</div>
+      <div class="prof-tags">
+        ${socials.map(s => `<span class="prof-tag">${socialLabels[s]||s}</span>`).join('')}
+      </div>
+    </div>`;
+  }
+
+  sections.forEach(s => {
+    const arr = Array.isArray(s.data) ? s.data : (s.data ? [s.data] : []);
+    if(arr.length === 0) return;
+    html += `<div class="prof-section">
+      <div class="prof-section-title">${s.title}</div>
+      <div class="prof-tags">
+        ${arr.map(tag => `<span class="prof-tag">${tag}</span>`).join('')}
+      </div>
+    </div>`;
+  });
+
+  // Campi liberi
+  if(av.loveText) html += `<div class="prof-section">
+    <div class="prof-section-title">❤️ Una cosa che amo</div>
+    <div style="font-family:var(--serif);font-style:italic;font-size:13px;color:rgba(245,234,208,.6);line-height:1.6;">${av.loveText}</div>
+  </div>`;
+
+  if(av.understandText) html += `<div class="prof-section">
+    <div class="prof-section-title">💭 Vorrei che capissero</div>
+    <div style="font-family:var(--serif);font-style:italic;font-size:13px;color:rgba(245,234,208,.6);line-height:1.6;">${av.understandText}</div>
+  </div>`;
+
+  if(!html) html = '<p class="prof-empty">Completa il tuo profilo nell'avatar builder.</p>';
+  container.innerHTML = html;
+}
+
+function renderStatsTab() {
+  const container = document.getElementById('prof-stats-content');
+  if(!container || !currentUser) return;
+
+  const joinDate = currentUser.created_at
+    ? new Date(currentUser.created_at).toLocaleDateString('it-IT', {day:'numeric',month:'long',year:'numeric'})
+    : 'Data non disponibile';
+
+  const av = currentUser.avatar;
+  const favArea = av?.favoriteArea;
+  const areaLabels = {
+    village:'Villaggio',forest:'Foresta',lake:'Lago',
+    library:'Biblioteca',hill:'Collina',port:'Porto',garden:'Giardino',
+  };
+  const areaName = Array.isArray(favArea)
+    ? favArea.map(a => areaLabels[a]||a).join(', ')
+    : (areaLabels[favArea] || 'Da scoprire');
+
+  container.innerHTML = `
+    <div class="prof-stat">
+      <span class="prof-stat-label">Entrato in Sekai</span>
+      <span class="prof-stat-value">${joinDate}</span>
+    </div>
+    <div class="prof-stat">
+      <span class="prof-stat-label">Area del cuore</span>
+      <span class="prof-stat-value">${areaName}</span>
+    </div>
+    <div class="prof-stat">
+      <span class="prof-stat-label">Codice avatar</span>
+      <span class="prof-stat-value" style="font-size:10px;font-family:monospace;">${av?.code||'—'}</span>
+    </div>
+    <div class="prof-stat">
+      <span class="prof-stat-label">Account</span>
+      <span class="prof-stat-value">${currentUser.username}</span>
+    </div>
+    <div class="prof-stat">
+      <span class="prof-stat-label">Email</span>
+      <span class="prof-stat-value" style="font-size:11px;">${currentUser.email||'—'}</span>
+    </div>
+  `;
+}
+
+function checkAppearanceEdit(av) {
+  const btn = document.getElementById('edit-appearance-btn');
+  const sub = document.getElementById('appearance-sub');
+  if(!btn || !sub) return;
+
+  const canChange = SekaiDB.canChangeAppearance(av);
+  if(canChange) {
+    btn.disabled = false;
+    sub.textContent = 'Capelli, occhi, vestiti e accessori';
+  } else {
+    btn.disabled = true;
+    const days = SekaiDB.daysUntilAppearanceChange(av);
+    sub.textContent = `Disponibile tra ${days} giorni`;
+  }
+}
+
+function editIdentity() {
+  closeProfile();
+  // Apre avatar builder solo per le sezioni identità
+  if(currentUser?.avatar) {
+    localStorage.setItem('sekai_avatar_edit', JSON.stringify({
+      ...currentUser.avatar,
+      editMode: 'identity'
+    }));
+  }
+  showAvatarScreen();
+}
+
+function editAppearance() {
+  const av = currentUser?.avatar;
+  if(!SekaiDB.canChangeAppearance(av)) return;
+  closeProfile();
+  if(av) {
+    localStorage.setItem('sekai_avatar_edit', JSON.stringify({
+      ...av,
+      editMode: 'appearance'
+    }));
+  }
+  showAvatarScreen();
+}
+
+function doLogout() {
+  if(!confirm('Vuoi uscire da Sekai?')) return;
+  SekaiDB.clearSession();
+  currentUser = null;
+  closeProfile();
+  // Nascondi mondo, mostra intro
+  document.getElementById('world').style.display = 'none';
+  const intro = document.getElementById('intro-ui');
+  if(intro) {
+    intro.style.display = 'flex';
+    intro.style.opacity = '1';
+    intro.style.pointerEvents = 'all';
+    document.getElementById('start-btn').style.display = 'block';
+    document.getElementById('already-started').style.display = 'none';
+  }
+  document.getElementById('intro').style.display = 'block';
+  document.getElementById('intro').style.opacity = '1';
+  // Riavvia frasi
+  if(!phraseTimer) startPhrases();
+}
+
+</script>
 <script src="sekai-db.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Zen+Kaku+Gothic+New:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -468,6 +705,168 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
   #avatar-svg{width:180px;height:240px;}
 }
 
+
+/* ══ PANNELLO PROFILO ══ */
+#profile-panel {
+  position:fixed;inset:0;z-index:600;
+  pointer-events:none;
+}
+#profile-panel.open { pointer-events:all; }
+
+#profile-overlay {
+  position:absolute;inset:0;
+  background:rgba(0,0,0,0);
+  transition:background .4s ease;
+}
+#profile-panel.open #profile-overlay {
+  background:rgba(0,0,0,0.45);
+  backdrop-filter:blur(4px);
+}
+
+#profile-drawer {
+  position:absolute;right:0;top:0;bottom:0;
+  width:min(380px, 92vw);
+  background:linear-gradient(180deg,#16112a 0%,#0d0a1a 100%);
+  border-left:1px solid rgba(212,168,83,.2);
+  display:flex;flex-direction:column;gap:0;
+  transform:translateX(100%);
+  transition:transform .4s cubic-bezier(.4,0,.2,1);
+  overflow-y:auto;
+  box-shadow:-8px 0 40px rgba(0,0,0,.5);
+}
+#profile-drawer::-webkit-scrollbar{width:3px;}
+#profile-drawer::-webkit-scrollbar-thumb{background:rgba(212,168,83,.2);}
+
+#profile-panel.open #profile-drawer {
+  transform:translateX(0);
+}
+
+.profile-close {
+  position:absolute;top:14px;left:14px;
+  background:transparent;border:none;
+  color:rgba(245,234,208,.3);font-size:18px;
+  cursor:pointer;padding:6px 10px;
+  border-radius:50%;transition:all .3s;z-index:1;
+}
+.profile-close:hover{color:rgba(245,234,208,.85);background:rgba(255,255,255,.06);}
+
+/* Avatar preview */
+#prof-avatar-wrap {
+  display:flex;flex-direction:column;align-items:center;
+  padding:50px 20px 20px;
+  background:linear-gradient(180deg,rgba(212,168,83,.06) 0%,transparent 100%);
+  border-bottom:1px solid rgba(212,168,83,.12);
+  gap:8px;
+}
+#prof-name {
+  font-family:var(--jp);font-size:20px;color:var(--gold);
+  letter-spacing:.3em;text-shadow:0 0 20px rgba(212,168,83,.3);
+  text-align:center;
+}
+#prof-code {
+  font-family:monospace;font-size:9px;
+  color:rgba(212,168,83,.25);letter-spacing:.08em;
+  text-align:center;
+}
+
+/* Tabs */
+#prof-tabs {
+  display:flex;border-bottom:1px solid rgba(212,168,83,.15);
+  flex-shrink:0;
+}
+.prof-tab {
+  flex:1;padding:12px 8px;
+  background:transparent;border:none;
+  font-family:var(--serif);font-size:12px;letter-spacing:.15em;
+  color:rgba(245,234,208,.4);cursor:pointer;
+  transition:all .25s;
+  border-bottom:2px solid transparent;margin-bottom:-1px;
+}
+.prof-tab:hover{color:var(--cream);}
+.prof-tab.active{color:var(--gold);border-bottom-color:var(--gold);}
+
+/* Content */
+.prof-content {
+  display:none;flex-direction:column;gap:12px;
+  padding:20px 20px;flex:1;
+}
+.prof-content.active{display:flex;}
+
+/* Identità */
+.prof-section {
+  display:flex;flex-direction:column;gap:6px;
+}
+.prof-section-title {
+  font-family:var(--serif);font-size:10px;
+  color:rgba(212,168,83,.5);letter-spacing:.25em;
+  text-transform:uppercase;
+}
+.prof-tags {
+  display:flex;flex-wrap:wrap;gap:5px;
+}
+.prof-tag {
+  padding:4px 10px;
+  background:rgba(212,168,83,.08);
+  border:1px solid rgba(212,168,83,.2);
+  border-radius:20px;
+  font-family:var(--serif);font-size:11px;
+  color:rgba(245,234,208,.65);letter-spacing:.06em;
+}
+.prof-empty {
+  font-family:var(--serif);font-style:italic;font-size:12px;
+  color:rgba(245,234,208,.25);letter-spacing:.1em;
+}
+
+/* Stats */
+.prof-stat {
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05);
+}
+.prof-stat-label {
+  font-family:var(--serif);font-size:12px;
+  color:rgba(245,234,208,.45);letter-spacing:.1em;
+}
+.prof-stat-value {
+  font-family:var(--serif);font-size:13px;
+  color:var(--gold);letter-spacing:.1em;
+}
+
+/* Action buttons */
+.prof-action-btn {
+  display:flex;align-items:center;gap:14px;
+  padding:14px 16px;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:4px;
+  cursor:pointer;transition:all .25s;text-align:left;
+  width:100%;
+}
+.prof-action-btn:hover {
+  background:rgba(212,168,83,.1);
+  border-color:rgba(212,168,83,.35);
+}
+.prof-action-btn > span { font-size:22px;flex-shrink:0; }
+.prof-action-title {
+  font-family:var(--serif);font-size:13px;
+  color:var(--cream);letter-spacing:.1em;margin-bottom:3px;
+}
+.prof-action-sub {
+  font-family:var(--serif);font-style:italic;font-size:11px;
+  color:rgba(245,234,208,.4);letter-spacing:.06em;
+}
+.prof-action-btn.danger:hover {
+  background:rgba(200,60,60,.1);
+  border-color:rgba(200,60,60,.35);
+}
+.prof-action-btn.danger .prof-action-title { color:rgba(220,120,120,.8); }
+.prof-action-btn:disabled {
+  opacity:.4;cursor:not-allowed;
+}
+.prof-action-btn:disabled:hover {
+  background:rgba(255,255,255,.04);
+  border-color:rgba(255,255,255,.08);
+}
+
 /* ══ WORLD ══ */
 #world{position:fixed;inset:0;display:none;}
 #wc{position:absolute;inset:0;width:100%;height:100%;}
@@ -865,6 +1264,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
     <div class="hctrl">
       <button class="cb" id="sb" onclick="toggleSnd()" title="Suoni">🔇</button>
       <button class="cb" onclick="openMap()" title="Mappa">🗺️</button>
+      <button class="cb" onclick="openProfile()" title="Il tuo profilo" id="profile-btn">👤</button>
     </div>
   </div>
   <div id="area-nav">
@@ -2726,5 +3126,74 @@ function returnToIntroUI() {
 }
 
 </script>
+
+<!-- PANNELLO PROFILO -->
+<div id="profile-panel">
+  <div id="profile-overlay" onclick="closeProfile()"></div>
+  <div id="profile-drawer">
+
+    <button class="profile-close" onclick="closeProfile()">✕</button>
+
+    <!-- AVATAR PREVIEW -->
+    <div id="prof-avatar-wrap">
+      <svg id="prof-svg" viewBox="0 0 200 260"
+        style="width:160px;height:208px;filter:drop-shadow(0 6px 20px rgba(0,0,0,.5));">
+      </svg>
+      <div id="prof-name"></div>
+      <div id="prof-code"></div>
+    </div>
+
+    <!-- TABS -->
+    <div id="prof-tabs">
+      <button class="prof-tab active" onclick="profTab('info')">Identità</button>
+      <button class="prof-tab" onclick="profTab('stats')">Sekai</button>
+      <button class="prof-tab" onclick="profTab('actions')">Azioni</button>
+    </div>
+
+    <!-- TAB IDENTITÀ -->
+    <div id="prof-info" class="prof-content active">
+      <div id="prof-identity"></div>
+    </div>
+
+    <!-- TAB STATISTICHE -->
+    <div id="prof-stats" class="prof-content">
+      <div id="prof-stats-content"></div>
+    </div>
+
+    <!-- TAB AZIONI -->
+    <div id="prof-actions" class="prof-content">
+      <button class="prof-action-btn" onclick="editIdentity()">
+        <span>✏️</span>
+        <div>
+          <div class="prof-action-title">Modifica identità</div>
+          <div class="prof-action-sub">Personalità, passioni, valori e campi liberi</div>
+        </div>
+      </button>
+      <button class="prof-action-btn" id="edit-appearance-btn" onclick="editAppearance()">
+        <span>🎨</span>
+        <div>
+          <div class="prof-action-title">Modifica aspetto</div>
+          <div class="prof-action-sub" id="appearance-sub">Capelli, occhi, vestiti e accessori</div>
+        </div>
+      </button>
+      <button class="prof-action-btn" onclick="openMap();closeProfile()">
+        <span>🗺️</span>
+        <div>
+          <div class="prof-action-title">Esplora il mondo</div>
+          <div class="prof-action-sub">Scegli dove andare</div>
+        </div>
+      </button>
+      <button class="prof-action-btn danger" onclick="doLogout()">
+        <span>🚪</span>
+        <div>
+          <div class="prof-action-title">Esci da Sekai</div>
+          <div class="prof-action-sub">Torni alla schermata iniziale</div>
+        </div>
+      </button>
+    </div>
+
+  </div>
+</div>
+
 </body>
 </html>
