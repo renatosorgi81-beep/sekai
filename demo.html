@@ -2939,6 +2939,19 @@ function returnToIntroUI() {
 }
 
 // ══ REG SCREEN ══
+
+function switchTab(tab) {
+  // Tab buttons
+  document.querySelectorAll('.rtab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + tab)?.classList.add('active');
+  // Forms
+  document.getElementById('form-register').style.display = tab === 'register' ? 'flex' : 'none';
+  document.getElementById('form-login').style.display    = tab === 'login'    ? 'flex' : 'none';
+  document.getElementById('form-payment').style.display  = 'none';
+  setError('reg-error', '');
+  setError('login-error', '');
+}
+
 function showRegScreen() {
   const sc = document.getElementById('reg-screen');
   if(sc) sc.style.display = 'flex';
