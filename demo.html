@@ -1551,6 +1551,7 @@ function goArea(id) {
 
 
 function launchVillage() {
+  alert('launchVillage chiamata!');
   // Nascondi tutto
   ['intro','map-ui','welcome-screen','avatar-screen','reg-screen'].forEach(id => {
     const el = document.getElementById(id);
@@ -1558,7 +1559,8 @@ function launchVillage() {
   });
 
   const fr = document.getElementById('area-frame');
-  if(!fr) { console.error('NO AREA-FRAME'); return; }
+  if(!fr) { alert('ERRORE: area-frame NON trovato!'); return; }
+  alert('area-frame trovato, mostro iframe...');
 
   // TEST: usa srcdoc per eliminare problemi di caricamento file
   fr.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;border:none;z-index:9999;display:block;background:red;';
