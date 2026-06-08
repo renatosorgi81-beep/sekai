@@ -1961,20 +1961,17 @@ function unlockAndStart() {
 }
 
 function showMapUI() {
-  // Nascondi intro completamente — altrimenti intercetta i click
-  const intro = document.getElementById('intro');
-  if(intro) {
-    intro.style.display = 'none';
-    intro.style.pointerEvents = 'none';
-  }
-  // Nascondi welcome screen
-  const wc = document.getElementById('welcome-screen');
-  if(wc) wc.style.display = 'none';
+  // Nascondi TUTTO tranne map-ui
+  ['intro','welcome-screen','avatar-screen','reg-screen'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) { el.style.display = 'none'; el.style.pointerEvents = 'none'; }
+  });
 
   const m = document.getElementById('map-ui');
+  if(!m) return;
   m.style.display = 'flex';
-  m.style.opacity = '0';
   m.style.pointerEvents = 'all';
+  m.style.opacity = '0';
   requestAnimationFrame(() => requestAnimationFrame(() => {
     m.style.transition = 'opacity 0.8s ease';
     m.style.opacity = '1';
@@ -2114,9 +2111,12 @@ function doLogin() {
     .then(user => {
       currentUser = SekaiDB.saveSession(user);
       hideRegScreen();
-      document.getElementById('intro-ui').style.display = 'none';
+      // Nascondi TUTTO l'intro — niente deve rimanere visibile
+      const introEl = document.getElementById('intro');
+      if(introEl) { introEl.style.display = 'none'; introEl.style.pointerEvents = 'none'; }
 
       if (!user.paid) {
+        if(introEl) introEl.style.display = 'block';
         showRegScreen();
         document.getElementById('form-login').style.display = 'none';
         document.getElementById('form-register').style.display = 'none';
@@ -2125,7 +2125,7 @@ function doLogin() {
       } else if (!user.has_avatar) {
         showAvatarScreen();
       } else {
-        showWelcomeScreen();
+        showMapUI();
       }
     })
     .catch(err => {
@@ -3336,7 +3336,7 @@ function returnToIntroUI() {
     </div>
     <p id="map-ui-title" style="position:relative;z-index:2;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(15px,2vw,21px);color:rgba(255,255,255,.7);letter-spacing:.25em;text-shadow:0 1px 8px rgba(0,0,0,.5);">Dove vuoi andare?</p>
     <div id="map-icons" style="position:relative;z-index:2;display:flex;flex-wrap:wrap;justify-content:center;gap:16px;max-width:580px;padding:0 20px;">
-      <div class="hs" onclick="alert('HS CLICK OK');goArea('village')"><div class="hs-dot">🏘️</div><span class="hs-lbl">Villaggio</span></div>
+      <div class="hs" onclick="goArea('village')"><div class="hs-dot">🏘️</div><span class="hs-lbl">Villaggio</span></div>
       <div class="hs" onclick="goArea('forest')"><div class="hs-dot">🌲</div><span class="hs-lbl">Foresta</span></div>
       <div class="hs" onclick="goArea('lake')"><div class="hs-dot">🌙</div><span class="hs-lbl">Lago della Luna</span></div>
       <div class="hs" onclick="goArea('library')"><div class="hs-dot">📚</div><span class="hs-lbl">Biblioteca</span></div>
