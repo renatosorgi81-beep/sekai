@@ -1961,9 +1961,20 @@ function unlockAndStart() {
 }
 
 function showMapUI() {
+  // Nascondi intro completamente — altrimenti intercetta i click
+  const intro = document.getElementById('intro');
+  if(intro) {
+    intro.style.display = 'none';
+    intro.style.pointerEvents = 'none';
+  }
+  // Nascondi welcome screen
+  const wc = document.getElementById('welcome-screen');
+  if(wc) wc.style.display = 'none';
+
   const m = document.getElementById('map-ui');
   m.style.display = 'flex';
   m.style.opacity = '0';
+  m.style.pointerEvents = 'all';
   requestAnimationFrame(() => requestAnimationFrame(() => {
     m.style.transition = 'opacity 0.8s ease';
     m.style.opacity = '1';
