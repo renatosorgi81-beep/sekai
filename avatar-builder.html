@@ -880,21 +880,30 @@ function updatePreview() {
 
 function buildCode() {
   const d = AV;
-  return 'SK-'+[
-    d.gender?.[0]?.toUpperCase()||'N',
-    d.face?.[0]?.toUpperCase()||'O',
-    d.hair?.[0]?.toUpperCase()||'W',
-    d.hairColor?.slice(1,4)?.toUpperCase()||'000',
-    d.eyes?.[0]?.toUpperCase()||'R',
-    d.eyeColor?.slice(1,4)?.toUpperCase()||'000',
-    d.skin?.slice(1,4)?.toUpperCase()||'F0C',
-    d.cloth?.[0]?.toUpperCase()||'H',
-    d.clothColor?.slice(1,4)?.toUpperCase()||'000',
-    d.accessory?.[0]?.toUpperCase()||'N',
-    (d.personality||[]).map(p=>p?.[0]).join('').slice(0,5)||'X',
-    (d.passions||[]).map(p=>p?.[0]).join('').slice(0,4)||'Y',
-    (d.values||[]).map(v=>v?.[0]).join('').slice(0,3)||'Z',
-    (d.gift||[]).map(g=>g?.[0]).join('').slice(0,3)||'G',
+  // Helper sicuro — funziona sia con stringhe che con array
+  const first = v => {
+    if(!v) return '?';
+    if(Array.isArray(v)) return v.length > 0 ? (String(v[0])[0]||'?').toUpperCase() : '?';
+    return (String(v)[0]||'?').toUpperCase();
+  };
+  const hex = v => v ? String(v).slice(1,4).toUpperCase() : '000';
+  const arrInit = (arr, max) => (arr||[]).map(x=>x?String(x)[0]:'').join('').slice(0,max)||'?';
+
+  return 'SK-' + [
+    first(d.gender),
+    first(d.face),
+    first(d.hair),
+    hex(d.hairColor),
+    first(d.eyes),
+    hex(d.eyeColor),
+    hex(d.skin),
+    first(d.cloth),
+    hex(d.clothColor),
+    first(d.accessory),
+    arrInit(d.personality, 5),
+    arrInit(d.passions, 4),
+    arrInit(d.values, 3),
+    arrInit(d.gift, 3),
   ].join('-');
 }
 
