@@ -3294,20 +3294,16 @@ function returnToIntroUI() {
 
 
 <!-- AREA IFRAME — nascosto, attivato da launchAreaPage -->
-<div id="map-ui" style="display:none; position:fixed; inset:0; z-index:1500; flex-direction:column; align-items:center; justify-content:center; gap:28px;">
-    <!-- Barra profilo nella mappa -->
-    <video style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.6;" autoplay muted loop playsinline><source src="bg.mp4" type="video/mp4"></video>
-    <div style="position:absolute;inset:0;background:rgba(8,5,20,.45);"></div>
-    <div id="map-ui-topbar" style="position:relative;z-index:2;">
-      <div id="map-ui-user">
-        <div id="map-ui-avatar-mini"></div>
-        <div id="map-ui-username"></div>
+<div id="map-ui" style="display:none; position:fixed; inset:0; z-index:1500; flex-direction:column; align-items:center; justify-content:center; gap:28px; background:rgba(8,5,20,.92);">
+    <div id="map-ui-topbar" style="position:absolute;top:0;left:0;right:0;z-index:2;display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:linear-gradient(to bottom,rgba(0,0,0,.35),transparent);">
+      <div id="map-ui-user" style="display:flex;align-items:center;gap:10px;">
+        <div id="map-ui-avatar-mini" style="width:36px;height:36px;border-radius:50%;background:rgba(212,168,83,.15);border:1.5px solid rgba(212,168,83,.4);display:flex;align-items:center;justify-content:center;font-family:serif;font-size:14px;color:rgba(212,168,83,.7);overflow:hidden;"></div>
+        <div id="map-ui-username" style="font-family:'Cormorant Garamond',serif;font-size:13px;color:rgba(245,234,208,.7);letter-spacing:.15em;"></div>
       </div>
-      <button id="map-profile-btn" onclick="openProfileFromMap()">👤 Il mio profilo</button>
+      <button id="map-profile-btn" onclick="openProfileFromMap()" style="background:rgba(212,168,83,.12);border:1px solid rgba(212,168,83,.35);border-radius:20px;padding:7px 16px;font-family:serif;font-size:12px;color:rgba(212,168,83,.8);letter-spacing:.12em;cursor:pointer;">👤 Il mio profilo</button>
     </div>
-    </div>
-    <p id="map-ui-title" style="position:relative;z-index:2;">Dove vuoi andare?</p>
-    <div id="map-icons" style="position:relative;z-index:2;">
+    <p id="map-ui-title" style="position:relative;z-index:2;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(15px,2vw,21px);color:rgba(255,255,255,.7);letter-spacing:.25em;text-shadow:0 1px 8px rgba(0,0,0,.5);">Dove vuoi andare?</p>
+    <div id="map-icons" style="position:relative;z-index:2;display:flex;flex-wrap:wrap;justify-content:center;gap:16px;max-width:580px;padding:0 20px;">
       <div class="hs" onclick="goArea('village')"><div class="hs-dot">🏘️</div><span class="hs-lbl">Villaggio</span></div>
       <div class="hs" onclick="goArea('forest')"><div class="hs-dot">🌲</div><span class="hs-lbl">Foresta</span></div>
       <div class="hs" onclick="goArea('lake')"><div class="hs-dot">🌙</div><span class="hs-lbl">Lago della Luna</span></div>
@@ -3316,7 +3312,7 @@ function returnToIntroUI() {
       <div class="hs" onclick="goArea('port')"><div class="hs-dot">⛵</div><span class="hs-lbl">Porto</span></div>
       <div class="hs" onclick="goArea('garden')"><div class="hs-dot">🌸</div><span class="hs-lbl">Giardino</span></div>
     </div>
-  </div>
+</div>
 
 
 <iframe id="area-frame"
