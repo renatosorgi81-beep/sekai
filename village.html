@@ -321,7 +321,22 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;cursor:none;
 <div id="join-toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="sekai-db.js"></script>
+
+<script>
+// ── SekaiDB minimal (inline) ──
+const SekaiDB = {
+  loadSession() {
+    try {
+      const raw = localStorage.getItem('sekai_session_v2');
+      if(!raw) return null;
+      const s = JSON.parse(raw);
+      const age = (new Date() - new Date(s.savedAt)) / (1000*60*60*24);
+      if(age > 7) { localStorage.removeItem('sekai_session_v2'); return null; }
+      return s;
+    } catch(e) { return null; }
+  }
+};
+</script>
 <script>
 'use strict';
 
@@ -358,8 +373,11 @@ const ME = {
 
 // ══ INIT ════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', async () => {
+  try {
   canvas = document.getElementById('scene-canvas');
+  if(!canvas) { console.error('Canvas not found'); return; }
   ctx = canvas.getContext('2d');
+  if(!ctx) { console.error('Canvas context failed'); return; }
   resize();
   window.addEventListener('resize', resize);
 
@@ -396,6 +414,10 @@ window.addEventListener('DOMContentLoaded', async () => {
     subscribeWhispers();
   }
 
+  // Assicura dimensioni canvas
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+
   // Avvia loop
   requestAnimationFrame(gameLoop);
 
@@ -408,6 +430,12 @@ window.addEventListener('DOMContentLoaded', async () => {
     updatePresenceBar();
   };
   setTimeout(hideLoading, 1500);
+
+  } catch(initErr) {
+    console.error('Village init error:', initErr);
+    const ld = document.getElementById('loading');
+    if(ld) { ld.classList.add('fade'); setTimeout(()=>ld.style.display='none',800); }
+  }
 });
 
 function resize() {
