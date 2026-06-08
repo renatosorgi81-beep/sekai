@@ -1188,14 +1188,11 @@ async function hashPassword(password) {
 </script>
 </head>
 <body>
-
 <div id="intro">
   <video id="bg-video" autoplay muted loop playsinline>
     <source src="bg.mp4" type="video/mp4">
   </video>
   <div id="intro-overlay"></div>
-
-  <!-- SCHERMATA UNICA INTRO -->
   <div id="intro-ui">
     <div id="intro-logo">
       <div class="logo-jp">世界</div>
@@ -1208,11 +1205,7 @@ async function hashPassword(password) {
     <button id="start-btn" onclick="unlockAndStart()">tocca per iniziare</button>
     <p id="already-started" style="display:none;font-family:var(--serif);font-style:italic;font-size:13px;color:rgba(255,255,255,.45);letter-spacing:.2em;cursor:pointer;" onclick="showRegScreen()">entra nel tuo account →</p>
   </div>
-
-  <!-- MAPPA AREE (appare dopo login) -->
-  
-
-<!-- REGISTRAZIONE -->
+</div>
 
 <div id="reg-screen" style="display:none;">
   <div id="reg-overlay"></div>
@@ -1307,7 +1300,6 @@ async function hashPassword(password) {
 
   </div>
 </div>
-
 
 <!-- CREAZIONE AVATAR — carica avatar-builder.html in iframe -->
 
@@ -1432,9 +1424,6 @@ async function hashPassword(password) {
   </div>
 </div>
 
-
-<!-- AREA IFRAME — nascosto, attivato da launchAreaPage -->
-
 <div id="map-ui" style="display:none; position:fixed; inset:0; z-index:1500; background:#0d0a18; flex-direction:column; align-items:center; justify-content:center; gap:28px;">
   <video id="map-bg-video" autoplay muted loop playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.55;z-index:0;">
     <source src="bg.mp4" type="video/mp4">
@@ -1459,9 +1448,6 @@ async function hashPassword(password) {
     </div>
 </div>
 
-<!-- AREA IFRAME -->
-
-<!-- AREA IFRAME -->
 <iframe id="area-frame" src="" style="position:fixed;inset:0;width:100%;height:100%;border:none;z-index:9999;display:none;background:#0d0a18;" allow="autoplay"></iframe>
 
 <script>
@@ -3212,5 +3198,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 </script>
+</body>
+</html>
 </body>
 </html>
