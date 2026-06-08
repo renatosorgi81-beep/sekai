@@ -1559,7 +1559,45 @@ function animIntro(canvas) {
 function goArea(id) {
   S.area = id;
   S.areaIdx = S.areas.indexOf(id);
+
+  // Aree con pagina dedicata
+  if(id === 'village') {
+    launchAreaPage('village.html');
+    return;
+  }
+  // Altre aree — mondo canvas esistente
   launchWorld();
+}
+
+function launchAreaPage(page) {
+  // Mostra iframe a schermo intero
+  const intro = document.getElementById('intro');
+  if(intro) { intro.style.opacity='0'; setTimeout(()=>intro.style.display='none',800); }
+
+  // Crea iframe
+  let areaFrame = document.getElementById('area-frame');
+  if(!areaFrame) {
+    areaFrame = document.createElement('iframe');
+    areaFrame.id = 'area-frame';
+    areaFrame.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;border:none;z-index:300;';
+    document.body.appendChild(areaFrame);
+  }
+  areaFrame.src = page + '?t=' + Date.now();
+  areaFrame.style.display = 'block';
+
+  // Ascolta messaggi dall'area
+  window._areaHandler = function(e) {
+    if(e.data?.type === 'BACK_TO_MAP') {
+      areaFrame.style.display = 'none';
+      document.getElementById('intro').style.display = 'block';
+      document.getElementById('intro').style.opacity = '1';
+      showMapUI();
+    }
+    if(e.data?.type === 'OPEN_PROFILE') {
+      openProfileFromMap();
+    }
+  };
+  window.addEventListener('message', window._areaHandler);
 }
 
 function enterWorld() {
