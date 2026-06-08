@@ -151,8 +151,10 @@ function renderStatsTab() {
   const container = document.getElementById('prof-stats-content');
   if(!container || !currentUser) return;
 
-  const joinDate = currentUser.created_at
-    ? new Date(currentUser.created_at).toLocaleDateString('it-IT', {day:'numeric',month:'long',year:'numeric'})
+  // Data primo ingresso = quando ha creato l'avatar per la prima volta
+  const avatarCreatedAt = currentUser?.avatar?.sekaiJoinedAt || currentUser?.created_at;
+  const joinDate = avatarCreatedAt
+    ? new Date(avatarCreatedAt).toLocaleDateString('it-IT', {day:'numeric', month:'long', year:'numeric'})
     : 'Data non disponibile';
 
   const av = currentUser.avatar;
