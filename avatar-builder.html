@@ -1547,26 +1547,7 @@ function lighten(hex, amt) {
 function darken(hex, amt) { return lighten(hex, -amt); }
 
 // ── CODICE UNIVOCO ─────────────────────────────
-function buildCode() {
-  const d = AV;
-  const parts = [
-    d.gender[0].toUpperCase(),
-    d.face[0].toUpperCase(),
-    d.hair[0].toUpperCase() + (d.hair[1]||''),
-    d.hairColor.slice(1,4).toUpperCase(),
-    d.eyes[0].toUpperCase() + (d.eyes[1]||''),
-    d.eyeColor.slice(1,4).toUpperCase(),
-    d.brows[0].toUpperCase(),
-    d.nose[0].toUpperCase(),
-    d.mouth[0].toUpperCase(),
-    d.skin.slice(1,4).toUpperCase(),
-    d.cloth[0].toUpperCase() + (d.cloth[1]||''),
-    d.clothColor.slice(1,4).toUpperCase(),
-    d.accessory[0].toUpperCase(),
-    d.personality[0].toUpperCase(),
-  ];
-  return 'SK-' + parts.join('-');
-}
+
 
 // ── RANDOMIZE ──────────────────────────────────
 function randomize() {
