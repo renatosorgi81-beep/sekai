@@ -29,7 +29,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
 #phrase-text {
   font-family:var(--serif);
   font-style:italic;
-  font-size:clamp(13px,1.6vw,17px);
+  font-size:clamp(11px,1.2vw,14px);
   color:rgba(255,255,255,.9);
   letter-spacing:.12em;
   text-align:center;
@@ -42,19 +42,19 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
 
 /* ══ INTRO UI ══ */
 #intro-ui {
-  position:absolute;inset:0;z-index:10;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:32px;
+  position:absolute;bottom:0;left:0;right:0;z-index:10;
+  display:flex;flex-direction:column;align-items:center;
+  padding-bottom:40px;
   transition:opacity 0.6s ease;
 }
 #intro-text-box {
-  display:flex;flex-direction:column;align-items:center;gap:24px;
-  background:rgba(5,3,15,0.38);
-  backdrop-filter:blur(4px);
-  -webkit-backdrop-filter:blur(4px);
-  border-radius:12px;
-  padding:24px 32px;
-  border:1px solid rgba(255,255,255,0.06);
+  display:flex;flex-direction:column;align-items:center;gap:16px;
+  background:rgba(5,3,15,0.5);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  border-radius:8px;
+  padding:16px 28px;
+  border:1px solid rgba(255,255,255,0.07);
   width:auto;
 }
 
@@ -62,7 +62,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
 
 .logo-jp {
   font-family:var(--jp);font-weight:300;
-  font-size:clamp(64px,12vw,120px);
+  font-size:clamp(36px,6vw,64px);
   color:rgba(255,255,255,1);
   letter-spacing:.5em;text-indent:.5em;
   text-shadow:0 2px 8px rgba(0,0,0,1), 0 4px 24px rgba(0,0,0,1), 0 0 60px rgba(0,0,0,0.9);
@@ -70,15 +70,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
 }
 .logo-sub {
   font-family:var(--serif);font-weight:300;
-  font-size:clamp(10px,1.3vw,15px);
-  color:rgba(255,255,255,.85);
+  font-size:clamp(9px,1vw,12px);
+  color:rgba(255,255,255,.7);
   letter-spacing:.85em;text-indent:.85em;
   animation:fadeUp 0.6s ease both;
 }
 .logo-tag {
   font-family:var(--serif);font-style:italic;
-  font-size:clamp(12px,1.4vw,16px);
-  color:rgba(255,255,255,.8);
+  font-size:clamp(11px,1.2vw,14px);
+  color:rgba(255,255,255,.65);
   letter-spacing:.15em;margin-top:4px;
   animation:fadeUp 0.6s 0.1s ease both;
 }
