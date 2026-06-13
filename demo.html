@@ -17,7 +17,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
 /* ══ VIDEO ══ */
 #intro{position:fixed;inset:0;z-index:100;transition:opacity 2.5s ease;background:linear-gradient(180deg,#0d0a18 0%,#1a1030 100%);}
 #bg-video{position:absolute;top:-4%;left:-4%;width:108%;height:108%;object-fit:cover;z-index:0;filter:blur(1px) saturate(1.4) contrast(1.08) brightness(1.05);transform:scale(1.06);}
-#intro-overlay{position:absolute;inset:0;z-index:1;background:radial-gradient(ellipse 90% 80% at 50% 50%,rgba(0,0,0,.05) 0%,rgba(0,0,0,.12) 55%,rgba(0,0,0,.55) 100%);}
+#intro-overlay{position:absolute;inset:0;z-index:1;background:radial-gradient(ellipse 90% 80% at 50% 50%,rgba(0,0,0,.35) 0%,rgba(0,0,0,.55) 55%,rgba(0,0,0,.75) 100%);}
 
 
 /* ══ FRASI ROTANTI ══ */
@@ -30,7 +30,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
   font-family:var(--serif);
   font-style:italic;
   font-size:clamp(13px,1.6vw,17px);
-  color:rgba(255,255,255,.62);
+  color:rgba(255,255,255,.9);
   letter-spacing:.12em;
   text-align:center;
   line-height:1.7;
@@ -53,31 +53,31 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;}
 .logo-jp {
   font-family:var(--jp);font-weight:300;
   font-size:clamp(64px,12vw,120px);
-  color:rgba(255,255,255,.94);
+  color:rgba(255,255,255,1);
   letter-spacing:.5em;text-indent:.5em;
-  text-shadow:0 2px 20px rgba(0,0,0,.35);
+  text-shadow:0 2px 20px rgba(0,0,0,.8), 0 0 40px rgba(0,0,0,.6);
   animation:fadeUp 0.6s ease both;
 }
 .logo-sub {
   font-family:var(--serif);font-weight:300;
   font-size:clamp(10px,1.3vw,15px);
-  color:rgba(255,255,255,.45);
+  color:rgba(255,255,255,.85);
   letter-spacing:.85em;text-indent:.85em;
   animation:fadeUp 0.6s ease both;
 }
 .logo-tag {
   font-family:var(--serif);font-style:italic;
   font-size:clamp(12px,1.4vw,16px);
-  color:rgba(255,255,255,.45);
+  color:rgba(255,255,255,.8);
   letter-spacing:.15em;margin-top:4px;
   animation:fadeUp 0.6s 0.1s ease both;
 }
 
 #start-btn {
   background:transparent;border:none;
-  border-bottom:1px solid rgba(255,255,255,.28);
+  border-bottom:1px solid rgba(255,255,255,.6);
   padding:6px 2px;
-  color:rgba(255,255,255,.5);
+  color:rgba(255,255,255,.9);
   font-family:var(--serif);font-style:italic;
   font-size:clamp(12px,1.3vw,15px);
   letter-spacing:.35em;
