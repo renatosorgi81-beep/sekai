@@ -233,6 +233,86 @@ canvas{display:block;}
   cursor:pointer;transition:all .3s;backdrop-filter:blur(8px);
 }
 #back-btn:hover{background:rgba(224,184,100,.2);border-color:rgba(224,184,100,.5);}
+
+/* ══ PANNELLO CASA ══ */
+#house-panel {
+  position:fixed;inset:0;z-index:35;pointer-events:none;
+}
+#house-panel.open { pointer-events:all; }
+.hp-overlay {
+  position:absolute;inset:0;background:rgba(0,0,0,0);transition:background .4s;
+}
+#house-panel.open .hp-overlay { background:rgba(0,0,0,0.4);backdrop-filter:blur(4px); }
+.hp-drawer {
+  position:absolute;left:0;top:0;bottom:0;
+  width:min(320px,88vw);
+  background:linear-gradient(180deg,#14201a 0%,#0d1410 100%);
+  border-right:1px solid rgba(224,184,100,.22);
+  transform:translateX(-100%);transition:transform .42s cubic-bezier(.4,0,.2,1);
+  overflow-y:auto;display:flex;flex-direction:column;
+  box-shadow:8px 0 40px rgba(0,0,0,.5);
+}
+#house-panel.open .hp-drawer { transform:translateX(0); }
+.hp-close {
+  position:absolute;top:14px;right:14px;background:transparent;border:none;
+  color:rgba(246,236,214,.35);font-size:18px;cursor:pointer;
+  padding:6px 10px;border-radius:50%;transition:all .3s;
+}
+.hp-close:hover{color:var(--cream);background:rgba(255,255,255,.08);}
+.hp-header {
+  display:flex;flex-direction:column;align-items:center;
+  padding:40px 20px 20px;
+  background:linear-gradient(180deg,rgba(80,140,80,.12),transparent);
+  border-bottom:1px solid rgba(224,184,100,.12);gap:4px;
+}
+.hp-icon { font-size:38px; }
+.hp-name {
+  font-family:var(--jp);font-size:18px;color:var(--gold);
+  letter-spacing:.15em;text-align:center;margin-top:4px;
+}
+.hp-level {
+  font-family:var(--serif);font-style:italic;font-size:13px;
+  color:rgba(246,236,214,.55);letter-spacing:.1em;
+}
+.hp-founded {
+  font-family:var(--serif);font-size:11px;
+  color:rgba(246,236,214,.35);letter-spacing:.08em;
+}
+.hp-body { padding:20px;display:flex;flex-direction:column;gap:16px; }
+.hp-stats { display:flex;flex-direction:column;gap:8px; }
+.hp-stat {
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 12px;border-radius:8px;
+  background:rgba(246,236,214,.04);
+  border:1px solid rgba(246,236,214,.08);
+}
+.hp-stat-label { font-family:var(--serif);font-size:13px;color:rgba(246,236,214,.6); }
+.hp-stat-val { font-family:var(--jp);font-size:16px;color:var(--gold);font-weight:500; }
+.hp-section-title {
+  font-family:var(--serif);font-size:10px;letter-spacing:.25em;
+  color:rgba(224,184,100,.6);text-transform:uppercase;
+  border-bottom:1px solid rgba(224,184,100,.15);padding-bottom:6px;
+}
+.hp-ornaments { display:grid;grid-template-columns:1fr 1fr;gap:8px; }
+.hp-orn {
+  display:flex;align-items:center;gap:8px;
+  padding:10px 10px;border-radius:8px;
+  background:rgba(246,236,214,.03);
+  border:1px solid rgba(246,236,214,.07);
+  opacity:.45;transition:all .3s;
+}
+.hp-orn.earned { opacity:1;background:rgba(224,184,100,.08);border-color:rgba(224,184,100,.25); }
+.hp-orn-ico { font-size:18px;width:22px;text-align:center; }
+.hp-orn-label { font-family:var(--serif);font-size:12px;color:rgba(246,236,214,.75);flex:1; }
+.hp-orn-val { font-family:monospace;font-size:11px;color:rgba(224,184,100,.6); }
+.hp-next {
+  font-family:var(--serif);font-style:italic;font-size:13px;
+  color:rgba(246,236,214,.75);line-height:1.6;
+  padding:12px 14px;border-radius:8px;
+  background:rgba(80,140,80,.08);
+  border:1px solid rgba(80,140,80,.2);
+}
+
 </style>
 </head>
 <body>
@@ -250,6 +330,7 @@ canvas{display:block;}
       <div class="tb-right">
         <button class="hud-btn" onclick="toggleTimeFlow()" id="time-btn" title="Velocità tempo">⏩</button>
         <button class="hud-btn" onclick="recenterView()" title="Centra vista">◎</button>
+        <button class="hud-btn" id="house-btn" onclick="openHousePanel()" title="La mia casa">🏠</button>
       </div>
     </div>
   </div>
@@ -292,6 +373,196 @@ canvas{display:block;}
 </div>
 
 <script>
+// ══════════════════════════════════════════════════════════════
+// SEKAI — SISTEMA CASA
+// Ogni utente ha una casetta nel villaggio che cresce con lui.
+// Non si compra nulla — si arricchisce vivendo Sekai.
+// ══════════════════════════════════════════════════════════════
+'use strict';
+
+const HouseSystem = {
+
+  // ── SCHEMA DEFAULT ──
+  _default(userId, username) {
+    return {
+      userId,
+      username,
+      name: `Casa di ${username}`,
+      founded_at: new Date().toISOString(),
+      last_visit: new Date().toISOString(),
+      visits: 1,
+      streak: 1,
+      // Ornamenti (0 = non ancora guadagnato)
+      lanterns: 0,      // si accende ogni 3 ritorni consecutivi, max 3
+      plants: 0,        // una pianta ogni 3 persone salutate, max 3
+      books: 0,         // un libro ogni storia scritta, max 3
+      paintings: 0,     // un quadro ogni passione condivisa, max 2
+      flowers: false,   // fiori sul davanzale (streak 7+)
+      chair: false,     // sedia in veranda (5 conversazioni)
+      // Personalizzazione
+      door_color: '#8a5a3a',
+      roof_color: '#5a3a2a',
+      wall_color: '#e8d8b8',
+      // Messaggi lasciati sulla porta (max 5)
+      door_messages: [],
+      // Statistiche
+      greetings: 0,     // persone salutate
+      conversations: 0, // conversazioni avviate
+      stories: 0,       // pensieri scritti
+      passions_shared: 0,
+    };
+  },
+
+  // ── CARICA / CREA ──
+  load(userId, username) {
+    const key = `sekai_house_${userId}`;
+    const raw = localStorage.getItem(key);
+    if (raw) {
+      try {
+        const h = JSON.parse(raw);
+        // Aggiorna streak e visita
+        this._updateVisit(h);
+        this.save(h);
+        return h;
+      } catch(e) {}
+    }
+    // Prima visita — crea casa
+    const h = this._default(userId, username);
+    this.save(h);
+    return h;
+  },
+
+  save(house) {
+    localStorage.setItem(`sekai_house_${house.userId}`, JSON.stringify(house));
+  },
+
+  // ── AGGIORNA VISITA / STREAK ──
+  _updateVisit(h) {
+    const now = new Date();
+    const last = new Date(h.last_visit);
+    const diffDays = Math.floor((now - last) / 86400000);
+    h.visits++;
+    h.last_visit = now.toISOString();
+    if (diffDays <= 1) {
+      h.streak++;
+    } else {
+      h.streak = 1;
+    }
+    // Aggiorna ornamenti in base allo streak
+    this._recalcOrnaments(h);
+  },
+
+  // ── RICALCOLA ORNAMENTI ──
+  _recalcOrnaments(h) {
+    h.lanterns  = Math.min(3, Math.floor(h.streak / 3));
+    h.plants    = Math.min(3, Math.floor(h.greetings / 3));
+    h.books     = Math.min(3, Math.floor(h.stories / 1));
+    h.paintings = Math.min(2, Math.floor(h.passions_shared / 2));
+    h.flowers   = h.streak >= 7;
+    h.chair     = h.conversations >= 5;
+  },
+
+  // ── LIVELLO CASA (1-5) ──
+  level(h) {
+    const score = h.lanterns + h.plants + h.books + h.paintings
+                + (h.flowers?2:0) + (h.chair?1:0);
+    if (score >= 12) return 5;
+    if (score >= 7)  return 4;
+    if (score >= 4)  return 3;
+    if (score >= 1)  return 2;
+    return 1;
+  },
+
+  // ── PROSSIMO TRAGUARDO ──
+  nextMilestone(h) {
+    if (!h.flowers && h.streak < 7)
+      return `Torna ancora ${7 - h.streak} ${7-h.streak===1?'giorno':'giorni'} di fila → fiori sul davanzale 🌸`;
+    if (h.plants < 3 && h.greetings < 9)
+      return `Saluta ancora ${3 - (h.greetings%3)} persone → nuova pianta 🌿`;
+    if (h.books < 3 && h.stories < 3)
+      return `Scrivi ${3 - h.stories} pensier${3-h.stories===1?'o':'i'} in Biblioteca → libro sul tavolo 📖`;
+    if (!h.chair && h.conversations < 5)
+      return `Conversa ancora con ${5 - h.conversations} persone → sedia in veranda 🪑`;
+    if (h.paintings < 2)
+      return `Condividi ancora ${4 - h.passions_shared*2} passioni → quadro sul muro 🖼️`;
+    return 'La tua casa è piena di vita. ✦';
+  },
+
+  // ── AZIONI CHE ARRICCHISCONO LA CASA ──
+  onGreeting(h) {
+    h.greetings++;
+    this._recalcOrnaments(h);
+    this.save(h);
+    return h.greetings % 3 === 0 ? `Nuova pianta in casa! 🌿 (${h.plants}/3)` : null;
+  },
+
+  onConversation(h) {
+    h.conversations++;
+    this._recalcOrnaments(h);
+    this.save(h);
+    return h.chair && h.conversations === 5 ? 'Una sedia è apparsa sulla tua veranda! 🪑' : null;
+  },
+
+  onStory(h) {
+    h.stories++;
+    this._recalcOrnaments(h);
+    this.save(h);
+    return h.stories <= 3 ? `Un libro è apparso in casa! 📖 (${h.books}/3)` : null;
+  },
+
+  onPassionShared(h) {
+    h.passions_shared++;
+    this._recalcOrnaments(h);
+    this.save(h);
+    return h.paintings > 0 && h.passions_shared % 2 === 0
+      ? `Un nuovo quadro sul muro! 🖼️ (${h.paintings}/2)` : null;
+  },
+
+  // ── LASCIA MESSAGGIO SULLA PORTA ──
+  leaveMessage(h, authorName, text) {
+    if (!text || text.length > 120) return false;
+    h.door_messages = h.door_messages || [];
+    h.door_messages.unshift({
+      author: authorName,
+      text: text.slice(0, 120),
+      at: new Date().toISOString(),
+    });
+    h.door_messages = h.door_messages.slice(0, 5); // max 5
+    this.save(h);
+    return true;
+  },
+
+  // ── DESCRIZIONE LIVELLO ──
+  levelLabel(lvl) {
+    return ['','Casetta appena arrivata','Casa con qualche luce','Casa con giardino',
+            'Casa con veranda','Casa piena di vita'][lvl] || '';
+  },
+
+  // ── STATS LEGGIBILI ──
+  stats(h) {
+    return {
+      level:         this.level(h),
+      levelLabel:    this.levelLabel(this.level(h)),
+      streak:        h.streak,
+      visits:        h.visits,
+      founded:       new Date(h.founded_at).toLocaleDateString('it-IT',{day:'numeric',month:'long',year:'numeric'}),
+      ornaments: {
+        lanterns:  `${h.lanterns}/3`,
+        plants:    `${h.plants}/3`,
+        books:     `${h.books}/3`,
+        paintings: `${h.paintings}/2`,
+        flowers:   h.flowers,
+        chair:     h.chair,
+      },
+      next: this.nextMilestone(h),
+    };
+  },
+};
+
+// Esponi globalmente
+window.HouseSystem = HouseSystem;
+
+
 // ══════════════════════════════════════════════════════════════
 // SEKAI — VILLAGGIO CENTRALE — Dati simulati
 // 30 avatar + 10 luoghi. Tutto modulare ed espandibile.
@@ -1392,6 +1663,16 @@ function closeAvatarCard(){
 }
 window.closeAvatarCard=closeAvatarCard;
 
+// Update house on interactions
+function houseInteract(kind){
+  if(!playerHouse) return;
+  let msg = null;
+  if(kind==='greet')   msg = HouseSystem.onGreeting(playerHouse);
+  if(kind==='passion') msg = HouseSystem.onPassionShared(playerHouse);
+  if(kind==='visit')   msg = HouseSystem.onConversation(playerHouse);
+  if(msg) setTimeout(()=>showToast('✦ '+msg), 1800);
+}
+
 const REACTIONS = {
   greet:      a=>`${a.name} ti sorride e ricambia il saluto. 🙋`,
   thank:      a=>`${a.name} arrossisce. «Grazie a te, davvero.» 🙏`,
@@ -1411,6 +1692,7 @@ function interact(kind){
   showToast(msg);
   if(kind==='greet'){ a.state='greeting'; a.greetTime=80; a.dir=1; }
   if(kind==='visit'){ closeAvatarCard(); }
+  houseInteract(kind);
 }
 window.interact=interact;
 
@@ -1512,6 +1794,7 @@ function loop(now){
   // luoghi + alberi + avatar ordinati per y (profondità)
   const renderables=[];
   for(const pl of VILLAGE_PLACES) if(pl.id!=='tree') renderables.push({y:pl.y, fn:()=>drawPlace(pl,sky)});
+  if(playerHouse) renderables.push({y:PLAYER_HOUSE_POS.y, fn:()=>drawPlayerHouse(sky)});
   for(const t of trees) renderables.push({y:t.y, fn:()=>drawTree(t,sky)});
 
   // aggiorna + aggiungi avatar
@@ -1542,6 +1825,7 @@ function start(){
   seedTrees();
   initAvatars();
   buildPlacesBar();
+  initPlayerHouse();
   // nascondi loading
   setTimeout(()=>{
     document.getElementById('loading').classList.add('hidden');
@@ -1559,5 +1843,30 @@ window.addEventListener('message', e=>{
 start();
 
 </script>
+
+<!-- PANNELLO CASA -->
+<div id="house-panel">
+  <div class="hp-overlay" onclick="closeHousePanel()"></div>
+  <div class="hp-drawer">
+    <button class="hp-close" onclick="closeHousePanel()">✕</button>
+    <div class="hp-header">
+      <div class="hp-icon">🏠</div>
+      <div id="hp-name" class="hp-name"></div>
+      <div id="hp-level" class="hp-level"></div>
+      <div id="hp-founded" class="hp-founded"></div>
+    </div>
+    <div class="hp-body">
+      <div class="hp-stats">
+        <div class="hp-stat"><span class="hp-stat-label">Giorni consecutivi</span><span class="hp-stat-val" id="hp-streak"></span> 🔥</div>
+        <div class="hp-stat"><span class="hp-stat-label">Visite totali</span><span class="hp-stat-val" id="hp-visits"></span></div>
+      </div>
+      <div class="hp-section-title">Ornamenti</div>
+      <div id="hp-ornaments" class="hp-ornaments"></div>
+      <div class="hp-section-title">Prossimo traguardo</div>
+      <div id="hp-next" class="hp-next"></div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
