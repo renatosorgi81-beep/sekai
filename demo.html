@@ -1306,7 +1306,7 @@ async function hashPassword(password) {
 
 <div id="avatar-screen" style="display:none;position:fixed;inset:0;z-index:800;">
   <iframe id="avatar-iframe"
-    src="avatar-builder.html"
+    src=""
     style="width:100%;height:100%;border:none;display:block;"
     allow="autoplay">
   </iframe>
@@ -2842,6 +2842,11 @@ function showAvatarScreen() {
   const sc = document.getElementById('avatar-screen');
   if(!sc) return;
   sc.style.display = 'block';
+  // Carica iframe solo quando serve
+  const avIframe = document.getElementById('avatar-iframe');
+  if(avIframe && !avIframe.src.includes('avatar-builder.html')) {
+    avIframe.src = 'avatar-builder.html';
+  }
   const app = document.getElementById('av-app');
   if(!app) return;
   const cats = ['name','gender','face','hair','eyes','brows','nose','mouth','skin','cloth','accessory','personality'];
