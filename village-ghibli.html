@@ -62,13 +62,26 @@ canvas{display:block;}
 
 /* ── barra luoghi ── */
 #places-bar{
-  position:absolute;bottom:20px;left:50%;transform:translateX(-50%);
+  position:absolute;bottom:20px;left:50%;
+  transform:translateX(-50%) translateY(140%);
   display:flex;gap:7px;flex-wrap:wrap;justify-content:center;
   max-width:94vw;padding:9px 13px;
-  background:rgba(12,18,28,.34);
-  border:1px solid rgba(251,243,223,.1);
-  border-radius:18px;backdrop-filter:blur(12px);pointer-events:all;
+  background:rgba(12,18,28,.42);
+  border:1px solid rgba(251,243,223,.12);
+  border-radius:18px;backdrop-filter:blur(14px);pointer-events:all;
+  opacity:0;transition:transform .4s cubic-bezier(.4,0,.2,1),opacity .4s;
 }
+#places-bar.open{ transform:translateX(-50%) translateY(0); opacity:1; }
+#places-toggle{
+  position:absolute;bottom:20px;left:50%;transform:translateX(-50%);
+  display:flex;align-items:center;gap:8px;
+  padding:10px 20px;border-radius:24px;
+  background:rgba(12,18,28,.4);border:1px solid rgba(251,243,223,.18);
+  color:var(--cream);font-family:var(--serif);font-size:13px;letter-spacing:.1em;
+  cursor:pointer;transition:all .3s;backdrop-filter:blur(10px);pointer-events:all;
+}
+#places-toggle:hover{ background:rgba(232,192,104,.2);border-color:rgba(232,192,104,.5); }
+#places-toggle.hidden{ opacity:0;pointer-events:none; }
 .place-chip{
   display:flex;align-items:center;gap:6px;padding:8px 13px;border-radius:13px;
   background:rgba(251,243,223,.04);border:1px solid transparent;
@@ -122,6 +135,7 @@ canvas{display:block;}
       </div>
     </div>
   </div>
+  <button id="places-toggle" onclick="togglePlaces()">🗺️ Dove andare</button>
   <div id="places-bar"></div>
 </div>
 
@@ -1078,11 +1092,25 @@ function toast(msg){
 }
 
 // ── UI: barra luoghi, orologio, tempo ──
+function togglePlaces(){
+  const bar=document.getElementById('places-bar');
+  const tog=document.getElementById('places-toggle');
+  if(bar.classList.contains('open')){
+    bar.classList.remove('open'); tog.classList.remove('hidden');
+  } else {
+    bar.classList.add('open'); tog.classList.add('hidden');
+  }
+}
+window.togglePlaces=togglePlaces;
+function closePlaces(){
+  document.getElementById('places-bar').classList.remove('open');
+  document.getElementById('places-toggle').classList.remove('hidden');
+}
 function buildPlacesBar(){
   const bar=document.getElementById('places-bar');
   bar.innerHTML=PLACES.map(pl=>`<div class="place-chip" data-id="${pl.id}"><span class="pc-icon">${pl.icon}</span><span class="pc-name">${pl.name}</span></div>`).join('');
   bar.querySelectorAll('.place-chip').forEach(ch=>{
-    ch.onclick=()=>{ const pl=PLACES.find(p=>p.id===ch.dataset.id); if(pl){ cam.tx=pl.wx; cam.tzoom=Math.max(cam.tzoom,1.2); } };
+    ch.onclick=()=>{ const pl=PLACES.find(p=>p.id===ch.dataset.id); if(pl){ cam.tx=pl.wx; cam.tzoom=Math.max(cam.tzoom,1.2); closePlaces(); } };
   });
 }
 function updateClock(){
